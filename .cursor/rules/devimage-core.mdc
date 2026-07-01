@@ -1,0 +1,53 @@
+---
+description: DevImage 项目核心约定与产品上下文
+alwaysApply: true
+---
+
+# DevImage 项目规则
+
+## 产品定位
+
+国内开发者的零配置占位 CDN。优先国内访问速度，替代 picsum/placehold 跨境慢的问题。
+
+## 技术栈
+
+- Monorepo: pnpm workspace
+- API: `apps/api` — NestJS + Fastify + TypeScript
+- 文档: `apps/docs` — VitePress
+- 规划: `docs/` — 中文 Markdown
+
+## 基础设施（生产）
+
+- **腾讯云轻量应用服务器** / CVM：跑 NestJS + Nginx + PM2
+- **COS 对象存储**：`/photo` 缓存、精选图包
+- **腾讯云 CDN**：国内加速（域名需 ICP 备案）
+- 详见 `docs/腾讯云COS部署指南.md`
+
+## 代码规范
+
+- 使用中文 commit message，格式：`feat: 描述` / `fix: 描述`
+- 新增函数必须添加函数级 JSDoc 注释
+- 占位图优先 SVG 生成，避免不必要的外部 HTTP 请求
+- 路由设计参考 `docs/竞品URL与API对照表.md`
+- 最小化 diff，不改动无关文件
+
+## API 约定
+
+- 图片 CDN 路径不加 `/v1` 版本号（URL 稳定）
+- 尺寸范围 10–4000；text 最长 50 字符
+- seed 路由：`Cache-Control: immutable`
+- Mock 路由前缀：`/mock/*`
+- 管理类 OpenAPI：`/api/docs`
+
+## 文档
+
+- 产品规划写 `docs/`（中文文件名）
+- 用户 API 文档写 `apps/docs/`
+- 不要主动创建未请求的 markdown
+
+## 国内部署优先
+
+- 不用 Cloudflare Workers 作为首期主力
+- 真实照片写 **COS 缓存**，禁止同步请求 Pexels
+- Phase 2 前 `/photo` 使用 COS 上的 CC0 精选包
+- COS 密钥通过 `.env` 注入，勿提交 Git

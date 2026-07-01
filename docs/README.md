@@ -1,0 +1,15 @@
+# DevImage 规划文档
+
+本目录为产品与技术规划文档（中文），面向团队内部与 AI 协作上下文。
+
+| 文档 | 说明 |
+|------|------|
+| **[完整开发文档](./完整开发文档.md)** | **功能全集、参数属性、一期/二期/三期规划、实现状态** |
+| [竞品 URL 与 API 对照表](./竞品URL与API对照表.md) | 路由设计、picsum/placehold 兼容 |
+| [MVP 功能优先级 PRD](./MVP功能优先级PRD.md) | 2 周 MVP 范围与里程碑 |
+| [Freemium 定价与成本模型](./Freemium定价与成本模型.md) | 定价 tier、成本测算 |
+| [技术栈选型评估](./技术栈选型评估.md) | Node + TS + NestJS + VitePress |
+| [腾讯云 COS 部署指南](./腾讯云COS部署指南.md) | 轻量 + COS + CDN 生产架构 |
+| [腾讯云 COS 部署指南](./腾讯云COS部署指南.md) | 轻量 + COS + CDN 生产架构 |
+
+对外用户文档见 [apps/docs](../apps/docs/)（VitePress 站点）。

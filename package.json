@@ -1,0 +1,26 @@
+{
+  "name": "devimage",
+  "version": "0.1.0",
+  "private": true,
+  "description": "国内开发者占位资源 CDN — 图片、头像、Mock 数据",
+  "scripts": {
+    "setup": "pnpm install",
+    "dev": "pnpm -r --parallel --filter @devimage/api --filter @devimage/docs dev",
+    "dev:api": "pnpm --filter @devimage/api dev",
+    "dev:docs": "pnpm --filter @devimage/docs dev",
+    "build": "pnpm -r --filter @devimage/api --filter @devimage/docs build",
+    "build:api": "pnpm --filter @devimage/api build",
+    "build:docs": "pnpm --filter @devimage/docs build",
+    "start:prod": "pnpm --filter @devimage/api start:prod",
+    "test": "pnpm --filter @devimage/api test",
+    "lint": "pnpm --filter @devimage/api lint"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

@@ -1,0 +1,48 @@
+---
+description: NestJS API 模块开发规范（DevImage apps/api）
+globs: apps/api/**/*.ts
+alwaysApply: false
+---
+
+# NestJS API 规范
+
+## 模块结构
+
+每个资源一个 Module：`placeholder/`、`avatar/`、`mock/`、`scene/`、`photo/`。
+
+```
+module/
+├── *.module.ts
+├── *.controller.ts   # 路由 + 响应头
+├── *.service.ts      # 纯业务逻辑
+└── *.service.spec.ts
+```
+
+## Controller 规则
+
+- 图片响应：`@Header('Content-Type', 'image/svg+xml')` + 返回 `string`
+- JSON 响应：直接返回对象，不用手动 `res.json`
+- 参数校验失败抛 `BadRequestException`
+- 静态路由先于通配路由注册（如 `/seed/` 在 `/:w/:h` 之前）
+
+## Service 规则
+
+- 生成逻辑放 Service，便于单元测试
+- 不 import HTTP 客户端调用外部图库（photo 模块除外，且必须异步缓存）
+- 共用工具放 `src/common/utils.ts`
+
+## Fastify 注意
+
+- 使用 `@nestjs/platform-fastify`，不用 Express 专属 API
+- 二进制/大响应避免全局 JSON 拦截器包装
+
+## 示例
+
+```typescript
+@Get(':w/:h')
+@Header('Content-Type', 'image/svg+xml; charset=utf-8')
+@Header('Cache-Control', 'public, max-age=3600')
+getPlaceholder(@Param('w') w: string, @Param('h') h: string): string {
+  return this.service.renderSvg(this.service.resolveOptions(w, h, {}));
+}
+```

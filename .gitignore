@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+**/dist/
+
+# VitePress
+**/.vitepress/cache/
+**/.vitepress/dist/
+
+# Test
+coverage/
+
+# Environment（保留 .env.example）
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript incremental
+*.tsbuildinfo
+
+# Cache / runtime
+.cache/
+data/cache/
+.pm2/
+
+# Editor（保留 .vscode/settings.json 等共享配置）
+.idea/
+*.swp
+*.tmp

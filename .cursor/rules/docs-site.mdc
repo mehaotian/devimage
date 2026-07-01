@@ -1,0 +1,41 @@
+---
+description: VitePress 文档站编写规范（DevImage apps/docs）
+globs: apps/docs/**/*
+alwaysApply: false
+---
+
+# 文档站规范
+
+## 位置
+
+- 用户文档：`apps/docs/`（VitePress）
+- 产品规划：`docs/`（不放入 VitePress 构建）
+
+## 页面结构
+
+```
+apps/docs/
+├── index.md
+├── guide/
+├── api/          # 每个 API 资源一页
+└── migrate/      # 从 picsum/placehold 迁移
+```
+
+## 写作要求
+
+- 语言：中文
+- 每个 API 页包含：路由、参数表、HTML/JS 示例、响应头说明
+- 示例 URL 使用 `http://localhost:3000` 或环境变量说明
+- 代码块标注语言：`html`、`javascript`、`bash`
+
+## 新增 API 时
+
+1. 在 `apps/docs/api/` 新增页面
+2. 更新 `.vitepress/config.ts` sidebar
+3. 在 `guide/quick-start.md` 添加一行示例
+
+## 禁止
+
+- 不要在文档站引用未实现的 Phase 2 功能为「已上线」（标注 Phase 2）
+- 不要复制 `docs/` 规划全文到 VitePress（可摘要 + 链接）
+- 部署文档统一描述 **腾讯云轻量 + COS + CDN**，不写香港 VPS / 阿里云 OSS
