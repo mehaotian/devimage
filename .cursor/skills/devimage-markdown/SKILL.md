@@ -3,7 +3,7 @@ name: devimage-markdown
 description: >-
   DevImage 仓库 Markdown 格式规范（markdownlint）。编写或修改 README、docs/、
   apps/docs/、.cursor/skills/ 下 .md 时使用，避免 MD060 表格、MD040 代码块语言、
-  MD034 裸链接、MD056 列数错误等 lint 警告。
+  MD034 裸链接、MD056 列数错误、MD036 加粗伪标题等 lint 警告。
 ---
 
 # DevImage Markdown 规范
@@ -97,7 +97,38 @@ pnpm install && pnpm dev
 ```
 ````
 
-## 4. 提交前验证
+## 4. 标题（MD036 / MD024 / MD001）
+
+### 禁止用加粗代替标题（MD036）
+
+单独一行的 `**Path 参数**`、`**示例**` 等会触发 MD036，应改为真实标题。
+
+```markdown
+#### 5.1.1 `GET /:width/:height`
+
+##### 5.1.1 Path 参数
+
+| 参数 | 类型 | ...
+```
+
+### 标题层级
+
+- 父级是 `#### 5.1.1` 时，子节用 `#####`（h5）
+- 父级是 `### 6.1` 且无 `####` 时，子节用 `####`（h4），**不要跳级**
+
+### 避免重复标题（MD024）
+
+同一文档内多次出现「Path 参数」等通用名时，**加章节前缀**：
+
+```markdown
+##### 5.1.1 Path 参数
+##### 5.1.2 Path 参数
+##### 5.2.1 Path 参数
+```
+
+行内说明仍可用加粗：`**用途**：替代 placehold.co …`（同行有正文，不触发 MD036）。
+
+## 5. 提交前验证
 
 在仓库根目录执行（排除 node_modules）：
 
@@ -112,9 +143,10 @@ npx --yes markdownlint-cli2 \
   ".cursor/skills/**/*.md"
 ```
 
-目标：**MD040、MD060、MD034、MD056 为零**。其他规则（MD013 行宽等）尽量修复，非阻塞。
+目标：**MD040、MD060、MD034、MD056、MD036 为零**。
+MD024（重复标题）、MD001（跳级）一并避免。MD013 行宽等非阻塞。
 
-## 5. 与其他 Skill 的关系
+## 6. 与其他 Skill 的关系
 
 - 写 VitePress API 文档 → 同时遵循 [devimage-docs](../devimage-docs/SKILL.md)
 - 写部署相关 md → 同时遵循 [devimage-deploy](../devimage-deploy/SKILL.md)
@@ -127,4 +159,7 @@ npx --yes markdownlint-cli2 \
 - [ ] 表格内 URL 用 `<>` 或反引号
 - [ ] 所有 ` ``` ` 块已标注语言
 - [ ] 单元格含 `|` 已转义或反引号包裹
-- [ ] 已跑 markdownlint-cli2 无表格/链接/代码块类错误
+- [ ] 子节标题用 `#` 而非单独一行 `**加粗**`
+- [ ] 重复子节名已加章节前缀（如 `##### 5.1.1 Path 参数`）
+- [ ] 标题层级连续（h3→h4→h5，不跳级）
+- [ ] 已跑 markdownlint-cli2 无表格/链接/代码块/标题类错误
