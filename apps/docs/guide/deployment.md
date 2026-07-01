@@ -8,7 +8,7 @@ DevImage 生产环境采用 **腾讯云轻量应用服务器 + COS 对象存储 
 
 ## 架构
 
-```
+```text
 开发者
   → 腾讯云 CDN（cdn.devimage.cn / devimage.cn）
       → Nginx（轻量服务器）
@@ -17,7 +17,7 @@ DevImage 生产环境采用 **腾讯云轻量应用服务器 + COS 对象存储 
 ```
 
 | 组件 | 用途 |
-|------|------|
+| ------ | ------ |
 | 轻量/CVM | API 进程、Nginx |
 | COS | 照片缓存、精选图包 |
 | CDN | 国内加速（需 ICP 备案） |
@@ -43,7 +43,7 @@ cp apps/api/.env.example apps/api/.env
 ```
 
 | 变量 | 说明 |
-|------|------|
+| ------ | ------ |
 | `PORT` | API 端口，默认 3000 |
 | `TENCENT_SECRET_ID` | 腾讯云 CAM 子账号 SecretId |
 | `TENCENT_SECRET_KEY` | CAM SecretKey（仅 COS 权限） |
@@ -98,7 +98,7 @@ server {
 
 ## COS 存储结构
 
-```
+```text
 devimage-125xxxxxx/
 ├── photos/{id}/{w}x{h}.webp    # API 写入的缓存图
 └── assets/seed-pack/           # CC0 精选图包
@@ -118,7 +118,7 @@ devimage-125xxxxxx/
 ## 缓存策略
 
 | 路由 | Cache-Control | CDN |
-|------|---------------|-----|
+| ------ | --------------- | ----- |
 | `/seed/*` | immutable, 1y | 长缓存 |
 | `/avatar/*` | immutable, 1y | 长缓存 |
 | `/:w/:h` 随机 | 1h | 短缓存 |
@@ -138,7 +138,7 @@ devimage-125xxxxxx/
 ## 预估成本（MVP）
 
 | 项目 | 月费 |
-|------|------|
+| ------ | ------ |
 | 轻量 2C4G | ¥45–65 |
 | COS + CDN 按量 | ¥10–30 |
 | **合计** | **¥55–95** |

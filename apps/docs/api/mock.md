@@ -15,14 +15,14 @@ GET /mock/users/1
 
 ## 文章
 
-```
+```http
 GET /mock/posts
 GET /mock/posts?count=10
 ```
 
 ## 商品
 
-```
+```http
 GET /mock/products
 GET /mock/products?count=10
 ```

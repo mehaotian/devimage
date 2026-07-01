@@ -3,10 +3,13 @@ name: devimage-api-route
 description: >-
   Adds or modifies DevImage placeholder CDN API routes in NestJS (apps/api).
   Use when implementing new endpoints like /avatar, /mock, /scene, /photo,
-  picsum compatibility, SVG generators, or cache headers.
+  picsum compatibility, SVG generators, cache headers, or updating API docs md.
+  Follow devimage-markdown when editing apps/docs/api/*.md.
 ---
 
 # DevImage API 路由开发
+
+> 同步更新 `apps/docs/api/*.md` 时遵循 [devimage-markdown](../devimage-markdown/SKILL.md)。
 
 ## 开始前
 
@@ -15,7 +18,7 @@ description: >-
 
 ## 新增路由 checklist
 
-```
+```markdown
 - [ ] 创建 Module / Controller / Service
 - [ ] Service 含函数级 JSDoc
 - [ ] 尺寸/颜色参数校验（common/utils.ts）

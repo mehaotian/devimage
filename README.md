@@ -29,10 +29,10 @@ pnpm dev
 ```
 
 | 服务 | 地址 |
-|------|------|
-| API | http://localhost:3000 |
-| Swagger | http://localhost:3000/api/docs |
-| 文档站 | http://localhost:5173 |
+| ------ | ------ |
+| API | <http://localhost:3000> |
+| Swagger | <http://localhost:3000/api/docs> |
+| 文档站 | <http://localhost:5173> |
 
 ## 示例
 
@@ -49,7 +49,7 @@ fetch('http://localhost:3000/mock/users').then((r) => r.json());
 
 ## 项目结构
 
-```
+```text
 DevImage/
 ├── apps/
 │   ├── api/          # NestJS API

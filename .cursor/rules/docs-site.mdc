@@ -26,7 +26,10 @@ apps/docs/
 - 语言：中文
 - 每个 API 页包含：路由、参数表、HTML/JS 示例、响应头说明
 - 示例 URL 使用 `http://localhost:3000` 或环境变量说明
-- 代码块标注语言：`html`、`javascript`、`bash`
+- 代码块必须标注语言（禁止裸 ` ``` `）：`html`、`javascript`、`bash`、`http`、`text` 等
+- 表格用 compact 风格：`| 列 | 列 |`、分隔行 `| ------ | ------ |`（pipe 两侧有空格）
+- 表格内 URL 用尖括号 `<http://...>`；单元格含 `|` 时用反引号或 `\|` 转义
+- 完整规范见 `.cursor/skills/devimage-markdown/SKILL.md`
 
 ## 新增 API 时
 

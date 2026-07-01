@@ -3,14 +3,19 @@ name: devimage-deploy
 description: >-
   Deploys DevImage to Tencent Cloud (Lighthouse/CVM) with COS object storage
   and CDN. Use when configuring production deployment, COS bucket, CDN caching,
-  Nginx, PM2, or domestic access optimization.
+  Nginx, PM2, domestic access optimization, or writing deployment markdown.
+  Follow devimage-markdown for table/code-block lint rules.
 ---
 
 # DevImage 部署（腾讯云 + COS）
 
+> 编写部署相关 `.md` 时遵循
+> [devimage-markdown](../devimage-markdown/SKILL.md)：
+> 架构图用 text、Shell 用 bash、Nginx 用 nginx 语言标识。
+
 ## 标准架构
 
-```
+```text
 腾讯云 CDN (cdn.devimage.cn / devimage.cn)
   → 轻量服务器 Nginx :443
       → NestJS API :3000 (PM2)
@@ -20,7 +25,7 @@ description: >-
 ## 资源清单
 
 | 产品 | 用途 |
-|------|------|
+| ------ | ------ |
 | 轻量应用服务器 | API + Nginx |
 | COS | photo 缓存、精选图包 |
 | CDN | 国内加速（需备案） |
@@ -46,7 +51,7 @@ pm2 start apps/api/dist/main.js --name devimage-api
 
 ## COS 目录
 
-```
+```text
 photos/{id}/{w}x{h}.webp   # API 异步写入
 assets/seed-pack/          # CC0 精选包
 ```

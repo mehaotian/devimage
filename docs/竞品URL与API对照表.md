@@ -8,7 +8,7 @@
 ## 1. 合成占位图（色块 + 文字）
 
 | 竞品 | URL 模式 | 示例 | DevImage 兼容路由 | 优先级 |
-|------|----------|------|-------------------|--------|
+| ------ | ---------- | ------ | ------------------- | -------- |
 | placehold.co | `/{w}x{h}` | `https://placehold.co/600x400` | `GET /{w}/{h}` 或 `GET /{w}x{h}` | P0 |
 | placehold.co | 自定义色 | `/600x400/EEE/31343C?text=Hello` | `GET /{w}/{h}?bg=eee&fg=31343C&text=Hello` | P0 |
 | placehold.co | 格式 | `/600x400.webp` | `GET /{w}/{h}.webp` | P1 |
@@ -37,7 +37,7 @@ GET https://cdn.devimage.cn/800/600.svg
 ## 2. 真实照片占位（picsum 类）
 
 | 竞品 | URL 模式 | 示例 | DevImage 路由 | 优先级 |
-|------|----------|------|---------------|--------|
+| ------ | ---------- | ------ | --------------- | -------- |
 | picsum.photos | 随机 | `/800/600` | `GET /photo/800/600` 或兼容 `/800/600?type=photo` | P2 |
 | picsum.photos | seed | `/seed/demo/800/600` | `GET /seed/{seed}/{w}/{h}` | P2 |
 | picsum.photos | 固定 ID | `/id/237/800/600` | `GET /id/{id}/{w}/{h}` | P2 |
@@ -60,7 +60,7 @@ GET https://cdn.devimage.cn/id/237/800/600
 ## 3. 头像占位
 
 | 竞品 | URL 模式 | 示例 | DevImage 路由 | 优先级 |
-|------|----------|------|---------------|--------|
+| ------ | ---------- | ------ | --------------- | -------- |
 | DiceBear | style + seed | `api.dicebear.com/10.x/lorelei/svg?seed=Felix` | `GET /avatar/{seed}/{size}` | P1 |
 | DiceBear | 多风格 | `/10.x/{style}/svg?seed=` | `GET /avatar/{style}/{seed}/{size}` | P2 |
 | UI Avatars | initials | `ui-avatars.com/api/?name=John+Doe` | `GET /avatar/{name}/{size}?mode=initials` | P1 |
@@ -78,7 +78,7 @@ GET https://cdn.devimage.cn/avatar/John%20Doe/48?mode=initials&bg=6366f1
 ## 4. 场景占位（差异化）
 
 | 场景 | 国内现状 | DevImage 路由 | 优先级 |
-|------|----------|---------------|--------|
+| ------ | ---------- | --------------- | -------- |
 | 404 页面 | 组件库内置 SVG | `GET /scene/404` 或 `GET /404` | P1 |
 | 空状态 | Ant Design Empty 等 | `GET /scene/empty?variant=no-data` | P1 |
 | 网络错误 | 各组件库分散 | `GET /scene/error?variant=network` | P2 |
@@ -95,7 +95,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 ## 5. Mock 数据 API
 
 | 竞品 | 模式 | 示例 | DevImage 路由 | 优先级 |
-|------|------|------|---------------|--------|
+| ------ | ------ | ------ | --------------- | -------- |
 | JSONPlaceholder | REST | `GET /posts/1` | `GET /mock/posts/1` | P1 |
 | JSONPlaceholder | 嵌套 | `GET /posts/1/comments` | `GET /mock/posts/1/comments` | P2 |
 | JSONPlaceholder | 写操作 | POST/PUT/DELETE | 返回 fake 成功（不落库） | P2 |
@@ -104,7 +104,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 ### DevImage Mock 资源（一期内置）
 
 | 资源 | 路由 |
-|------|------|
+| ------ | ------ |
 | 用户 | `GET /mock/users`、`/mock/users/:id` |
 | 文章 | `GET /mock/posts`、`/mock/posts/:id` |
 | 商品 | `GET /mock/products?count=10` |
@@ -115,7 +115,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 ## 6. 响应头与缓存策略（对标最佳实践）
 
 | 类型 | Cache-Control | Content-Type |
-|------|---------------|--------------|
+| ------ | --------------- | -------------- |
 | SVG 合成图 | `public, max-age=31536000, immutable`（带 seed） | `image/svg+xml` |
 | 随机合成图 | `public, max-age=3600` | `image/svg+xml` |
 | 缓存照片 | `public, max-age=31536000, immutable` | `image/webp` |
@@ -127,7 +127,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 ## 7. 参数命名统一规范
 
 | 语义 | DevImage 主参数 | 兼容别名 |
-|------|-----------------|----------|
+| ------ | ----------------- | ---------- |
 | 宽度 | `w`（query）或 path | `width` |
 | 高度 | `h`（query）或 path | `height` |
 | 背景色 | `bg` | `bc`, `bgColor` |
@@ -141,7 +141,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 ## 8. 迁移对照速查
 
 | 原 URL | DevImage 替换 |
-|--------|---------------|
+| -------- | --------------- |
 | `picsum.photos/800/600` | `cdn.devimage.cn/photo/800/600` |
 | `placehold.co/600x400` | `cdn.devimage.cn/600/400` |
 | `placehold.co/600x400?text=Hi` | `cdn.devimage.cn/600/400?text=Hi` |
