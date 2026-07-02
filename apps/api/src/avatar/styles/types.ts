@@ -5,7 +5,11 @@ export type AvatarStyleGroup =
   | 'text'
   | 'pixel'
   | 'character'
-  | 'icon';
+  | 'icon'
+  | 'abstract'
+  | 'retro'
+  | 'symbol'
+  | 'filter';
 
 /** 渲染引擎类型 */
 export type AvatarEngine = 'native' | 'partner' | 'composite';
@@ -26,4 +30,6 @@ export interface AvatarStyleMeta {
   aliasOf?: string;
   /** 该风格支持的 URL query 参数 */
   queryParams?: readonly AvatarStyleQueryParam[];
+  /** 实验性风格（预览阶段，未写入正式 API 文档） */
+  experimental?: boolean;
 }

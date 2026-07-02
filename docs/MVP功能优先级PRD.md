@@ -72,6 +72,7 @@
 | Mock 文章/商品 | `/mock/posts` `/mock/products` | 扩展资源 |
 | picsum 兼容层 | `/photo/:w/:h` | COS 缓存精选图包（非实时 Pexels） |
 | 用量统计（内存） | 响应头 `X-DevImage-Requests` | 为 Freemium 预留 |
+| 伪二维码占位 | `GET /qr/:seed/:size` | 类 QR 视觉、不可扫描；详见 [伪二维码占位规划](./伪二维码占位规划.md)；头像 Lab 先验 `devimg-matrix` |
 
 ### Phase 3 — P2  polish（Day 12–14）
 
@@ -101,6 +102,7 @@
 apps/api/src/
 ├── placeholder/     # /:w/:h, /seed/
 ├── avatar/          # /avatar/
+├── qr/              # /qr/ (Phase 2.5，见 docs/伪二维码占位规划.md)
 ├── scene/           # /scene/, /404
 ├── mock/            # /mock/*
 ├── photo/           # /photo/ (Phase 2)

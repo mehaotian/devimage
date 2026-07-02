@@ -46,6 +46,9 @@ pnpm dev
 <!-- 纯渐变、无首字 -->
 <img src="http://localhost:3000/avatar/devimg/Luna/128?text=0" alt="gradient avatar" />
 
+<!-- 图即算法风格（玻璃拟态） -->
+<img src="http://localhost:3000/avatar/devimg-glass/Luna/128" alt="glass avatar" />
+
 <!-- 多风格 seed（DiceBear rings） -->
 <img src="http://localhost:3000/avatar/rings/Luna/128" alt="rings avatar" />
 ```

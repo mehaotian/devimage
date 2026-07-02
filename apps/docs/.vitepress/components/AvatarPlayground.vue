@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
+import LazyGalleryImg from './LazyGalleryImg.vue';
 import {
   EXPECTED_PATTERN_COUNT,
   PATTERN_CATALOG,
@@ -34,7 +35,30 @@ const DEVIMG_FAMILY = new Set([
 const DEFAULT_STYLE = 'devimg';
 const DEFAULT_SEED = '张三';
 const PREVIEW_SIZE = 240;
+const STYLE_GALLERY_SIZE = 72;
+const PATTERN_GALLERY_SIZE = 64;
 const SEED_DEBOUNCE_MS = 400;
+
+const DEVIMG_CORE_IDS = ['devimg', 'devimg-geo', 'devimg-pattern'];
+
+/** 已从 catalog 移除的风格（过滤浏览器缓存的旧 /avatar/styles 响应） */
+const REMOVED_STYLE_IDS = new Set(['devimg-planet', 'devimg-zodiac']);
+
+const GROUP_LABELS: Record<string, string> = {
+  gradient: '渐变',
+  geometric: '几何',
+  text: '文字',
+  pixel: '像素',
+  character: '角色',
+  icon: '图标',
+  abstract: '抽象',
+  retro: '复古',
+  symbol: '符号',
+  filter: '滤镜',
+};
+
+const DEVIMG_ALGO_GROUP_ORDER = ['abstract', 'geometric', 'text', 'retro', 'filter', 'symbol'];
+const DICEBEAR_GROUP_ORDER = ['geometric', 'pixel', 'text', 'icon', 'character'];
 
 const styles = ref<StyleMeta[]>([]);
 const selectedStyle = ref(DEFAULT_STYLE);
@@ -55,6 +79,7 @@ const patternCatalogStale = ref(false);
 
 type PlaygroundTab = 'play' | 'gallery' | 'code';
 const activeTab = ref<PlaygroundTab>('play');
+const patternsExpanded = ref(false);
 
 let seedTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -214,7 +239,29 @@ const groupedByProvider = computed(() => {
   return map;
 });
 
-const PATTERN_GALLERY_SIZE = 64;
+/**
+ * 构建风格画廊缩略图 URL
+ */
+function buildStyleThumbUrl(styleId: string, seedValue: string): string {
+  if (styleId === 'devimg-pattern') {
+    return buildAvatarUrl(styleId, seedValue, STYLE_GALLERY_SIZE, {
+      variant: 'pattern',
+      text: false,
+      shape: avatarShape.value,
+    });
+  }
+  if (DEVIMG_FAMILY.has(styleId)) {
+    if (styleId === 'devimg-geo') {
+      return buildAvatarUrl(styleId, seedValue, STYLE_GALLERY_SIZE);
+    }
+    return buildAvatarUrl('devimg', seedValue, STYLE_GALLERY_SIZE, {
+      variant: 'gradient',
+      text: true,
+      shape: avatarShape.value,
+    });
+  }
+  return buildAvatarUrl(styleId, seedValue, STYLE_GALLERY_SIZE);
+}
 
 /**
  * 构建纹理画廊缩略图 URL（每个 pattern 独立 seed，展示配色差异）
@@ -235,6 +282,16 @@ function buildPatternThumbUrl(seedValue: string, pattern: string, shape: 'circle
 function setPlaygroundTab(tab: PlaygroundTab): void {
   activeTab.value = tab;
   copied.value = false;
+}
+
+/**
+ * 从画廊选中某个 style
+ */
+function selectStyleFromGallery(styleId: string): void {
+  selectedStyle.value = styleId;
+  syncDevimgControls(styleId);
+  copied.value = false;
+  activeTab.value = 'play';
 }
 
 /**
@@ -333,15 +390,95 @@ const patternCount = computed(() =>
   patternGroups.value.reduce((total, group) => total + group.options.length, 0),
 );
 
+const galleryStyleCount = computed(() => styles.value.filter((item) => !item.aliasOf).length);
+
+const galleryTotalCount = computed(() => galleryStyleCount.value + patternCount.value);
+
+const devimgCoreStyles = computed(() =>
+  DEVIMG_CORE_IDS.map((id) => styles.value.find((item) => item.id === id)).filter(
+    (item): item is StyleMeta => Boolean(item),
+  ),
+);
+
+const devimgAlgoGroups = computed(() => {
+  const algo = styles.value.filter(
+    (item) =>
+      item.provider === 'devimage' &&
+      !item.aliasOf &&
+      !DEVIMG_CORE_IDS.includes(item.id),
+  );
+  const byGroup = new Map<string, StyleMeta[]>();
+  for (const item of algo) {
+    const list = byGroup.get(item.group) ?? [];
+    list.push(item);
+    byGroup.set(item.group, list);
+  }
+  return DEVIMG_ALGO_GROUP_ORDER.filter((groupId) => byGroup.has(groupId)).map((groupId) => ({
+    id: `devimg-${groupId}`,
+    title: `图即 · ${GROUP_LABELS[groupId] ?? groupId}`,
+    items: byGroup.get(groupId) ?? [],
+  }));
+});
+
+const partnerGallerySections = computed(() => {
+  const sections: { id: string; title: string; items: StyleMeta[] }[] = [];
+  const dicebearItems = styles.value.filter((item) => item.provider === 'dicebear' && !item.aliasOf);
+  const byGroup = new Map<string, StyleMeta[]>();
+  for (const item of dicebearItems) {
+    const list = byGroup.get(item.group) ?? [];
+    list.push(item);
+    byGroup.set(item.group, list);
+  }
+  for (const groupId of DICEBEAR_GROUP_ORDER) {
+    const items = byGroup.get(groupId);
+    if (items?.length) {
+      sections.push({
+        id: `dicebear-${groupId}`,
+        title: `DiceBear · ${GROUP_LABELS[groupId] ?? groupId}`,
+        items,
+      });
+    }
+  }
+  for (const provider of ['jdenticon', 'minidenticons'] as const) {
+    const items = styles.value.filter((item) => item.provider === provider && !item.aliasOf);
+    if (items.length) {
+      sections.push({
+        id: provider,
+        title: providerLabels[provider] ?? provider,
+        items,
+      });
+    }
+  }
+  return sections;
+});
+
+const galleryNavItems = computed(() => {
+  const items: { id: string; label: string }[] = [
+    { id: 'gallery-devimg-core', label: '图即 · 基础' },
+    ...devimgAlgoGroups.value.map((group) => ({ id: group.id, label: group.title })),
+    ...partnerGallerySections.value.map((section) => ({ id: section.id, label: section.title })),
+    { id: 'gallery-patterns', label: `纹理 pattern (${patternCount.value})` },
+  ];
+  if (patternGroups.value.length) {
+    for (const group of patternGroups.value) {
+      items.push({ id: `pattern-group-${group.id}`, label: group.title });
+    }
+  }
+  return items;
+});
+
 /**
  * 滚动到画廊指定分组（需先切到画廊 Tab）
  */
-function scrollToPatternGroup(groupId: string): void {
+function scrollToGallerySection(sectionId: string): void {
+  if (sectionId === 'gallery-patterns' && !patternsExpanded.value) {
+    patternsExpanded.value = true;
+  }
   if (activeTab.value !== 'gallery') {
     activeTab.value = 'gallery';
   }
   window.requestAnimationFrame(() => {
-    document.getElementById(`pattern-group-${groupId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 
@@ -376,12 +513,12 @@ async function fetchStyles(): Promise<void> {
   loading.value = true;
   loadError.value = '';
   try {
-    const res = await fetch(`${API_BASE}/avatar/styles`);
+    const res = await fetch(`${API_BASE}/avatar/styles`, { cache: 'no-store' });
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
     const data = (await res.json()) as { styles: StyleMeta[] };
-    styles.value = data.styles ?? [];
+    styles.value = (data.styles ?? []).filter((item) => !REMOVED_STYLE_IDS.has(item.id));
     if (!styles.value.some((item) => item.id === selectedStyle.value)) {
       selectedStyle.value = styles.value[0]?.id ?? DEFAULT_STYLE;
     }
@@ -462,8 +599,8 @@ onUnmounted(() => {
         :aria-selected="activeTab === 'gallery'"
         @click="setPlaygroundTab('gallery')"
       >
-        纹理画廊
-        <span class="avatar-playground__tab-badge">{{ patternCount }}</span>
+        画廊
+        <span class="avatar-playground__tab-badge">{{ galleryTotalCount }}</span>
       </button>
       <button
         type="button"
@@ -637,7 +774,7 @@ onUnmounted(() => {
 
           <div v-if="isDevimgFamily" class="avatar-playground__quick-links">
             <button type="button" class="avatar-playground__quick-link" @click="setPlaygroundTab('gallery')">
-              浏览全部纹理 →
+              浏览画廊 →
             </button>
             <button type="button" class="avatar-playground__quick-link" @click="setPlaygroundTab('code')">
               查看 API / HTML →
@@ -655,58 +792,157 @@ onUnmounted(() => {
     </div>
 
     <section
-      v-show="activeTab === 'gallery' && patternGroups.length"
+      v-if="activeTab === 'gallery'"
+      id="gallery"
       class="avatar-playground__pane avatar-playground__gallery"
       role="tabpanel"
     >
       <div class="avatar-playground__gallery-head">
         <p class="avatar-playground__gallery-desc">
-          共 {{ patternCount }} 种 · seed：<code>{{ effectiveSeed }}</code> · 点击缩略图试玩并跳回预览
+          共 {{ galleryStyleCount }} 种风格 + {{ patternCount }} 种纹理 · seed：<code>{{ effectiveSeed }}</code> · 点击缩略图试玩
+        </p>
+        <p class="avatar-playground__gallery-warn">
+          缩略图按滚动懒加载；纹理 pattern 默认折叠。请勿批量爬取，详见
+          <a href="/guide/fair-use">公平使用</a>。
         </p>
         <p v-if="patternCatalogStale" class="avatar-playground__gallery-warn">
           API 返回的 pattern 目录偏旧（可能为浏览器缓存）。画廊已用内置完整 {{ EXPECTED_PATTERN_COUNT }} 种列表；请硬刷新或重启 API。
         </p>
-        <nav class="avatar-playground__gallery-nav" aria-label="纹理分组跳转">
+        <nav class="avatar-playground__gallery-nav" aria-label="画廊分组跳转">
           <button
-            v-for="group in patternGroups"
-            :key="group.id"
+            v-for="item in galleryNavItems"
+            :key="item.id"
             type="button"
             class="avatar-playground__gallery-nav-btn"
-            @click="scrollToPatternGroup(group.id)"
+            @click="scrollToGallerySection(item.id)"
           >
-            {{ group.title }}
+            {{ item.label }}
           </button>
         </nav>
       </div>
 
       <div
-        v-for="group in patternGroups"
-        :id="`pattern-group-${group.id}`"
+        id="gallery-devimg-core"
+        class="avatar-playground__gallery-group"
+      >
+        <h4 class="avatar-playground__gallery-group-title">图即 · 基础</h4>
+        <div class="avatar-playground__gallery-grid">
+          <button
+            v-for="item in devimgCoreStyles"
+            :key="item.id"
+            type="button"
+            class="avatar-playground__gallery-item"
+            :class="{ 'avatar-playground__gallery-item--active': selectedStyle === item.id && !isPatternMode }"
+            :title="item.title"
+            @click="selectStyleFromGallery(item.id)"
+          >
+            <LazyGalleryImg
+              :src="buildStyleThumbUrl(item.id, effectiveSeed)"
+              :alt="item.id"
+              :size="STYLE_GALLERY_SIZE"
+            />
+            <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        v-for="group in devimgAlgoGroups"
+        :id="group.id"
         :key="group.id"
         class="avatar-playground__gallery-group"
       >
         <h4 class="avatar-playground__gallery-group-title">{{ group.title }}</h4>
         <div class="avatar-playground__gallery-grid">
           <button
-            v-for="item in group.options"
+            v-for="item in group.items"
             :key="item.id"
             type="button"
             class="avatar-playground__gallery-item"
-            :class="{ 'avatar-playground__gallery-item--active': patternId === item.id && isPatternMode }"
-            :title="item.label"
-            @click="selectPatternFromGallery(item.id)"
+            :class="{ 'avatar-playground__gallery-item--active': selectedStyle === item.id }"
+            :title="item.title"
+            @click="selectStyleFromGallery(item.id)"
           >
-            <img
-              :src="buildPatternThumbUrl(effectiveSeed, item.id, avatarShape)"
+            <LazyGalleryImg
+              :src="buildStyleThumbUrl(item.id, effectiveSeed)"
               :alt="item.id"
-              width="64"
-              height="64"
-              loading="lazy"
-              class="avatar-playground__gallery-img"
+              :size="STYLE_GALLERY_SIZE"
             />
             <span class="avatar-playground__gallery-label">{{ item.id }}</span>
           </button>
         </div>
+      </div>
+
+      <div
+        v-for="section in partnerGallerySections"
+        :id="section.id"
+        :key="section.id"
+        class="avatar-playground__gallery-group"
+      >
+        <h4 class="avatar-playground__gallery-group-title">{{ section.title }}</h4>
+        <div class="avatar-playground__gallery-grid">
+          <button
+            v-for="item in section.items"
+            :key="item.id"
+            type="button"
+            class="avatar-playground__gallery-item"
+            :class="{ 'avatar-playground__gallery-item--active': selectedStyle === item.id }"
+            :title="item.title"
+            @click="selectStyleFromGallery(item.id)"
+          >
+            <LazyGalleryImg
+              :src="buildStyleThumbUrl(item.id, effectiveSeed)"
+              :alt="item.id"
+              :size="STYLE_GALLERY_SIZE"
+            />
+            <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="gallery-patterns" class="avatar-playground__gallery-group">
+        <button
+          type="button"
+          class="avatar-playground__gallery-collapse"
+          :aria-expanded="patternsExpanded"
+          @click="patternsExpanded = !patternsExpanded"
+        >
+          <span class="avatar-playground__gallery-group-title avatar-playground__gallery-group-title--btn">
+            图即 · 纹理 pattern（{{ patternCount }} 种）
+          </span>
+          <span class="avatar-playground__gallery-collapse-hint">
+            {{ patternsExpanded ? '收起' : '展开预览' }}
+          </span>
+        </button>
+
+        <template v-if="patternsExpanded">
+          <div
+            v-for="group in patternGroups"
+            :id="`pattern-group-${group.id}`"
+            :key="group.id"
+            class="avatar-playground__gallery-subgroup"
+          >
+            <h5 class="avatar-playground__gallery-subtitle">{{ group.title }}</h5>
+            <div class="avatar-playground__gallery-grid">
+              <button
+                v-for="item in group.options"
+                :key="item.id"
+                type="button"
+                class="avatar-playground__gallery-item"
+                :class="{ 'avatar-playground__gallery-item--active': patternId === item.id && isPatternMode }"
+                :title="item.label"
+                @click="selectPatternFromGallery(item.id)"
+              >
+                <LazyGalleryImg
+                  :src="buildPatternThumbUrl(effectiveSeed, item.id, avatarShape)"
+                  :alt="item.id"
+                  :size="PATTERN_GALLERY_SIZE"
+                />
+                <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+              </button>
+            </div>
+          </div>
+        </template>
       </div>
     </section>
 
@@ -1187,6 +1423,47 @@ onUnmounted(() => {
   font-size: 13px;
   font-weight: 600;
   color: var(--vp-c-text-2);
+}
+
+.avatar-playground__gallery-group-title--btn {
+  margin: 0;
+}
+
+.avatar-playground__gallery-collapse {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+  cursor: pointer;
+  text-align: left;
+}
+
+.avatar-playground__gallery-collapse:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+.avatar-playground__gallery-collapse-hint {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--vp-c-brand-1);
+}
+
+.avatar-playground__gallery-subgroup {
+  margin-bottom: 16px;
+  scroll-margin-top: 72px;
+}
+
+.avatar-playground__gallery-subtitle {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-3);
 }
 
 .avatar-playground__gallery-grid {

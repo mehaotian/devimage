@@ -15,6 +15,7 @@ import {
   isDevimgPatternId,
   renderDevimgPattern,
 } from './devimg-patterns/index';
+import { isExperimentalNativeStyle, renderExperimentalNative } from './native-renderers/index';
 
 /** devimg 背景变体 */
 export type DevimgVariant = 'gradient' | 'mesh' | 'pattern';
@@ -58,6 +59,10 @@ export class NativeAvatarService {
 
     if (options.style === 'devimg-geo') {
       return this.renderGeo(options.seed, size);
+    }
+
+    if (isExperimentalNativeStyle(options.style)) {
+      return renderExperimentalNative(options.style, options.seed, size);
     }
 
     if (this.isDevimgFamily(options.style)) {

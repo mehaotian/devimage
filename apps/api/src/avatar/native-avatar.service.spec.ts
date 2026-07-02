@@ -127,4 +127,10 @@ describe('NativeAvatarService', () => {
       }),
     ).toThrow('bg is not supported with pattern');
   });
+
+  it('should render experimental native style devimg-mandala', () => {
+    const svg = service.renderSvg({ style: 'devimg-mandala', seed: 'Luna', size: 128 });
+    expect(svg).toContain('<ellipse');
+    expect(svg).toContain('width="128"');
+  });
 });
