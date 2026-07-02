@@ -80,7 +80,7 @@ const highlights = [
 const resources = [
   { icon: 'res-placeholder', title: '占位图', desc: '随机色块 SVG', route: '/800/600', link: '/api/placeholder', count: '任意尺寸' },
   { icon: 'res-seed', title: 'Seed 固定图', desc: '确定性配色', route: '/seed/demo/800/600', link: '/api/placeholder', count: 'UI 回归' },
-  { icon: 'res-avatar', title: '字母头像', desc: '中文首字 / 英文首字母', route: '/avatar/张三/128', link: '/api/avatar', count: '圆形 SVG' },
+  { icon: 'res-avatar', title: '字母头像', desc: '渐变首字 / 多风格 seed', route: '/avatar/devimg-initials/张三/128', link: '/api/avatar', count: '25+ 风格' },
   { icon: 'res-scene', title: '场景插画', desc: '404 / 空状态 / 断网', route: '/scene/404', link: '/api/scene', count: '4 种 variant' },
   { icon: 'res-users', title: 'Mock 用户', desc: '中文姓名 + 头像', route: '/mock/users', link: '/api/mock', count: '最多 100 条' },
   { icon: 'res-posts', title: 'Mock 文章', desc: '标题 + 正文', route: '/mock/posts', link: '/api/mock', count: '列表数据' },
@@ -104,7 +104,7 @@ const codeLangTabs = [
 
 const previewTabs = [
   { id: 'placeholder', label: '占位图', path: '/800/600', img: '/800/600' },
-  { id: 'avatar', label: '头像', path: '/avatar/张三/128', img: '/avatar/%E5%BC%A0%E4%B8%89/128' },
+  { id: 'avatar', label: '头像', path: '/avatar/devimg-initials/张三/128', img: '/avatar/devimg-initials/%E5%BC%A0%E4%B8%89/128' },
   { id: 'seed', label: 'Seed', path: '/seed/demo/400/300', img: '/seed/demo/400/300' },
   { id: 'scene', label: '场景图', path: '/scene/404?w=480&h=320', img: '/scene/404?w=480&h=320' },
 ];
@@ -128,7 +128,7 @@ const imgSrc = computed(() => `${API_BASE}${currentTab.value.img}`);
 
 const codeExamples = computed(() => {
   const url = `${API_BASE}/800/600`;
-  const avatar = `${API_BASE}/avatar/张三/64`;
+  const avatar = `${API_BASE}/avatar/devimg-initials/张三/64`;
   const map: Record<string, string> = {
     html: `<img src="${url}" alt="placeholder" width="800" height="600" />`,
     vue: `<template>\n  <img :src="'${url}'" alt="placeholder" />\n</template>`,

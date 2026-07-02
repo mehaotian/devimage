@@ -10,6 +10,8 @@
 | [Freemium 定价与成本模型](./Freemium定价与成本模型.md) | 定价 tier、成本测算 |
 | [技术栈选型评估](./技术栈选型评估.md) | Node + TS + NestJS + VitePress |
 | [腾讯云 COS 部署指南](./腾讯云COS部署指南.md) | 轻量 + COS + CDN 生产架构 |
-| [腾讯云 COS 部署指南](./腾讯云COS部署指南.md) | 轻量 + COS + CDN 生产架构 |
+| [头像美术资源规范](./头像美术资源规范.md) | 可灵 AI 出图、Sprite 裁剪、manifest、拼接验收 |
+| [头像设计师交付规范](./头像设计师交付规范.md) | 设计师 Brief：锚点、分层互斥、导出、多 style 可拼接 |
+| [竞品站](./竞品站.md) | 竞品链接索引 |
 
 对外用户文档见 [apps/docs](../apps/docs/)（VitePress 站点）。

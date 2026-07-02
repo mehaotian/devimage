@@ -34,6 +34,10 @@ Thumbs.db
 data/cache/
 .pm2/
 
+# Avatar 原始 Sprite Sheet（体积大，本地保留）
+packages/avatar-assets/assets/devimage-cn/raw/*.png
+packages/avatar-assets/out/
+
 # Editor（保留 .vscode/settings.json 等共享配置）
 .idea/
 *.swp

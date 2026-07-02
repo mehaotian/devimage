@@ -1,0 +1,36 @@
+{
+  "style": "devimage-cn",
+  "version": "1.0.0",
+  "canvas": 512,
+  "basePath": "../assets/devimage-cn",
+  "background": {
+    "type": "circle",
+    "fromSeed": "hue",
+    "saturation": 55,
+    "lightness": 55
+  },
+  "layers": [
+    {
+      "slot": "faces",
+      "z": 1,
+      "count": 16,
+      "path": "faces/{id}.png"
+    },
+    {
+      "slot": "features",
+      "z": 2,
+      "count": 16,
+      "path": "features/{id}.png"
+    },
+    {
+      "slot": "hair",
+      "z": 3,
+      "count": 16,
+      "path": "hair/{id}.png"
+    }
+  ],
+  "seed": {
+    "algorithm": "fnv1a-mod",
+    "slots": ["faces", "features", "hair"]
+  }
+}

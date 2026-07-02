@@ -5,31 +5,56 @@ import {
   Param,
   Query,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AvatarService } from './avatar.service';
+import { AvatarStyleService } from './avatar-style.service';
 
 @ApiTags('avatar')
 @Controller('avatar')
 export class AvatarController {
-  constructor(private readonly avatarService: AvatarService) {}
+  constructor(private readonly avatarStyleService: AvatarStyleService) {}
 
   /**
-   * 根据名称生成字母/中文首字头像
+   * 列出可用头像风格（native + partner）
    */
-  @Get(':name/:size')
+  @Get('styles')
+  @Header('Cache-Control', 'public, max-age=3600')
+  @ApiOperation({ summary: '列出可用头像风格' })
+  listStyles() {
+    const styles = this.avatarStyleService.listStyles();
+    const nativeCount = styles.filter((item) => item.engine === 'native').length;
+    const partnerCount = styles.filter((item) => item.engine === 'partner').length;
+    return {
+      count: styles.length,
+      nativeCount,
+      partnerCount,
+      styles,
+    };
+  }
+
+  /**
+   * 多风格 seed 头像（native / partner SVG）
+   */
+  @Get(':style/:seed/:size')
   @Header('Content-Type', 'image/svg+xml; charset=utf-8')
   @Header('Cache-Control', 'public, max-age=31536000, immutable')
-  @ApiOperation({ summary: '生成字母/中文首字头像' })
-  getAvatar(
-    @Param('name') name: string,
+  @ApiOperation({ summary: '按 style + seed 生成 SVG 头像' })
+  getStyledAvatar(
+    @Param('style') style: string,
+    @Param('seed') seed: string,
     @Param('size') size: string,
     @Query('bg') bg?: string,
     @Query('fg') fg?: string,
   ): string {
+    if (!this.avatarStyleService.isKnownStyle(style)) {
+      throw new NotFoundException(`Unknown avatar style: ${style}`);
+    }
+
     try {
-      return this.avatarService.renderSvg({
-        name: decodeURIComponent(name),
+      return this.avatarStyleService.renderSvg({
+        style,
+        seed: decodeURIComponent(seed),
         size: Number.parseInt(size, 10),
         bg,
         fg,

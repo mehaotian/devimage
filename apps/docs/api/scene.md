@@ -1,5 +1,15 @@
 # 场景图 API
 
+## 在线试玩
+
+<!-- markdownlint-disable MD033 -->
+
+<ScenePlayground />
+
+<!-- markdownlint-enable MD033 -->
+
+---
+
 ## `GET /scene/:variant`
 
 | variant | 说明 |

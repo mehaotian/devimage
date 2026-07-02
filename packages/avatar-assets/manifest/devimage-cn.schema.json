@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://devimage.cn/schemas/avatar-manifest.json",
+  "title": "DevImage Avatar Style Manifest",
+  "type": "object",
+  "required": ["style", "version", "canvas", "basePath", "background", "layers", "seed"],
+  "additionalProperties": false,
+  "properties": {
+    "style": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "路由 style 段，如 devimage-cn"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "canvas": {
+      "type": "integer",
+      "minimum": 64,
+      "maximum": 1024,
+      "description": "部件画布边长（px），与 viewBox 一致"
+    },
+    "basePath": {
+      "type": "string",
+      "description": "资源根路径（相对 manifest 文件）或 CDN URL 前缀"
+    },
+    "background": {
+      "type": "object",
+      "required": ["type", "fromSeed"],
+      "properties": {
+        "type": { "const": "circle" },
+        "fromSeed": { "enum": ["hue", "fixed"] },
+        "saturation": { "type": "number", "minimum": 0, "maximum": 100 },
+        "lightness": { "type": "number", "minimum": 0, "maximum": 100 },
+        "color": { "type": "string", "pattern": "^[0-9a-fA-F]{6}$" }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["slot", "z", "count", "path"],
+        "additionalProperties": false,
+        "properties": {
+          "slot": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "z": { "type": "integer", "minimum": 0 },
+          "count": { "type": "integer", "minimum": 1, "maximum": 256 },
+          "path": {
+            "type": "string",
+            "pattern": ".\\{id\\}."
+          },
+          "optional": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "seed": {
+      "type": "object",
+      "required": ["algorithm", "slots"],
+      "properties": {
+        "algorithm": { "enum": ["fnv1a-mod"] },
+        "slots": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

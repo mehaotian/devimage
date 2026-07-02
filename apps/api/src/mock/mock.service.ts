@@ -56,7 +56,7 @@ export class MockService {
       id,
       name: faker.person.fullName(),
       email: faker.internet.email(),
-      avatar: `https://cdn.devimage.cn/avatar/${encodeURIComponent(faker.person.firstName())}/128`,
+      avatar: `https://cdn.devimage.cn/avatar/devimg-initials/${encodeURIComponent(faker.person.firstName())}/128`,
       phone: faker.phone.number(),
       address: faker.location.city(),
     };

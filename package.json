@@ -13,7 +13,10 @@
     "build:docs": "pnpm --filter @devimage/docs build",
     "start:prod": "pnpm --filter @devimage/api start:prod",
     "test": "pnpm --filter @devimage/api test",
-    "lint": "pnpm --filter @devimage/api lint"
+    "lint": "pnpm --filter @devimage/api lint",
+    "avatar:split": "pnpm --filter @devimage/avatar-assets split",
+    "avatar:matte": "pnpm --filter @devimage/avatar-assets matte",
+    "avatar:validate": "pnpm --filter @devimage/avatar-assets validate"
   },
   "devDependencies": {
     "typescript": "^5.8.2"

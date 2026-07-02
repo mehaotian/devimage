@@ -2,6 +2,18 @@
 
 兼容 [JSONPlaceholder](https://jsonplaceholder.typicode.com) 使用习惯，路径前缀为 `/mock`。
 
+Mock 请勿高频轮询，详见 [公平使用](/guide/fair-use)。
+
+## 在线试玩
+
+<!-- markdownlint-disable MD033 -->
+
+<MockPlayground />
+
+<!-- markdownlint-enable MD033 -->
+
+---
+
 ## 用户
 
 ```javascript

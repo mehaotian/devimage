@@ -1,5 +1,17 @@
 # 占位图 API
 
+使用规范见 [公平使用](/guide/fair-use)。
+
+## 在线试玩
+
+<!-- markdownlint-disable MD033 -->
+
+<PlaceholderPlayground />
+
+<!-- markdownlint-enable MD033 -->
+
+---
+
 ## `GET /:width/:height`
 
 返回 SVG 占位图。
@@ -39,11 +51,3 @@
 ### 响应头
 
 - `Cache-Control: public, max-age=31536000, immutable`
-
----
-
-## 在线预览
-
-<iframe src="http://localhost:3000/400/200?text=DevImage" width="420" height="220" style="border:1px solid #e2e8f0;border-radius:8px;"></iframe>
-
-> 本地开发时需先运行 `pnpm dev:api`

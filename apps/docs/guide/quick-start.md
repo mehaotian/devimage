@@ -4,7 +4,8 @@ DevImage 提供 **URL 即 API** 的占位资源服务，无需注册、无需 AP
 
 ## 安装与启动
 
-> **必须使用 pnpm**，在仓库**根目录**执行安装。依赖位于 `apps/api` 与 `apps/docs`，根目录 `pnpm install` 会一并安装。
+> **必须使用 pnpm**，在仓库**根目录**执行安装。
+> 依赖位于 `apps/api` 与 `apps/docs`，根目录 `pnpm install` 会一并安装。
 
 ```bash
 # 安装 pnpm
@@ -39,8 +40,17 @@ pnpm dev
 ## 头像
 
 ```html
-<img src="http://localhost:3000/avatar/张三/128" alt="avatar" />
+<!-- 首字头像 -->
+<img src="http://localhost:3000/avatar/devimg-initials/张三/128" alt="avatar" />
+
+<!-- 多风格 seed（自研渐变） -->
+<img src="http://localhost:3000/avatar/devimg-gradient/Luna/128" alt="gradient avatar" />
+
+<!-- 多风格 seed（DiceBear rings） -->
+<img src="http://localhost:3000/avatar/rings/Luna/128" alt="rings avatar" />
 ```
+
+风格列表与在线试玩见 [头像 API](/api/avatar)。
 
 ## Mock 数据
 

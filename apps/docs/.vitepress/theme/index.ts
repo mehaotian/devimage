@@ -1,6 +1,11 @@
 import DefaultTheme from 'vitepress/theme';
 import HomePage from '../components/HomePage.vue';
 import HomeIcon from '../components/HomeIcon.vue';
+import AvatarPlayground from '../components/AvatarPlayground.vue';
+import PlaceholderPlayground from '../components/PlaceholderPlayground.vue';
+import ScenePlayground from '../components/ScenePlayground.vue';
+import MockPlayground from '../components/MockPlayground.vue';
+import ApiPlaygroundShell from '../components/ApiPlaygroundShell.vue';
 import './custom.css';
 
 export default {
@@ -8,5 +13,10 @@ export default {
   enhanceApp({ app }) {
     app.component('HomePage', HomePage);
     app.component('HomeIcon', HomeIcon);
+    app.component('AvatarPlayground', AvatarPlayground);
+    app.component('PlaceholderPlayground', PlaceholderPlayground);
+    app.component('ScenePlayground', ScenePlayground);
+    app.component('MockPlayground', MockPlayground);
+    app.component('ApiPlaygroundShell', ApiPlaygroundShell);
   },
 };

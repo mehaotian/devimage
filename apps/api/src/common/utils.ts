@@ -54,16 +54,22 @@ export function seedToHue(seed: string): number {
 }
 
 /**
- * HSL 转 hex 背景色
+ * HSL 转 hex 背景色（h: 0–360，s/l: 0–100）
  */
 export function hslToHex(h: number, s: number, l: number): string {
-  const a = (s * Math.min(l, 1 - l)) / 100;
-  const f = (n: number): string => {
+  const sat = s / 100;
+  const light = l / 100;
+  const chroma = sat * Math.min(light, 1 - light);
+
+  /**
+   * 计算单个 RGB 通道（0–255）
+   */
+  const channel = (n: number): string => {
     const k = (n + h / 30) % 12;
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color)
-      .toString(16)
-      .padStart(2, '0');
+    const rgb = light - chroma * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    const clamped = Math.min(255, Math.max(0, Math.round(255 * rgb)));
+    return clamped.toString(16).padStart(2, '0');
   };
-  return `${f(0)}${f(8)}${f(4)}`;
+
+  return `${channel(0)}${channel(8)}${channel(4)}`;
 }

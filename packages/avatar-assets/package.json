@@ -1,0 +1,15 @@
+{
+  "name": "@devimage/avatar-assets",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DevImage 组合式头像美术资源与裁剪脚本",
+  "type": "module",
+  "scripts": {
+    "split": "node scripts/split-sprite-sheet.mjs",
+    "matte": "node scripts/remove-white-bg.mjs",
+    "validate": "node scripts/validate-composite.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.33.5"
+  }
+}

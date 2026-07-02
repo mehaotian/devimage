@@ -27,6 +27,8 @@ export default defineConfig({
           items: [
             { text: '快速开始', link: '/guide/quick-start' },
             { text: '功能一览', link: '/guide/dev-spec' },
+            { text: '使用规范', link: '/guide/fair-use' },
+            { text: '头像许可', link: '/guide/avatar-licenses' },
             { text: '部署', link: '/guide/deployment' },
           ],
         },
