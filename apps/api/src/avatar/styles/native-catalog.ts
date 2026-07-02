@@ -11,7 +11,7 @@ export const NATIVE_STYLE_CATALOG: readonly AvatarStyleMeta[] = [
     engine: 'native',
     license: 'DevImage',
     provider: 'devimage',
-    queryParams: ['variant', 'text', 'shape', 'bg', 'fg'],
+    queryParams: ['variant', 'text', 'shape', 'bg', 'fg', 'pattern'],
   },
   {
     id: 'devimg-geo',
@@ -20,6 +20,15 @@ export const NATIVE_STYLE_CATALOG: readonly AvatarStyleMeta[] = [
     engine: 'native',
     license: 'DevImage',
     provider: 'devimage',
+  },
+  {
+    id: 'devimg-pattern',
+    title: '纹理 pattern',
+    group: 'geometric',
+    engine: 'native',
+    license: 'DevImage',
+    provider: 'devimage',
+    queryParams: ['text', 'shape', 'fg', 'pattern'],
   },
   {
     id: 'devimg-gradient',

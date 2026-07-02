@@ -94,4 +94,35 @@ describe('NativeAvatarService', () => {
     const b = service.renderSvg({ style: 'devimg-geo', seed: 'Felix', size: 64 });
     expect(a).toBe(b);
   });
+
+  it('should render devimg-pattern with svg pattern tile', () => {
+    const svg = service.renderSvg({ style: 'devimg-pattern', seed: 'Luna', size: 128 });
+    expect(svg).toContain('clipPath');
+    expect(svg).toContain('<pattern id="pat"');
+    expect(svg).not.toContain('<text');
+  });
+
+  it('should render devimg with pattern variant and optional text', () => {
+    const svg = service.renderSvg({
+      style: 'devimg',
+      seed: '张三',
+      size: 128,
+      variant: 'pattern',
+      pattern: 'polka',
+      text: '1',
+    });
+    expect(svg).toContain('<pattern id="pat"');
+    expect(svg).toContain('张');
+  });
+
+  it('should reject bg on pattern variant', () => {
+    expect(() =>
+      service.renderSvg({
+        style: 'devimg-pattern',
+        seed: 'Luna',
+        size: 64,
+        bg: '6366f1',
+      }),
+    ).toThrow('bg is not supported with pattern');
+  });
 });

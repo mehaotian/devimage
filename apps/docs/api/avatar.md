@@ -21,13 +21,13 @@ DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含**自研 nati
 
 ## 风格目录
 
-当前共 **44** 种风格：**5** 自研（含 3 个别名）+ **39** 三方接入。完整 JSON 列表：`GET /avatar/styles`。
+当前共 **45** 种风格：**6** 自研（含 3 个别名）+ **39** 三方接入。完整 JSON 列表：`GET /avatar/styles`。
 
 ### 引擎与三方库
 
 | 类型 | engine | provider | 风格数 | 库 / 站点 | npm |
 | ------ | ------ | ------ | ------: | ------ | ------ |
-| 自研 | `native` | `devimage` | 5 | DevImage 自研 SVG | — |
+| 自研 | `native` | `devimage` | 6 | DevImage 自研 SVG | — |
 | 三方 | `partner` | `dicebear` | 37 | [DiceBear](https://www.dicebear.com/) | [@dicebear/core](https://www.npmjs.com/package/@dicebear/core) |
 | 三方 | `partner` | `jdenticon` | 1 | [Jdenticon](https://jdenticon.com/) | [jdenticon](https://www.npmjs.com/package/jdenticon) |
 | 三方 | `partner` | `minidenticons` | 1 | [Minidenticons](https://github.com/laem/minidenticons) | [minidenticons](https://www.npmjs.com/package/minidenticons) |
@@ -38,29 +38,48 @@ DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含**自研 nati
 
 ### 自研 native（devimage）
 
-DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 **`devimg`**，通过 query 控制背景与首字；**`devimg-geo`** 为独立几何风格。
+DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 **`devimg`**，通过 query 控制背景与首字；**`devimg-geo`** 为独立几何风格；**`devimg-pattern`** 为 CSS 纹理 pattern 头像。
 
 #### 主风格
 
 | style | 名称 | 说明 | Query | 示例 |
 | ------ | ------ | ------ | ------ | ------ |
-| `devimg` | 图即头像 | 圆形头像：渐变/mesh 底 + 可选首字 | `variant`, `text`, `bg`, `fg` | `/avatar/devimg/张三/128` |
+| `devimg` | 图即头像 | 圆形头像：渐变/mesh/pattern 底 + 可选首字 | `variant`, `text`, `bg`, `fg`, `pattern` | `/avatar/devimg/张三/128` |
 | `devimg-geo` | 几何弧环 | 同心弧环 stroke，抽象 identicon | — | `/avatar/devimg-geo/Luna/128` |
+| `devimg-pattern` | 纹理 pattern | CSS 纹理满铺背景，seed 选模板与配色 | `text`, `shape`, `fg`, `pattern` | `/avatar/devimg-pattern/Luna/128` |
 
 #### devimg Query 参数
 
 | 参数 | 取值 | 默认 | 说明 |
 | ------ | ------ | ------ | ------ |
-| `variant` | `gradient` \| `mesh` | `gradient` | 背景：线性渐变 / 网格光斑 |
+| `variant` | `gradient` \| `mesh` \| `pattern` | `gradient` | 背景：线性渐变 / 网格光斑 / CSS 纹理 |
 | `text` | `0` \| `1` | `1` | 是否显示首字 |
 | `shape` | `circle` \| `square` | `circle` | 裁剪形状：圆形 / 方形 |
-| `bg` | 6 位 hex | seed 推导 | 纯色底（覆盖 variant） |
+| `bg` | 6 位 hex | seed 推导 | 纯色底（覆盖 variant；**pattern 不可用**） |
 | `fg` | 6 位 hex | `ffffff` | 首字颜色 |
+| `pattern` | 见下表 | seed 推导 | 指定纹理模板（`variant=pattern` 或 `devimg-pattern`） |
+
+#### pattern 纹理模板
+
+灵感来自 [CSS3 Patterns Gallery](https://leaverou.github.io/css3patterns/)（MIT），服务端以 SVG `<pattern>` 渲染：
+
+| pattern | 说明 |
+| ------ | ------ |
+| `stripes` | 斜向条纹 |
+| `polka` | 波点 |
+| `checker` | 棋盘格 |
+| `houndstooth` | 千鸟格（简化） |
+| `argyle` | 菱形格 |
+| `grid` | 网格线 |
 
 ```text
 /avatar/devimg/张三/128
 /avatar/devimg/Luna/128?text=0
 /avatar/devimg/Luna/128?variant=mesh&text=0
+/avatar/devimg/Luna/128?variant=pattern&text=0
+/avatar/devimg/Luna/128?variant=pattern&pattern=polka
+/avatar/devimg-pattern/Luna/128
+/avatar/devimg-pattern/Luna/128?pattern=houndstooth
 /avatar/devimg/张三/128?shape=square
 /avatar/devimg/张三/128?bg=6366f1&fg=ffffff
 ```
@@ -185,15 +204,17 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 
 | 参数 | 格式 | 说明 | 示例 |
 | ------ | ------ | ------ | ------ |
-| variant | `gradient` \| `mesh` | 背景算法 | `mesh` |
+| variant | `gradient` \| `mesh` \| `pattern` | 背景算法 | `pattern` |
 | text | `0` \| `1` | 是否显示首字 | `0` |
 | shape | `circle` \| `square` | 圆形 / 方形裁剪 | `square` |
 | bg | 6 位 hex，不带 `#` | 纯色背景 | `6366f1` |
 | fg | 6 位 hex，不带 `#` | 首字颜色 | `ffffff` |
+| pattern | `stripes` \| `polka` \| `checker` \| `houndstooth` \| `argyle` \| `grid` | 纹理模板 | `polka` |
 
 规则：
 
 - 非法 `variant` / `text` / `shape` / hex 返回 `400 Bad Request`
+- `variant=pattern` 或 `devimg-pattern` 时传 `bg` 返回 `400`（配色由 seed 推导，与模板绑定）
 - 同一完整 URL 输出始终相同（`immutable` 缓存）
 
 #### 配色对比示例
@@ -204,6 +225,8 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 | 纯渐变、无字 | `/avatar/devimg/Luna/128?text=0` |
 | 品牌靛蓝底 + 白字 | `/avatar/devimg/张三/128?bg=6366f1&fg=ffffff` |
 | mesh + 首字 | `/avatar/devimg/张三/128?variant=mesh` |
+| pattern 纹理 | `/avatar/devimg-pattern/Luna/128` |
+| 指定波点 | `/avatar/devimg/Luna/128?variant=pattern&pattern=polka&text=0` |
 | 方形裁剪 | `/avatar/devimg/张三/128?shape=square` |
 
 ```html
@@ -220,6 +243,7 @@ curl "http://localhost:3000/avatar/devimg/张三/128?bg=6366f1&fg=ffffff" -o ava
 
 ```html
 <img src="http://localhost:3000/avatar/devimg-geo/Luna/128" />
+<img src="http://localhost:3000/avatar/devimg-pattern/Luna/128" />
 <img src="http://localhost:3000/avatar/rings/Luna/128" />
 <img src="http://localhost:3000/avatar/jdenticon/Felix/128" />
 <img src="http://localhost:3000/avatar/minidenticon/Felix/128" />

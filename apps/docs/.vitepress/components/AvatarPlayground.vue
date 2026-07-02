@@ -21,6 +21,7 @@ const DEVIMG_FAMILY = new Set([
   'devimg-gradient',
   'devimg-mesh',
   'devimg-initials',
+  'devimg-pattern',
 ]);
 
 const DEFAULT_STYLE = 'devimg';
@@ -35,7 +36,8 @@ const seed = ref(DEFAULT_SEED);
 const debouncedSeed = ref(DEFAULT_SEED);
 const bgColor = ref('');
 const fgColor = ref('');
-const variant = ref<'gradient' | 'mesh'>('gradient');
+const variant = ref<'gradient' | 'mesh' | 'pattern'>('gradient');
+const patternId = ref('');
 const showText = ref(true);
 const avatarShape = ref<'circle' | 'square'>('circle');
 const copied = ref(false);
@@ -80,6 +82,7 @@ function buildAvatarUrl(
     shape?: 'circle' | 'square';
     bg?: string;
     fg?: string;
+    pattern?: string;
   },
 ): string {
   const base = `${API_BASE}/avatar/${encodeURIComponent(style)}/${encodeURIComponent(seedValue)}/${size}`;
@@ -95,12 +98,17 @@ function buildAvatarUrl(
       params.set('variant', variantValue);
     } else if (style === 'devimg-gradient' && variantValue !== 'gradient') {
       params.set('variant', variantValue);
+    } else if (style === 'devimg-pattern') {
+      // devimg-pattern 固定纹理，无需 variant query
     } else if (style !== 'devimg-gradient' && style !== 'devimg-mesh') {
       if (variantValue !== 'gradient') {
         params.set('variant', variantValue);
       }
     }
-    const defaultText = style === 'devimg-gradient' || style === 'devimg-mesh' ? false : true;
+    const defaultText =
+      style === 'devimg-gradient' || style === 'devimg-mesh' || style === 'devimg-pattern'
+        ? false
+        : true;
     if (textValue !== defaultText) {
       params.set('text', textValue ? '1' : '0');
     }
@@ -108,11 +116,17 @@ function buildAvatarUrl(
     if (shapeValue === 'square') {
       params.set('shape', 'square');
     }
+    const patternValue = query?.pattern?.trim() ?? '';
+    if (patternValue) {
+      params.set('pattern', patternValue);
+    }
   }
 
   const bg = normalizeHex(query?.bg ?? '');
   const fg = normalizeHex(query?.fg ?? '');
-  if (bg.length === 6) {
+  const skipBg =
+    style === 'devimg-pattern' || (style === 'devimg' && (query?.variant ?? 'gradient') === 'pattern');
+  if (bg.length === 6 && !skipBg) {
     params.set('bg', bg);
   }
   if (fg.length === 6) {
@@ -136,12 +150,29 @@ const supportsColorQuery = computed(
     activeStyleMeta.value?.queryParams?.some((item) => item === 'bg' || item === 'fg'),
 );
 
+const isPatternMode = computed(
+  () => selectedStyle.value === 'devimg-pattern' || variant.value === 'pattern',
+);
+
+const showVariantPicker = computed(
+  () => isDevimgFamily.value && selectedStyle.value !== 'devimg-pattern',
+);
+
+const showPatternPicker = computed(() => isDevimgFamily.value && isPatternMode.value);
+
+const showBgControl = computed(() => isDevimgFamily.value && !isPatternMode.value);
+
+const showFgControl = computed(() => isDevimgFamily.value && showText.value);
+
+const showColorSection = computed(() => showBgControl.value || showFgControl.value);
+
 const devimgQuery = computed(() => ({
   variant: variant.value,
   text: showText.value,
   shape: avatarShape.value,
-  bg: bgColor.value,
+  bg: isPatternMode.value ? '' : bgColor.value,
   fg: fgColor.value,
+  pattern: patternId.value,
 }));
 
 const previewUrl = computed(() =>
@@ -183,6 +214,12 @@ function syncDevimgControls(styleId: string): void {
     case 'devimg-mesh':
       variant.value = 'mesh';
       showText.value = false;
+      break;
+    case 'devimg-pattern':
+      variant.value = 'pattern';
+      showText.value = false;
+      patternId.value = '';
+      bgColor.value = '';
       break;
     case 'devimg-initials':
       variant.value = 'gradient';
@@ -296,6 +333,12 @@ watch(selectedStyle, (styleId) => {
   }
 });
 
+watch(variant, (value) => {
+  if (value === 'pattern') {
+    bgColor.value = '';
+  }
+});
+
 onMounted(() => {
   debouncedSeed.value = seed.value.trim() || DEFAULT_SEED;
   syncDevimgControls(selectedStyle.value);
@@ -370,12 +413,28 @@ onUnmounted(() => {
           </div>
         </label>
 
-        <label class="avatar-playground__field">
+        <label v-if="showVariantPicker" class="avatar-playground__field">
           <span class="avatar-playground__label">variant 背景</span>
           <div class="avatar-playground__select-wrap">
             <select v-model="variant" class="avatar-playground__select">
               <option value="gradient">gradient 渐变圆</option>
               <option value="mesh">mesh 网格渐变</option>
+              <option value="pattern">pattern 纹理</option>
+            </select>
+          </div>
+        </label>
+
+        <label v-if="showPatternPicker" class="avatar-playground__field">
+          <span class="avatar-playground__label">pattern 纹理</span>
+          <div class="avatar-playground__select-wrap">
+            <select v-model="patternId" class="avatar-playground__select">
+              <option value="">seed 自动</option>
+              <option value="stripes">stripes 斜纹</option>
+              <option value="polka">polka 波点</option>
+              <option value="checker">checker 棋盘</option>
+              <option value="houndstooth">houndstooth 千鸟格</option>
+              <option value="argyle">argyle 菱形</option>
+              <option value="grid">grid 网格</option>
             </select>
           </div>
         </label>
@@ -386,11 +445,13 @@ onUnmounted(() => {
         </label>
       </div>
 
-      <div v-if="supportsColorQuery && isDevimgFamily" class="avatar-playground__colors">
-        <p class="avatar-playground__colors-title">品牌色（bg / fg）</p>
+      <div v-if="showColorSection" class="avatar-playground__colors">
+        <p class="avatar-playground__colors-title">
+          {{ showBgControl ? '品牌色（bg / fg）' : '文字色（fg）' }}
+        </p>
 
         <div class="avatar-playground__color-row">
-          <label class="avatar-playground__color-field">
+          <label v-if="showBgControl" class="avatar-playground__color-field">
             <span class="avatar-playground__label">bg 背景</span>
             <div class="avatar-playground__color-input-wrap">
               <input
@@ -409,7 +470,7 @@ onUnmounted(() => {
             </div>
           </label>
 
-          <label class="avatar-playground__color-field">
+          <label v-if="showFgControl" class="avatar-playground__color-field">
             <span class="avatar-playground__label">fg 文字</span>
             <div class="avatar-playground__color-input-wrap">
               <input
@@ -429,7 +490,7 @@ onUnmounted(() => {
           </label>
         </div>
 
-        <div class="avatar-playground__presets">
+        <div v-if="showBgControl" class="avatar-playground__presets">
           <button type="button" class="avatar-playground__preset" @click="applyPreset('6366f1', 'ffffff')">
             靛蓝
           </button>

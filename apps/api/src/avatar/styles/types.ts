@@ -11,7 +11,7 @@ export type AvatarStyleGroup =
 export type AvatarEngine = 'native' | 'partner' | 'composite';
 
 /** 可选 Query 参数（Playground 与文档用） */
-export type AvatarStyleQueryParam = 'variant' | 'text' | 'shape' | 'bg' | 'fg';
+export type AvatarStyleQueryParam = 'variant' | 'text' | 'shape' | 'bg' | 'fg' | 'pattern';
 
 /** 风格元数据（供 API 与文档使用） */
 export interface AvatarStyleMeta {

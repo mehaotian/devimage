@@ -21,6 +21,7 @@ export interface StyledAvatarRenderOptions {
   shape?: string;
   bg?: string;
   fg?: string;
+  pattern?: string;
 }
 
 /**
@@ -69,6 +70,7 @@ export class AvatarStyleService {
           shape: options.shape,
           bg: options.bg,
           fg: options.fg,
+          pattern: options.pattern,
         });
       case 'partner':
         return this.renderPartnerSvg(options);

@@ -10,9 +10,10 @@ import {
   buildGradientColors,
   buildRainbowMeshBlobs,
 } from './devimg-palette';
+import { isDevimgPatternId, renderDevimgPattern } from './devimg-patterns';
 
 /** devimg 背景变体 */
-export type DevimgVariant = 'gradient' | 'mesh';
+export type DevimgVariant = 'gradient' | 'mesh' | 'pattern';
 
 /** devimg 裁剪形状 */
 export type DevimgShape = 'circle' | 'square';
@@ -26,6 +27,7 @@ export interface NativeAvatarOptions {
   shape?: string;
   bg?: string;
   fg?: string;
+  pattern?: string;
 }
 
 interface DevimgRenderConfig {
@@ -36,6 +38,7 @@ interface DevimgRenderConfig {
   shape: DevimgShape;
   bg?: string;
   fg?: string;
+  pattern?: string;
 }
 
 /**
@@ -69,7 +72,8 @@ export class NativeAvatarService {
       style === 'devimg' ||
       style === 'devimg-gradient' ||
       style === 'devimg-mesh' ||
-      style === 'devimg-initials'
+      style === 'devimg-initials' ||
+      style === 'devimg-pattern'
     );
   }
 
@@ -94,6 +98,10 @@ export class NativeAvatarService {
         variant = variant ?? 'gradient';
         text = text ?? '1';
         break;
+      case 'devimg-pattern':
+        variant = variant ?? 'pattern';
+        text = text ?? '0';
+        break;
       case 'devimg':
       default:
         variant = variant ?? 'gradient';
@@ -101,8 +109,18 @@ export class NativeAvatarService {
         break;
     }
 
-    if (variant !== 'gradient' && variant !== 'mesh') {
-      throw new Error(`Invalid variant: ${variant}. Use gradient or mesh.`);
+    if (variant !== 'gradient' && variant !== 'mesh' && variant !== 'pattern') {
+      throw new Error(`Invalid variant: ${variant}. Use gradient, mesh or pattern.`);
+    }
+
+    if (options.pattern && !isDevimgPatternId(options.pattern)) {
+      throw new Error(
+        `Invalid pattern: ${options.pattern}. Use stripes, polka, checker, houndstooth, argyle or grid.`,
+      );
+    }
+
+    if (variant === 'pattern' && options.bg) {
+      throw new Error('bg is not supported with pattern variant. Pattern colors are derived from seed.');
     }
 
     if (text !== '0' && text !== '1') {
@@ -122,6 +140,7 @@ export class NativeAvatarService {
       shape,
       bg: options.bg,
       fg: options.fg,
+      pattern: options.pattern,
     };
   }
 
@@ -149,12 +168,14 @@ export class NativeAvatarService {
    * 统一 devimg 渲染：背景 variant + 可选首字 overlay
    */
   private renderDevimg(config: DevimgRenderConfig): string {
-    const { seed, size, variant, showText, shape, bg, fg } = config;
+    const { seed, size, variant, showText, shape, bg, fg, pattern } = config;
     const solidBg = bg ? `#${parseHexColor(bg, '000000')}` : undefined;
     const background =
       variant === 'mesh'
         ? this.buildMeshLayers(seed, solidBg)
-        : this.buildGradientLayers(seed, solidBg);
+        : variant === 'pattern'
+          ? this.buildPatternLayers(seed, solidBg, pattern)
+          : this.buildGradientLayers(seed, solidBg);
 
     const textLayer = showText ? this.buildInitialTextLayer(seed, fg) : '';
     const clipDef = this.buildShapeClipDef(shape);
@@ -204,6 +225,24 @@ export class NativeAvatarService {
         `<rect width="100" height="100" fill="url(#rg)"/>`,
       ].join(''),
     };
+  }
+
+  /**
+   * 构建 CSS 纹理 pattern 背景层（seed 选模板 + 配色）
+   */
+  private buildPatternLayers(
+    seed: string,
+    solidBg?: string,
+    patternOverride?: string,
+  ): { defs: string; body: string } {
+    if (solidBg) {
+      return {
+        defs: '',
+        body: `<rect width="100" height="100" fill="${solidBg}"/>`,
+      };
+    }
+
+    return renderDevimgPattern(seed, patternOverride);
   }
 
   /**

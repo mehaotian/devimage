@@ -49,6 +49,7 @@ export class AvatarController {
     @Query('shape') shape?: string,
     @Query('bg') bg?: string,
     @Query('fg') fg?: string,
+    @Query('pattern') pattern?: string,
   ): string {
     if (!this.avatarStyleService.isKnownStyle(style)) {
       throw new NotFoundException(`Unknown avatar style: ${style}`);
@@ -64,6 +65,7 @@ export class AvatarController {
         shape,
         bg,
         fg,
+        pattern,
       });
     } catch (err) {
       throw new BadRequestException(
