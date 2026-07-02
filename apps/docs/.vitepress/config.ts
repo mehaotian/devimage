@@ -3,16 +3,18 @@ import { defineConfig } from 'vitepress';
 const API_BASE = process.env.VITE_API_BASE ?? 'http://localhost:3000';
 
 export default defineConfig({
-  title: 'DevImage',
-  description: '国内开发者占位资源 CDN — 图片、头像、Mock 数据',
+  title: 'devimg',
+  description: '图即 — 开发用的占位图 CDN。占位图、头像、场景图、Mock 数据，URL 即用。',
   lang: 'zh-CN',
   ignoreDeadLinks: true,
+  head: [['meta', { name: 'theme-color', content: '#6366f1' }]],
   themeConfig: {
+    siteTitle: 'devimg · 图即',
     nav: [
-      { text: '指南', link: '/guide/quick-start' },
-      { text: 'API', link: '/api/placeholder' },
+      { text: '首页', link: '/' },
+      { text: 'API 文档', link: '/api/placeholder' },
+      { text: '功能一览', link: '/guide/dev-spec' },
       { text: '迁移', link: '/migrate/from-picsum' },
-      { text: '开发文档', link: '/guide/dev-spec' },
     ],
     sidebar: {
       '/guide/': [
@@ -20,7 +22,7 @@ export default defineConfig({
           text: '指南',
           items: [
             { text: '快速开始', link: '/guide/quick-start' },
-            { text: '功能与分期规划', link: '/guide/dev-spec' },
+            { text: '功能一览', link: '/guide/dev-spec' },
             { text: '部署', link: '/guide/deployment' },
           ],
         },
@@ -46,10 +48,9 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [{ icon: 'github', link: 'https://github.com/devimage/devimage' }],
     footer: {
-      message: 'Released under MIT License.',
-      copyright: 'Copyright © 2026 DevImage',
+      message: 'devimg · 图即 — 开发用的占位图 CDN',
+      copyright: 'Copyright © 2026 devimg',
     },
   },
   vite: {

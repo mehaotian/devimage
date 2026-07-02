@@ -1,4 +1,8 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "vue.server.config.typescript.tsdk": "node_modules/typescript/lib",
+  "vetur.validation.script": false,
+  "vetur.validation.template": false,
+  "vetur.validation.style": false
 }
