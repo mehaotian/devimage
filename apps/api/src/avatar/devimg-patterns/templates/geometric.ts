@@ -39,17 +39,22 @@ export const renderBricks: PatternRenderer = (ctx) => {
   );
 };
 
-/** 三角拼贴 */
+/** 三角拼贴（四象限风车，alternate 双色） */
 export const renderTriangles: PatternRenderer = (ctx) => {
-  const unit = clampCell(ctx.cell, 6, 14);
+  const unit = clampCell(ctx.cell, 8, 16);
+  const half = unit / 2;
+  const c1 = fillColor(ctx.c1);
+  const c2 = fillColor(ctx.c2);
 
   return wrapPattern(
     unit,
     unit,
     [
-      `<rect width="${unit}" height="${unit}" fill="${fillColor(ctx.c2)}"/>`,
-      `<path d="M0,0 L${unit},0 L0,${unit} Z" fill="${fillColor(ctx.c1)}"/>`,
-      `<path d="M${unit},${unit} L${unit},0 L0,${unit} Z" fill="${fillColor(ctx.c1)}" opacity="0.72"/>`,
+      `<rect width="${unit}" height="${unit}" fill="${c2}"/>`,
+      `<path d="M0,0 L${half},0 L0,${half} Z" fill="${c1}"/>`,
+      `<path d="M${half},0 L${unit},0 L${half},${half} Z" fill="${c2}"/>`,
+      `<path d="M${unit},${half} L${unit},${unit} L${half},${unit} Z" fill="${c1}"/>`,
+      `<path d="M0,${half} L${half},${unit} L0,${unit} Z" fill="${c2}"/>`,
     ].join(''),
   );
 };
@@ -57,7 +62,7 @@ export const renderTriangles: PatternRenderer = (ctx) => {
 /** 十字格 */
 export const renderCross: PatternRenderer = (ctx) => {
   const unit = clampCell(ctx.cell, 8, 16);
-  const stroke = strokeForCell(unit, 0.14);
+  const stroke = strokeForCell(unit, 0.18);
   const half = unit / 2;
 
   return wrapPattern(

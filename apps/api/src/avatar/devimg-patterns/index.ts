@@ -1,5 +1,6 @@
 import { buildGradientColors } from '../devimg-palette';
 import { seedToInt } from '../../common/seed';
+import { buildPatternFourthColor } from './templates/premium';
 import { DEVIMG_PATTERN_IDS, getPatternRenderer } from './catalog';
 import type { DevimgPatternId, PatternRenderContext, PatternRenderResult } from './types';
 
@@ -21,6 +22,7 @@ export function buildPatternContext(
   patternOverride?: string,
 ): PatternRenderContext & { patternId: DevimgPatternId } {
   const { c1, c2, c3, angle } = buildGradientColors(seed);
+  const c4 = buildPatternFourthColor(seed);
   const cell = seedToInt(seed, 'pat-cell', 6, 15);
   let patternId: DevimgPatternId;
 
@@ -30,7 +32,7 @@ export function buildPatternContext(
     patternId = DEVIMG_PATTERN_IDS[seedToInt(seed, 'pat-id', 0, DEVIMG_PATTERN_IDS.length)]!;
   }
 
-  return { c1, c2, c3, cell, angle, patternId };
+  return { c1, c2, c3, c4, cell, angle, patternId };
 }
 
 /**

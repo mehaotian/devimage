@@ -60,9 +60,9 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 | `fg` | 6 位 hex | `ffffff` | 首字颜色 |
 | `pattern` | 见下表 | seed 推导 | 指定纹理模板（`variant=pattern` 或 `devimg-pattern`） |
 
-#### pattern 纹理模板（39 种）
+#### pattern 纹理模板（43 种）
 
-完整 JSON 列表：`GET /avatar/patterns`。灵感来自 [CSS3 Patterns Gallery](https://leaverou.github.io/css3patterns/)（MIT），服务端以 SVG `<pattern>` 渲染；**符号类**使用 seed 推导的 `c1` / `c2` / `c3` 三色；seed 自动选取模板，亦可用 `pattern` 指定。
+完整 JSON 列表：`GET /avatar/patterns`。灵感来自 [CSS3 Patterns Gallery](https://leaverou.github.io/css3patterns/)（MIT），服务端以 SVG `<pattern>` 渲染；**符号类**使用 `c1` / `c2` / `c3`，**精品类**额外使用 `c4`；seed 自动选取模板，亦可用 `pattern` 指定。
 
 **基础**
 
@@ -133,6 +133,15 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 | `quatrefoil` | 四叶花 |
 | `scales` | 鱼鳞 |
 
+**精品**（四色 `c1`–`c4`）
+
+| pattern | 说明 |
+| ------ | ------ |
+| `tartan` | 苏格兰格 |
+| `madras` | 马德拉斯 plaid |
+| `gingham` | 四色格布 |
+| `plaid` | 十字 plaid |
+
 ```text
 /avatar/devimg/张三/128
 /avatar/devimg/Luna/128?text=0
@@ -140,7 +149,7 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 /avatar/devimg/Luna/128?variant=pattern&text=0
 /avatar/devimg/Luna/128?variant=pattern&pattern=polka
 /avatar/devimg-pattern/Luna/128
-/avatar/devimg-pattern/Luna/128?pattern=yin-yang
+/avatar/devimg-pattern/Luna/128?pattern=tartan
 /avatar/devimg/张三/128?shape=square
 /avatar/devimg/张三/128?bg=6366f1&fg=ffffff
 ```
@@ -270,7 +279,7 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 | shape | `circle` \| `square` | 圆形 / 方形裁剪 | `square` |
 | bg | 6 位 hex，不带 `#` | 纯色背景 | `6366f1` |
 | fg | 6 位 hex，不带 `#` | 首字颜色 | `ffffff` |
-| pattern | 见 [pattern 纹理模板](#pattern-纹理模板39-种) | 纹理模板 | `yin-yang` |
+| pattern | 见 [pattern 纹理模板](#pattern-纹理模板43-种) | 纹理模板 | `tartan` |
 
 规则：
 
@@ -322,8 +331,8 @@ curl http://localhost:3000/avatar/patterns
 
 | 字段 | 说明 |
 | ------ | ------ |
-| `count` | pattern 总数（当前 39） |
-| `groups[].id` | 分组 ID：`basic` / `textile` / `geometric` / `wave` / `advanced` / `symbol` |
+| `count` | pattern 总数（当前 43） |
+| `groups[].id` | 分组 ID：`basic` / `textile` / `geometric` / `wave` / `advanced` / `symbol` / `premium` |
 | `groups[].title` | 分组中文名 |
 | `groups[].patterns[].id` | pattern 参数值 |
 | `groups[].patterns[].title` | 中文说明 |

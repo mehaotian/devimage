@@ -26,7 +26,7 @@ export const renderDotsOffset: PatternRenderer = (ctx) => {
 export const renderConcentric: PatternRenderer = (ctx) => {
   const unit = clampCell(ctx.cell * 2, 14, 28);
   const cx = (unit / 2).toFixed(2);
-  const stroke = strokeForCell(unit, 0.06);
+  const stroke = strokeForCell(unit, 0.1);
   const r1 = (unit * 0.2).toFixed(2);
   const r2 = (unit * 0.35).toFixed(2);
   const r3 = (unit * 0.48).toFixed(2);
@@ -53,9 +53,9 @@ export const renderMicrobial: PatternRenderer = (ctx) => {
     unit,
     [
       `<rect width="${unit}" height="${unit}" fill="${fillColor(ctx.c2)}"/>`,
-      `<circle cx="${(unit * 0.3).toFixed(1)}" cy="${(unit * 0.35).toFixed(1)}" r="${r}" fill="${fillColor(ctx.c1)}" opacity="0.85"/>`,
-      `<circle cx="${(unit * 0.72).toFixed(1)}" cy="${(unit * 0.28).toFixed(1)}" r="${r}" fill="${fillColor(ctx.c1)}" opacity="0.7"/>`,
-      `<circle cx="${(unit * 0.55).toFixed(1)}" cy="${(unit * 0.68).toFixed(1)}" r="${r}" fill="${fillColor(ctx.c1)}" opacity="0.75"/>`,
+      `<circle cx="${(unit * 0.3).toFixed(1)}" cy="${(unit * 0.35).toFixed(1)}" r="${r}" fill="${fillColor(ctx.c1)}" opacity="0.95"/>`,
+      `<circle cx="${(unit * 0.72).toFixed(1)}" cy="${(unit * 0.28).toFixed(1)}" r="${r}" fill="${fillColor(ctx.c1)}" opacity="0.88"/>`,
+      `<circle cx="${(unit * 0.55).toFixed(1)}" cy="${(unit * 0.68).toFixed(1)}" r="${r}" fill="${fillColor(ctx.c1)}" opacity="0.9"/>`,
     ].join(''),
   );
 };

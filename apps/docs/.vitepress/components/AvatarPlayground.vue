@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue';
+import {
+  EXPECTED_PATTERN_COUNT,
+  PATTERN_CATALOG,
+  mergePatternCatalog,
+  toPatternGroupOptions,
+  type PatternGroupOption,
+} from '../data/pattern-catalog';
 
 const API_BASE =
   typeof __API_BASE__ !== 'undefined' ? __API_BASE__ : 'http://localhost:3000';
@@ -24,43 +31,6 @@ const DEVIMG_FAMILY = new Set([
   'devimg-pattern',
 ]);
 
-interface PatternOption {
-  id: string;
-  label: string;
-}
-
-interface PatternGroupOption {
-  title: string;
-  options: PatternOption[];
-}
-
-/** API 不可用时的 fallback 目录 */
-const FALLBACK_PATTERN_GROUPS: PatternGroupOption[] = [
-  {
-    title: '基础',
-    options: [
-      { id: 'stripes', label: 'stripes 斜纹' },
-      { id: 'polka', label: 'polka 波点' },
-      { id: 'checker', label: 'checker 棋盘' },
-      { id: 'grid', label: 'grid 网格' },
-    ],
-  },
-  {
-    title: '波纹',
-    options: [
-      { id: 'waves', label: 'waves 波浪' },
-      { id: 'seigaiha', label: 'seigaiha 青海波' },
-    ],
-  },
-  {
-    title: '进阶几何',
-    options: [
-      { id: 'honeycomb', label: 'honeycomb 蜂窝' },
-      { id: 'japanese-cube', label: 'japanese-cube 立体方块' },
-    ],
-  },
-];
-
 const DEFAULT_STYLE = 'devimg';
 const DEFAULT_SEED = '张三';
 const PREVIEW_SIZE = 240;
@@ -80,7 +50,8 @@ const avatarShape = ref<'circle' | 'square'>('circle');
 const copied = ref(false);
 const loading = ref(true);
 const loadError = ref('');
-const patternGroups = ref<PatternGroupOption[]>(FALLBACK_PATTERN_GROUPS);
+const patternGroups = ref<PatternGroupOption[]>(toPatternGroupOptions(PATTERN_CATALOG));
+const patternCatalogStale = ref(false);
 
 let seedTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -240,6 +211,33 @@ const groupedByProvider = computed(() => {
   return map;
 });
 
+const PATTERN_GALLERY_SIZE = 64;
+
+/**
+ * 构建纹理画廊缩略图 URL（每个 pattern 独立 seed，展示配色差异）
+ */
+function buildPatternThumbUrl(seedValue: string, pattern: string, shape: 'circle' | 'square'): string {
+  const gallerySeed = `${seedValue}:${pattern}`;
+  return buildAvatarUrl('devimg-pattern', gallerySeed, PATTERN_GALLERY_SIZE, {
+    variant: 'pattern',
+    text: false,
+    shape,
+    pattern,
+  });
+}
+
+/**
+ * 从画廊选中某个 pattern
+ */
+function selectPatternFromGallery(id: string): void {
+  selectedStyle.value = 'devimg-pattern';
+  variant.value = 'pattern';
+  patternId.value = id;
+  showText.value = false;
+  bgColor.value = '';
+  copied.value = false;
+}
+
 /**
  * 切换 style 时同步 devimg 控件默认值
  */
@@ -319,30 +317,38 @@ function copyPreviewLink(): void {
   void copyText(apiUrl.value);
 }
 
+const patternCount = computed(() =>
+  patternGroups.value.reduce((total, group) => total + group.options.length, 0),
+);
+
 /**
- * 从 API 拉取 pattern 目录
+ * 滚动到画廊指定分组
+ */
+function scrollToPatternGroup(groupId: string): void {
+  document.getElementById(`pattern-group-${groupId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * 从 API 拉取 pattern 目录（禁用浏览器缓存，并与静态目录合并）
  */
 async function fetchPatternCatalog(): Promise<void> {
   try {
-    const res = await fetch(`${API_BASE}/avatar/patterns`);
+    const res = await fetch(`${API_BASE}/avatar/patterns`, { cache: 'no-store' });
     if (!res.ok) {
       return;
     }
     const data = (await res.json()) as {
-      groups: { title: string; patterns: { id: string; title: string }[] }[];
+      count?: number;
+      groups: { id?: string; title: string; patterns: { id: string; title: string }[] }[];
     };
     if (!data.groups?.length) {
       return;
     }
-    patternGroups.value = data.groups.map((group) => ({
-      title: group.title,
-      options: group.patterns.map((item) => ({
-        id: item.id,
-        label: `${item.id} ${item.title}`,
-      })),
-    }));
+    patternGroups.value = mergePatternCatalog(data.groups);
+    patternCatalogStale.value =
+      (data.count ?? data.groups.reduce((n, g) => n + g.patterns.length, 0)) < EXPECTED_PATTERN_COUNT;
   } catch {
-    /* 使用 fallback */
+    /* 保留静态目录 */
   }
 }
 
@@ -420,6 +426,7 @@ onUnmounted(() => {
 
 <template>
   <div class="avatar-playground">
+    <div class="avatar-playground__main">
     <div class="avatar-playground__panel avatar-playground__preview">
       <button
         type="button"
@@ -495,7 +502,7 @@ onUnmounted(() => {
           <div class="avatar-playground__select-wrap">
             <select v-model="patternId" class="avatar-playground__select">
               <option value="">seed 自动</option>
-              <optgroup v-for="group in patternGroups" :key="group.title" :label="group.title">
+              <optgroup v-for="group in patternGroups" :key="group.id" :label="group.title">
                 <option v-for="item in group.options" :key="item.id" :value="item.id">
                   {{ item.label }}
                 </option>
@@ -602,15 +609,75 @@ onUnmounted(() => {
         <a href="/guide/avatar-licenses">自研与第三方许可</a>。
       </p>
     </div>
+    </div>
+
+    <section v-if="patternGroups.length" class="avatar-playground__gallery">
+      <div class="avatar-playground__gallery-head">
+        <h3 class="avatar-playground__gallery-title">纹理画廊</h3>
+        <p class="avatar-playground__gallery-desc">
+          共 {{ patternCount }} 种 · 当前 seed：<code>{{ effectiveSeed }}</code> · 点击切换
+        </p>
+        <p v-if="patternCatalogStale" class="avatar-playground__gallery-warn">
+          API 返回的 pattern 目录偏旧（可能为浏览器缓存）。画廊已用内置完整 {{ EXPECTED_PATTERN_COUNT }} 种列表；请硬刷新或重启 API。
+        </p>
+        <nav class="avatar-playground__gallery-nav" aria-label="纹理分组跳转">
+          <button
+            v-for="group in patternGroups"
+            :key="group.id"
+            type="button"
+            class="avatar-playground__gallery-nav-btn"
+            @click="scrollToPatternGroup(group.id)"
+          >
+            {{ group.title }}
+          </button>
+        </nav>
+      </div>
+
+      <div
+        v-for="group in patternGroups"
+        :id="`pattern-group-${group.id}`"
+        :key="group.id"
+        class="avatar-playground__gallery-group"
+      >
+        <h4 class="avatar-playground__gallery-group-title">{{ group.title }}</h4>
+        <div class="avatar-playground__gallery-grid">
+          <button
+            v-for="item in group.options"
+            :key="item.id"
+            type="button"
+            class="avatar-playground__gallery-item"
+            :class="{ 'avatar-playground__gallery-item--active': patternId === item.id && isPatternMode }"
+            :title="item.label"
+            @click="selectPatternFromGallery(item.id)"
+          >
+            <img
+              :src="buildPatternThumbUrl(effectiveSeed, item.id, avatarShape)"
+              :alt="item.id"
+              width="64"
+              height="64"
+              loading="lazy"
+              class="avatar-playground__gallery-img"
+            />
+            <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
 .avatar-playground {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 24px 0;
+}
+
+.avatar-playground__main {
   display: grid;
   grid-template-columns: minmax(260px, 320px) 1fr;
   gap: 20px;
-  margin: 24px 0;
 }
 
 .avatar-playground__panel {
@@ -873,8 +940,125 @@ onUnmounted(() => {
   color: #ef4444;
 }
 
+.avatar-playground__gallery {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  padding: 18px;
+  background: var(--vp-c-bg-soft);
+  overflow: visible;
+}
+
+.avatar-playground__gallery-head {
+  margin-bottom: 16px;
+}
+
+.avatar-playground__gallery-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.avatar-playground__gallery-desc {
+  margin: 0;
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  line-height: 1.5;
+}
+
+.avatar-playground__gallery-warn {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #f59e0b66;
+  background: color-mix(in srgb, #f59e0b 12%, transparent);
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  line-height: 1.5;
+}
+
+.avatar-playground__gallery-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.avatar-playground__gallery-nav-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-2);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.avatar-playground__gallery-nav-btn:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.avatar-playground__gallery-group {
+  margin-bottom: 18px;
+  scroll-margin-top: 72px;
+}
+
+.avatar-playground__gallery-group:last-child {
+  margin-bottom: 0;
+}
+
+.avatar-playground__gallery-group-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+
+.avatar-playground__gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 10px;
+}
+
+.avatar-playground__gallery-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.avatar-playground__gallery-item:hover {
+  border-color: var(--vp-c-brand-1);
+}
+
+.avatar-playground__gallery-item--active {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--vp-c-brand-1) 25%, transparent);
+}
+
+.avatar-playground__gallery-img {
+  border-radius: 6px;
+  width: 64px;
+  height: 64px;
+}
+
+.avatar-playground__gallery-label {
+  font-size: 10px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--vp-c-text-2);
+  word-break: break-all;
+}
+
 @media (max-width: 768px) {
-  .avatar-playground {
+  .avatar-playground__main {
     grid-template-columns: 1fr;
   }
 }

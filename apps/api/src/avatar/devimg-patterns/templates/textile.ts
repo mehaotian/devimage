@@ -54,10 +54,11 @@ export const renderWeave: PatternRenderer = (ctx) => {
   );
 };
 
-/** 桌布格（细棋盘） */
+/** 桌布格（细格 + 分隔线，区别于 plain checker） */
 export const renderTablecloth: PatternRenderer = (ctx) => {
   const tile = clampCell(ctx.cell, 4, 8);
   const period = tile * 2;
+  const line = Math.max(0.6, tile * 0.1).toFixed(2);
 
   return wrapPattern(
     period,
@@ -66,24 +67,29 @@ export const renderTablecloth: PatternRenderer = (ctx) => {
       `<rect width="${period}" height="${period}" fill="${fillColor(ctx.c2)}"/>`,
       `<rect width="${tile}" height="${tile}" fill="${fillColor(ctx.c1)}"/>`,
       `<rect x="${tile}" y="${tile}" width="${tile}" height="${tile}" fill="${fillColor(ctx.c1)}"/>`,
+      `<line x1="${tile}" y1="0" x2="${tile}" y2="${period}" stroke="${fillColor(ctx.c2)}" stroke-width="${line}"/>`,
+      `<line x1="0" y1="${tile}" x2="${period}" y2="${tile}" stroke="${fillColor(ctx.c2)}" stroke-width="${line}"/>`,
     ].join(''),
   );
 };
 
-/** 碳纤维（双层细斜线） */
+/** 碳纤维（双角度交织 twill，区别于单斜纹 stripes） */
 export const renderCarbon: PatternRenderer = (ctx) => {
-  const unit = clampCell(ctx.cell, 6, 12);
-  const stroke = Math.max(0.8, unit * 0.12).toFixed(2);
+  const unit = clampCell(ctx.cell, 8, 14);
+  const stroke = Math.max(1, unit * 0.14).toFixed(2);
+  const c1 = fillColor(ctx.c1);
+  const c2 = fillColor(ctx.c2);
+  const offset = (unit * 0.35).toFixed(2);
 
   return wrapPattern(
     unit,
     unit,
     [
-      `<rect width="${unit}" height="${unit}" fill="${fillColor(ctx.c2)}"/>`,
-      `<path d="M0,${unit} L${unit},0" fill="none" stroke="${fillColor(ctx.c1)}" stroke-width="${stroke}"/>`,
-      `<path d="M-${unit},${unit} L${unit},-${unit}" fill="none" stroke="${fillColor(ctx.c1)}" stroke-width="${stroke}" opacity="0.55"/>`,
+      `<rect width="${unit}" height="${unit}" fill="${c2}"/>`,
+      `<path d="M-${unit},${unit} L${unit},-${unit}" fill="none" stroke="${c1}" stroke-width="${stroke}"/>`,
+      `<path d="M0,${unit} L${unit},0" fill="none" stroke="${c1}" stroke-width="${stroke}" opacity="0.75"/>`,
+      `<path d="M-${offset},${unit} L${unit},-${offset}" fill="none" stroke="${c1}" stroke-width="${stroke}" opacity="0.45"/>`,
     ].join(''),
-    'rotate(45)',
   );
 };
 

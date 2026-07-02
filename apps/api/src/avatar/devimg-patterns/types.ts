@@ -38,13 +38,18 @@ export type DevimgPatternId =
   | 'starry-night'
   | 'pinwheel'
   | 'quatrefoil'
-  | 'scales';
+  | 'scales'
+  | 'tartan'
+  | 'madras'
+  | 'gingham'
+  | 'plaid';
 
 /** pattern 渲染上下文（viewBox 100×100） */
 export interface PatternRenderContext {
   readonly c1: string;
   readonly c2: string;
   readonly c3: string;
+  readonly c4: string;
   readonly cell: number;
   readonly angle: number;
 }

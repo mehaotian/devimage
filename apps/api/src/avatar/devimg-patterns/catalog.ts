@@ -50,6 +50,7 @@ import {
   renderStarryNight,
   renderYinYang,
 } from './templates/symbol';
+import { renderGingham, renderMadras, renderPlaid, renderTartan } from './templates/premium';
 
 /** pattern 中文标题（Playground / API 目录） */
 export const PATTERN_TITLES: Record<DevimgPatternId, string> = {
@@ -92,6 +93,10 @@ export const PATTERN_TITLES: Record<DevimgPatternId, string> = {
   pinwheel: '风车',
   quatrefoil: '四叶花',
   scales: '鱼鳞',
+  tartan: '苏格兰格',
+  madras: '马德拉斯',
+  gingham: '四色格布',
+  plaid: '十字 plaid',
 };
 
 /** Playground / 文档用分组 */
@@ -144,6 +149,11 @@ export const PATTERN_GROUPS: readonly PatternGroupMeta[] = [
     title: '符号',
     patterns: ['stars', 'hearts', 'yin-yang', 'starry-night', 'pinwheel', 'quatrefoil', 'scales'],
   },
+  {
+    id: 'premium',
+    title: '精品',
+    patterns: ['tartan', 'madras', 'gingham', 'plaid'],
+  },
 ] as const;
 
 /** 全部 pattern id（顺序与 seed 槽位一致） */
@@ -191,6 +201,10 @@ const PATTERN_RENDERERS: Record<DevimgPatternId, PatternRenderer> = {
   pinwheel: renderPinwheel,
   quatrefoil: renderQuatrefoil,
   scales: renderScales,
+  tartan: renderTartan,
+  madras: renderMadras,
+  gingham: renderGingham,
+  plaid: renderPlaid,
 };
 
 /**

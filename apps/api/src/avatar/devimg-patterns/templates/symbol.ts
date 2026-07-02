@@ -55,11 +55,11 @@ export const renderStarryNight: PatternRenderer = (ctx) => {
   const c1 = fillColor(ctx.c1);
   const c3 = accent(ctx);
   const dots = [
-    { x: unit * 0.2, y: unit * 0.25, r: 0.9, c: c1, o: 1 },
-    { x: unit * 0.72, y: unit * 0.18, r: 0.7, c: c3, o: 0.9 },
-    { x: unit * 0.55, y: unit * 0.62, r: 1.1, c: c1, o: 0.85 },
-    { x: unit * 0.28, y: unit * 0.72, r: 0.6, c: c3, o: 0.8 },
-    { x: unit * 0.82, y: unit * 0.78, r: 0.8, c: c1, o: 0.75 },
+    { x: unit * 0.2, y: unit * 0.25, r: 1.2, c: c1, o: 1 },
+    { x: unit * 0.72, y: unit * 0.18, r: 1, c: c3, o: 0.95 },
+    { x: unit * 0.55, y: unit * 0.62, r: 1.4, c: c1, o: 0.9 },
+    { x: unit * 0.28, y: unit * 0.72, r: 0.9, c: c3, o: 0.88 },
+    { x: unit * 0.82, y: unit * 0.78, r: 1.1, c: c1, o: 0.85 },
   ]
     .map(
       (d) =>
