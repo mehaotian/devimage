@@ -37,7 +37,7 @@ DevImage 是国内开发者的**零配置占位 CDN**，URL 可直接用于 `<im
 | `GET /avatar/:style/:seed/:size` | `bg`, `fg` | native + partner 多风格（25+） |
 | `GET /avatar/styles` | — | 含 `engine` / `license` |
 
-中文首字：`/avatar/devimg-initials/张三/128`
+中文首字：`/avatar/devimg/张三/128`
 
 文档试玩：各 API 页内嵌 Playground；规范见 [使用规范](/guide/fair-use)。
 
@@ -121,7 +121,7 @@ Query：`w`（默认 800）、`h`（默认 600）
 ```html
 <img src="http://localhost:3000/800/600" />
 <img src="http://localhost:3000/seed/demo/800/600" />
-<img src="http://localhost:3000/avatar/devimg-gradient/Luna/128" />
+<img src="http://localhost:3000/avatar/devimg/Luna/128?text=0" />
 <img src="http://localhost:3000/avatar/rings/Luna/128" />
 <img src="http://localhost:3000/scene/404" />
 ```

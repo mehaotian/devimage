@@ -27,6 +27,6 @@ describe('DicebearAvatarService', () => {
   it('should reject non-partner style', () => {
     expect(() =>
       service.renderSvg({ style: 'devimg-geo', seed: 'x', size: 64 }),
-    ).toThrow('Not a partner style');
+    ).toThrow('Unknown partner style');
   });
 });

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Avatar, Style } from '@dicebear/core';
 import { parseDimension } from '../common/utils';
-import { isPartnerStyle, loadDicebearStyleDefinition } from './styles/registry';
+import { isDicebearStyle, loadDicebearStyleDefinition } from './styles/registry';
 
 export interface StyledAvatarOptions {
   style: string;
@@ -20,7 +20,7 @@ export class DicebearAvatarService {
    * 判断 style 是否为 partner（DiceBear）
    */
   isKnownStyle(style: string): boolean {
-    return isPartnerStyle(style);
+    return isDicebearStyle(style);
   }
 
   /**

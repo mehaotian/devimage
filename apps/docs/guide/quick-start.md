@@ -40,11 +40,11 @@ pnpm dev
 ## 头像
 
 ```html
-<!-- 首字头像 -->
-<img src="http://localhost:3000/avatar/devimg-initials/张三/128" alt="avatar" />
+<!-- 首字头像（devimg 默认 text=1） -->
+<img src="http://localhost:3000/avatar/devimg/张三/128" alt="avatar" />
 
-<!-- 多风格 seed（自研渐变） -->
-<img src="http://localhost:3000/avatar/devimg-gradient/Luna/128" alt="gradient avatar" />
+<!-- 纯渐变、无首字 -->
+<img src="http://localhost:3000/avatar/devimg/Luna/128?text=0" alt="gradient avatar" />
 
 <!-- 多风格 seed（DiceBear rings） -->
 <img src="http://localhost:3000/avatar/rings/Luna/128" alt="rings avatar" />

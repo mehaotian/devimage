@@ -44,6 +44,9 @@ export class AvatarController {
     @Param('style') style: string,
     @Param('seed') seed: string,
     @Param('size') size: string,
+    @Query('variant') variant?: string,
+    @Query('text') text?: string,
+    @Query('shape') shape?: string,
     @Query('bg') bg?: string,
     @Query('fg') fg?: string,
   ): string {
@@ -56,6 +59,9 @@ export class AvatarController {
         style,
         seed: decodeURIComponent(seed),
         size: Number.parseInt(size, 10),
+        variant,
+        text,
+        shape,
         bg,
         fg,
       });

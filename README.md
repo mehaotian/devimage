@@ -39,7 +39,7 @@ pnpm dev
 ```html
 <img src="http://localhost:3000/800/600" />
 <img src="http://localhost:3000/seed/demo/800/600" />
-<img src="http://localhost:3000/avatar/devimg-initials/张三/128" />
+<img src="http://localhost:3000/avatar/devimg/张三/128" />
 <img src="http://localhost:3000/scene/404" />
 ```
 

@@ -10,6 +10,9 @@ export type AvatarStyleGroup =
 /** 渲染引擎类型 */
 export type AvatarEngine = 'native' | 'partner' | 'composite';
 
+/** 可选 Query 参数（Playground 与文档用） */
+export type AvatarStyleQueryParam = 'variant' | 'text' | 'shape' | 'bg' | 'fg';
+
 /** 风格元数据（供 API 与文档使用） */
 export interface AvatarStyleMeta {
   id: string;
@@ -19,4 +22,8 @@ export interface AvatarStyleMeta {
   license: string;
   provider: string;
   attribution?: string;
+  /** 映射到 canonical style（兼容别名） */
+  aliasOf?: string;
+  /** 该风格支持的 URL query 参数 */
+  queryParams?: readonly AvatarStyleQueryParam[];
 }

@@ -5,20 +5,13 @@ import type { AvatarStyleMeta } from './types';
  */
 export const NATIVE_STYLE_CATALOG: readonly AvatarStyleMeta[] = [
   {
-    id: 'devimg-gradient',
-    title: '渐变圆',
+    id: 'devimg',
+    title: '图即头像',
     group: 'gradient',
     engine: 'native',
     license: 'DevImage',
     provider: 'devimage',
-  },
-  {
-    id: 'devimg-mesh',
-    title: '网格渐变',
-    group: 'gradient',
-    engine: 'native',
-    license: 'DevImage',
-    provider: 'devimage',
+    queryParams: ['variant', 'text', 'shape', 'bg', 'fg'],
   },
   {
     id: 'devimg-geo',
@@ -29,11 +22,33 @@ export const NATIVE_STYLE_CATALOG: readonly AvatarStyleMeta[] = [
     provider: 'devimage',
   },
   {
+    id: 'devimg-gradient',
+    title: '渐变圆',
+    group: 'gradient',
+    engine: 'native',
+    license: 'DevImage',
+    provider: 'devimage',
+    aliasOf: 'devimg',
+    queryParams: ['text', 'shape', 'bg', 'fg'],
+  },
+  {
+    id: 'devimg-mesh',
+    title: '网格渐变',
+    group: 'gradient',
+    engine: 'native',
+    license: 'DevImage',
+    provider: 'devimage',
+    aliasOf: 'devimg',
+    queryParams: ['text', 'shape', 'bg', 'fg'],
+  },
+  {
     id: 'devimg-initials',
     title: '渐变首字',
     group: 'text',
     engine: 'native',
     license: 'DevImage',
     provider: 'devimage',
+    aliasOf: 'devimg',
+    queryParams: ['variant', 'shape', 'bg', 'fg'],
   },
 ] as const;

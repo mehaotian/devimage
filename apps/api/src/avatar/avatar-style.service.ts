@@ -1,18 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import {
   getAvatarEngine,
+  getAvatarProvider,
   getAvatarStyleMeta,
   isKnownAvatarStyle,
   listAvatarStyles,
 } from './styles/registry';
 import type { AvatarStyleMeta } from './styles/types';
 import { DicebearAvatarService } from './dicebear-avatar.service';
+import { JdenticonAvatarService } from './jdenticon-avatar.service';
+import { MinidenticonsAvatarService } from './minidenticons-avatar.service';
 import { NativeAvatarService } from './native-avatar.service';
 
 export interface StyledAvatarRenderOptions {
   style: string;
   seed: string;
   size: number;
+  variant?: string;
+  text?: string;
+  shape?: string;
   bg?: string;
   fg?: string;
 }
@@ -25,6 +31,8 @@ export class AvatarStyleService {
   constructor(
     private readonly nativeAvatarService: NativeAvatarService,
     private readonly dicebearAvatarService: DicebearAvatarService,
+    private readonly jdenticonAvatarService: JdenticonAvatarService,
+    private readonly minidenticonsAvatarService: MinidenticonsAvatarService,
   ) {}
 
   /**
@@ -56,17 +64,43 @@ export class AvatarStyleService {
           style: options.style,
           seed: options.seed,
           size: options.size,
+          variant: options.variant,
+          text: options.text,
+          shape: options.shape,
           bg: options.bg,
           fg: options.fg,
         });
       case 'partner':
+        return this.renderPartnerSvg(options);
+      default:
+        throw new Error(`Style engine not implemented: ${engine}`);
+    }
+  }
+
+  /**
+   * 按 provider 调度 partner 引擎
+   */
+  private renderPartnerSvg(options: StyledAvatarRenderOptions): string {
+    const provider = getAvatarProvider(options.style);
+    switch (provider) {
+      case 'dicebear':
         return this.dicebearAvatarService.renderSvg({
           style: options.style,
           seed: options.seed,
           size: options.size,
         });
+      case 'jdenticon':
+        return this.jdenticonAvatarService.renderSvg({
+          seed: options.seed,
+          size: options.size,
+        });
+      case 'minidenticons':
+        return this.minidenticonsAvatarService.renderSvg({
+          seed: options.seed,
+          size: options.size,
+        });
       default:
-        throw new Error(`Style engine not implemented: ${engine}`);
+        throw new Error(`Partner provider not implemented: ${provider ?? options.style}`);
     }
   }
 

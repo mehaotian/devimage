@@ -12,10 +12,19 @@ interface StyleMeta {
   license: string;
   provider?: string;
   attribution?: string;
+  aliasOf?: string;
+  queryParams?: string[];
 }
 
-const DEFAULT_STYLE = 'devimg-gradient';
-const DEFAULT_SEED = 'Luna';
+const DEVIMG_FAMILY = new Set([
+  'devimg',
+  'devimg-gradient',
+  'devimg-mesh',
+  'devimg-initials',
+]);
+
+const DEFAULT_STYLE = 'devimg';
+const DEFAULT_SEED = '张三';
 const PREVIEW_SIZE = 240;
 const SEED_DEBOUNCE_MS = 400;
 
@@ -24,48 +33,169 @@ const selectedStyle = ref(DEFAULT_STYLE);
 const seed = ref(DEFAULT_SEED);
 /** 防抖后的 seed，避免输入时每个字符都请求 API */
 const debouncedSeed = ref(DEFAULT_SEED);
+const bgColor = ref('');
+const fgColor = ref('');
+const variant = ref<'gradient' | 'mesh'>('gradient');
+const showText = ref(true);
+const avatarShape = ref<'circle' | 'square'>('circle');
 const copied = ref(false);
 const loading = ref(true);
 const loadError = ref('');
 
 let seedTimer: ReturnType<typeof setTimeout> | null = null;
 
-const engineLabels: Record<string, string> = {
-  native: '图即自研',
-  partner: '开源接入（DiceBear）',
+const providerLabels: Record<string, string> = {
+  devimage: '图即自研',
+  dicebear: 'DiceBear',
+  jdenticon: 'Jdenticon',
+  minidenticons: 'Minidenticons',
 };
 
 /**
- * 构建多风格头像 URL
+ * 规范化 hex 输入（去掉 #，仅保留 6 位）
  */
-function buildAvatarUrl(style: string, seedValue: string, size = PREVIEW_SIZE): string {
-  return `${API_BASE}/avatar/${encodeURIComponent(style)}/${encodeURIComponent(seedValue)}/${size}`;
+function normalizeHex(value: string): string {
+  return value.replace(/^#/, '').trim().slice(0, 6);
+}
+
+/**
+ * 转为 color input 所需的 #rrggbb 格式
+ */
+function toColorPickerValue(hex: string, fallback: string): string {
+  const normalized = normalizeHex(hex);
+  const value = normalized.length === 6 ? normalized : fallback;
+  return `#${value}`;
+}
+
+/**
+ * 构建多风格头像 URL（含 devimg query）
+ */
+function buildAvatarUrl(
+  style: string,
+  seedValue: string,
+  size = PREVIEW_SIZE,
+  query?: {
+    variant?: string;
+    text?: boolean;
+    shape?: 'circle' | 'square';
+    bg?: string;
+    fg?: string;
+  },
+): string {
+  const base = `${API_BASE}/avatar/${encodeURIComponent(style)}/${encodeURIComponent(seedValue)}/${size}`;
+  const params = new URLSearchParams();
+
+  if (DEVIMG_FAMILY.has(style)) {
+    const variantValue = query?.variant ?? 'gradient';
+    const textValue = query?.text ?? true;
+    if (style === 'devimg') {
+      params.set('variant', variantValue);
+      params.set('text', textValue ? '1' : '0');
+    } else if (style === 'devimg-mesh' && variantValue !== 'mesh') {
+      params.set('variant', variantValue);
+    } else if (style === 'devimg-gradient' && variantValue !== 'gradient') {
+      params.set('variant', variantValue);
+    } else if (style !== 'devimg-gradient' && style !== 'devimg-mesh') {
+      if (variantValue !== 'gradient') {
+        params.set('variant', variantValue);
+      }
+    }
+    const defaultText = style === 'devimg-gradient' || style === 'devimg-mesh' ? false : true;
+    if (textValue !== defaultText) {
+      params.set('text', textValue ? '1' : '0');
+    }
+    const shapeValue = query?.shape ?? 'circle';
+    if (shapeValue === 'square') {
+      params.set('shape', 'square');
+    }
+  }
+
+  const bg = normalizeHex(query?.bg ?? '');
+  const fg = normalizeHex(query?.fg ?? '');
+  if (bg.length === 6) {
+    params.set('bg', bg);
+  }
+  if (fg.length === 6) {
+    params.set('fg', fg);
+  }
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
 }
 
 const effectiveSeed = computed(() => debouncedSeed.value.trim() || DEFAULT_SEED);
 
+const activeStyleMeta = computed(() =>
+  styles.value.find((item) => item.id === selectedStyle.value),
+);
+
+const isDevimgFamily = computed(() => DEVIMG_FAMILY.has(selectedStyle.value));
+
+const supportsColorQuery = computed(
+  () =>
+    isDevimgFamily.value ||
+    activeStyleMeta.value?.queryParams?.some((item) => item === 'bg' || item === 'fg'),
+);
+
+const devimgQuery = computed(() => ({
+  variant: variant.value,
+  text: showText.value,
+  shape: avatarShape.value,
+  bg: bgColor.value,
+  fg: fgColor.value,
+}));
+
 const previewUrl = computed(() =>
-  buildAvatarUrl(selectedStyle.value, effectiveSeed.value),
+  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, PREVIEW_SIZE, devimgQuery.value),
 );
 
 const apiUrl = computed(() =>
-  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, 128),
+  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, 128, devimgQuery.value),
 );
 
 const htmlSnippet = computed(
   () =>
-    `<img src="${apiUrl.value}" alt="${selectedStyle.value} avatar" width="128" height="128" />`,
+    `<img src="${apiUrl.value}" alt="${effectiveSeed.value} avatar" width="128" height="128" />`,
 );
 
-const groupedByEngine = computed(() => {
+const groupedByProvider = computed(() => {
   const map = new Map<string, StyleMeta[]>();
   for (const item of styles.value) {
-    const list = map.get(item.engine) ?? [];
+    if (item.provider === 'devimage' && item.aliasOf) {
+      continue;
+    }
+    const key = item.provider ?? item.engine;
+    const list = map.get(key) ?? [];
     list.push(item);
-    map.set(item.engine, list);
+    map.set(key, list);
   }
   return map;
 });
+
+/**
+ * 切换 style 时同步 devimg 控件默认值
+ */
+function syncDevimgControls(styleId: string): void {
+  switch (styleId) {
+    case 'devimg-gradient':
+      variant.value = 'gradient';
+      showText.value = false;
+      break;
+    case 'devimg-mesh':
+      variant.value = 'mesh';
+      showText.value = false;
+      break;
+    case 'devimg-initials':
+      variant.value = 'gradient';
+      showText.value = true;
+      break;
+    case 'devimg':
+      variant.value = 'gradient';
+      showText.value = true;
+      break;
+    default:
+      break;
+  }
+}
 
 /**
  * 随机 seed（类似 DiceBear 骰子按钮）
@@ -74,6 +204,22 @@ function randomizeSeed(): void {
   const pool = ['Luna', 'Felix', 'Aneka', 'Milo', '张三', 'DevImage', '图即'];
   const pick = pool[Math.floor(Math.random() * pool.length)] ?? 'Luna';
   seed.value = `${pick}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/**
+ * 应用预设品牌色
+ */
+function applyPreset(bg: string, fg: string): void {
+  bgColor.value = bg;
+  fgColor.value = fg;
+}
+
+/**
+ * 清除自定义配色，回到 seed 默认色
+ */
+function clearColors(): void {
+  bgColor.value = '';
+  fgColor.value = '';
 }
 
 /**
@@ -117,7 +263,17 @@ async function fetchStyles(): Promise<void> {
   } catch (err) {
     loadError.value =
       err instanceof Error ? err.message : '无法加载风格列表，请确认 API 已启动';
-    styles.value = [{ id: 'devimg-gradient', title: '渐变圆', group: 'gradient', engine: 'native', license: 'DevImage' }];
+    styles.value = [
+      {
+        id: 'devimg',
+        title: '图即头像',
+        group: 'gradient',
+        engine: 'native',
+        license: 'DevImage',
+        provider: 'devimage',
+        queryParams: ['variant', 'text', 'shape', 'bg', 'fg'],
+      },
+    ];
   } finally {
     loading.value = false;
   }
@@ -132,12 +288,17 @@ watch(seed, (value) => {
   }, SEED_DEBOUNCE_MS);
 });
 
-watch(selectedStyle, () => {
+watch(selectedStyle, (styleId) => {
   copied.value = false;
+  syncDevimgControls(styleId);
+  if (!supportsColorQuery.value) {
+    clearColors();
+  }
 });
 
 onMounted(() => {
   debouncedSeed.value = seed.value.trim() || DEFAULT_SEED;
+  syncDevimgControls(selectedStyle.value);
   void fetchStyles();
 });
 
@@ -176,9 +337,9 @@ onUnmounted(() => {
             :disabled="loading"
           >
             <optgroup
-              v-for="[engine, items] in groupedByEngine"
-              :key="engine"
-              :label="engineLabels[engine] ?? engine"
+              v-for="[provider, items] in groupedByProvider"
+              :key="provider"
+              :label="providerLabels[provider] ?? provider"
             >
               <option v-for="item in items" :key="item.id" :value="item.id">
                 {{ item.title }}
@@ -197,6 +358,92 @@ onUnmounted(() => {
           </button>
         </div>
       </label>
+
+      <div v-if="isDevimgFamily" class="avatar-playground__devimg">
+        <label class="avatar-playground__field">
+          <span class="avatar-playground__label">shape 形状</span>
+          <div class="avatar-playground__select-wrap">
+            <select v-model="avatarShape" class="avatar-playground__select">
+              <option value="circle">circle 圆形</option>
+              <option value="square">square 方形</option>
+            </select>
+          </div>
+        </label>
+
+        <label class="avatar-playground__field">
+          <span class="avatar-playground__label">variant 背景</span>
+          <div class="avatar-playground__select-wrap">
+            <select v-model="variant" class="avatar-playground__select">
+              <option value="gradient">gradient 渐变圆</option>
+              <option value="mesh">mesh 网格渐变</option>
+            </select>
+          </div>
+        </label>
+
+        <label class="avatar-playground__toggle">
+          <input v-model="showText" type="checkbox" />
+          <span>text 显示首字（中文首字 / 英文首字母）</span>
+        </label>
+      </div>
+
+      <div v-if="supportsColorQuery && isDevimgFamily" class="avatar-playground__colors">
+        <p class="avatar-playground__colors-title">品牌色（bg / fg）</p>
+
+        <div class="avatar-playground__color-row">
+          <label class="avatar-playground__color-field">
+            <span class="avatar-playground__label">bg 背景</span>
+            <div class="avatar-playground__color-input-wrap">
+              <input
+                type="color"
+                class="avatar-playground__color-picker"
+                :value="toColorPickerValue(bgColor, '6366f1')"
+                @input="bgColor = normalizeHex(($event.target as HTMLInputElement).value)"
+              />
+              <input
+                v-model="bgColor"
+                type="text"
+                class="avatar-playground__input avatar-playground__hex"
+                placeholder="6366f1"
+                maxlength="7"
+              />
+            </div>
+          </label>
+
+          <label class="avatar-playground__color-field">
+            <span class="avatar-playground__label">fg 文字</span>
+            <div class="avatar-playground__color-input-wrap">
+              <input
+                type="color"
+                class="avatar-playground__color-picker"
+                :value="toColorPickerValue(fgColor, 'ffffff')"
+                @input="fgColor = normalizeHex(($event.target as HTMLInputElement).value)"
+              />
+              <input
+                v-model="fgColor"
+                type="text"
+                class="avatar-playground__input avatar-playground__hex"
+                placeholder="ffffff"
+                maxlength="7"
+              />
+            </div>
+          </label>
+        </div>
+
+        <div class="avatar-playground__presets">
+          <button type="button" class="avatar-playground__preset" @click="applyPreset('6366f1', 'ffffff')">
+            靛蓝
+          </button>
+          <button type="button" class="avatar-playground__preset" @click="applyPreset('0ea5e9', 'ffffff')">
+            天蓝
+          </button>
+          <button type="button" class="avatar-playground__preset" @click="applyPreset('10b981', 'ffffff')">
+            翡翠
+          </button>
+          <button type="button" class="avatar-playground__preset" @click="clearColors()">
+            默认
+          </button>
+        </div>
+      </div>
 
       <p v-if="loadError" class="avatar-playground__error">{{ loadError }}</p>
     </div>
@@ -223,9 +470,10 @@ onUnmounted(() => {
       </div>
 
       <p class="avatar-playground__hint">
-        同一 <code>style</code> + <code>seed</code> 始终生成相同头像；点击左侧预览图可快速复制 URL。
-        几何风格含
-        <a href="/guide/avatar-licenses">自研与第三方许可说明</a>。
+        同一 <code>style</code> + <code>seed</code>（及 devimg 的 <code>variant</code> / <code>text</code> / <code>shape</code> / <code>bg</code> / <code>fg</code>）始终生成相同头像；
+        点击左侧预览图可快速复制 URL。
+        许可说明见
+        <a href="/guide/avatar-licenses">自研与第三方许可</a>。
       </p>
     </div>
   </div>
@@ -356,6 +604,92 @@ onUnmounted(() => {
   background: var(--vp-c-bg);
   cursor: pointer;
   font-size: 18px;
+}
+
+.avatar-playground__devimg {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.avatar-playground__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--vp-c-text-1);
+  cursor: pointer;
+}
+
+.avatar-playground__colors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.avatar-playground__colors-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.avatar-playground__color-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.avatar-playground__color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.avatar-playground__color-input-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.avatar-playground__color-picker {
+  width: 42px;
+  height: 38px;
+  padding: 2px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg);
+  cursor: pointer;
+}
+
+.avatar-playground__hex {
+  flex: 1;
+  font-family: var(--vp-font-family-mono);
+  font-size: 13px;
+}
+
+.avatar-playground__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.avatar-playground__preset {
+  padding: 6px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .avatar-playground__refs {
