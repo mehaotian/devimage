@@ -53,10 +53,13 @@ const loadError = ref('');
 const patternGroups = ref<PatternGroupOption[]>(toPatternGroupOptions(PATTERN_CATALOG));
 const patternCatalogStale = ref(false);
 
+type PlaygroundTab = 'play' | 'gallery' | 'code';
+const activeTab = ref<PlaygroundTab>('play');
+
 let seedTimer: ReturnType<typeof setTimeout> | null = null;
 
 const providerLabels: Record<string, string> = {
-  devimage: '图即自研',
+  devimage: '图即风格',
   dicebear: 'DiceBear',
   jdenticon: 'Jdenticon',
   minidenticons: 'Minidenticons',
@@ -227,6 +230,14 @@ function buildPatternThumbUrl(seedValue: string, pattern: string, shape: 'circle
 }
 
 /**
+ * 切换 Playground 主 Tab
+ */
+function setPlaygroundTab(tab: PlaygroundTab): void {
+  activeTab.value = tab;
+  copied.value = false;
+}
+
+/**
  * 从画廊选中某个 pattern
  */
 function selectPatternFromGallery(id: string): void {
@@ -236,6 +247,7 @@ function selectPatternFromGallery(id: string): void {
   showText.value = false;
   bgColor.value = '';
   copied.value = false;
+  activeTab.value = 'play';
 }
 
 /**
@@ -322,10 +334,15 @@ const patternCount = computed(() =>
 );
 
 /**
- * 滚动到画廊指定分组
+ * 滚动到画廊指定分组（需先切到画廊 Tab）
  */
 function scrollToPatternGroup(groupId: string): void {
-  document.getElementById(`pattern-group-${groupId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (activeTab.value !== 'gallery') {
+    activeTab.value = 'gallery';
+  }
+  window.requestAnimationFrame(() => {
+    document.getElementById(`pattern-group-${groupId}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 }
 
 /**
@@ -426,196 +443,225 @@ onUnmounted(() => {
 
 <template>
   <div class="avatar-playground">
-    <div class="avatar-playground__main">
-    <div class="avatar-playground__panel avatar-playground__preview">
+    <div class="avatar-playground__tabs" role="tablist" aria-label="头像试玩">
       <button
         type="button"
-        class="avatar-playground__image-btn"
-        :title="copied ? '已复制链接' : '点击复制固定 seed 链接'"
-        @click="copyPreviewLink"
+        role="tab"
+        class="avatar-playground__tab"
+        :class="{ 'avatar-playground__tab--active': activeTab === 'play' }"
+        :aria-selected="activeTab === 'play'"
+        @click="setPlaygroundTab('play')"
       >
-        <img
-          :src="previewUrl"
-          :alt="`${selectedStyle} · ${effectiveSeed}`"
-          width="240"
-          height="240"
-          class="avatar-playground__image"
-        />
-        <span v-if="copied" class="avatar-playground__copied">已复制 URL</span>
+        快速试玩
       </button>
+      <button
+        type="button"
+        role="tab"
+        class="avatar-playground__tab"
+        :class="{ 'avatar-playground__tab--active': activeTab === 'gallery' }"
+        :aria-selected="activeTab === 'gallery'"
+        @click="setPlaygroundTab('gallery')"
+      >
+        纹理画廊
+        <span class="avatar-playground__tab-badge">{{ patternCount }}</span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="avatar-playground__tab"
+        :class="{ 'avatar-playground__tab--active': activeTab === 'code' }"
+        :aria-selected="activeTab === 'code'"
+        @click="setPlaygroundTab('code')"
+      >
+        代码参考
+      </button>
+    </div>
 
-      <label class="avatar-playground__field">
-        <span class="avatar-playground__label">风格</span>
-        <div class="avatar-playground__select-wrap">
-          <select
-            v-model="selectedStyle"
-            class="avatar-playground__select"
-            :disabled="loading"
+    <div v-show="activeTab === 'play'" class="avatar-playground__pane" role="tabpanel">
+      <div class="avatar-playground__main">
+        <div class="avatar-playground__panel avatar-playground__preview">
+          <button
+            type="button"
+            class="avatar-playground__image-btn"
+            :title="copied ? '已复制链接' : '点击复制固定 seed 链接'"
+            @click="copyPreviewLink"
           >
-            <optgroup
-              v-for="[provider, items] in groupedByProvider"
-              :key="provider"
-              :label="providerLabels[provider] ?? provider"
-            >
-              <option v-for="item in items" :key="item.id" :value="item.id">
-                {{ item.title }}
-              </option>
-            </optgroup>
-          </select>
-        </div>
-      </label>
-
-      <label class="avatar-playground__field">
-        <span class="avatar-playground__label">Seed</span>
-        <div class="avatar-playground__seed-row">
-          <input v-model="seed" type="text" class="avatar-playground__input" maxlength="64" />
-          <button type="button" class="avatar-playground__dice" title="随机 seed" @click="randomizeSeed">
-            🎲
+            <img
+              :src="previewUrl"
+              :alt="`${selectedStyle} · ${effectiveSeed}`"
+              width="240"
+              height="240"
+              class="avatar-playground__image"
+            />
+            <span v-if="copied" class="avatar-playground__copied">已复制 URL</span>
           </button>
+          <p class="avatar-playground__preview-caption">
+            {{ selectedStyle }} · {{ effectiveSeed }}
+          </p>
         </div>
-      </label>
 
-      <div v-if="isDevimgFamily" class="avatar-playground__devimg">
-        <label class="avatar-playground__field">
-          <span class="avatar-playground__label">shape 形状</span>
-          <div class="avatar-playground__select-wrap">
-            <select v-model="avatarShape" class="avatar-playground__select">
-              <option value="circle">circle 圆形</option>
-              <option value="square">square 方形</option>
-            </select>
-          </div>
-        </label>
-
-        <label v-if="showVariantPicker" class="avatar-playground__field">
-          <span class="avatar-playground__label">variant 背景</span>
-          <div class="avatar-playground__select-wrap">
-            <select v-model="variant" class="avatar-playground__select">
-              <option value="gradient">gradient 渐变圆</option>
-              <option value="mesh">mesh 网格渐变</option>
-              <option value="pattern">pattern 纹理</option>
-            </select>
-          </div>
-        </label>
-
-        <label v-if="showPatternPicker" class="avatar-playground__field">
-          <span class="avatar-playground__label">pattern 纹理</span>
-          <div class="avatar-playground__select-wrap">
-            <select v-model="patternId" class="avatar-playground__select">
-              <option value="">seed 自动</option>
-              <optgroup v-for="group in patternGroups" :key="group.id" :label="group.title">
-                <option v-for="item in group.options" :key="item.id" :value="item.id">
-                  {{ item.label }}
-                </option>
-              </optgroup>
-            </select>
-          </div>
-        </label>
-
-        <label class="avatar-playground__toggle">
-          <input v-model="showText" type="checkbox" />
-          <span>text 显示首字（中文首字 / 英文首字母）</span>
-        </label>
-      </div>
-
-      <div v-if="showColorSection" class="avatar-playground__colors">
-        <p class="avatar-playground__colors-title">
-          {{ showBgControl ? '品牌色（bg / fg）' : '文字色（fg）' }}
-        </p>
-
-        <div class="avatar-playground__color-row">
-          <label v-if="showBgControl" class="avatar-playground__color-field">
-            <span class="avatar-playground__label">bg 背景</span>
-            <div class="avatar-playground__color-input-wrap">
-              <input
-                type="color"
-                class="avatar-playground__color-picker"
-                :value="toColorPickerValue(bgColor, '6366f1')"
-                @input="bgColor = normalizeHex(($event.target as HTMLInputElement).value)"
-              />
-              <input
-                v-model="bgColor"
-                type="text"
-                class="avatar-playground__input avatar-playground__hex"
-                placeholder="6366f1"
-                maxlength="7"
-              />
+        <div class="avatar-playground__panel avatar-playground__controls">
+          <label class="avatar-playground__field">
+            <span class="avatar-playground__label">风格</span>
+            <div class="avatar-playground__select-wrap">
+              <select
+                v-model="selectedStyle"
+                class="avatar-playground__select"
+                :disabled="loading"
+              >
+                <optgroup
+                  v-for="[provider, items] in groupedByProvider"
+                  :key="provider"
+                  :label="providerLabels[provider] ?? provider"
+                >
+                  <option v-for="item in items" :key="item.id" :value="item.id">
+                    {{ item.title }}
+                  </option>
+                </optgroup>
+              </select>
             </div>
           </label>
 
-          <label v-if="showFgControl" class="avatar-playground__color-field">
-            <span class="avatar-playground__label">fg 文字</span>
-            <div class="avatar-playground__color-input-wrap">
-              <input
-                type="color"
-                class="avatar-playground__color-picker"
-                :value="toColorPickerValue(fgColor, 'ffffff')"
-                @input="fgColor = normalizeHex(($event.target as HTMLInputElement).value)"
-              />
-              <input
-                v-model="fgColor"
-                type="text"
-                class="avatar-playground__input avatar-playground__hex"
-                placeholder="ffffff"
-                maxlength="7"
-              />
+          <label class="avatar-playground__field">
+            <span class="avatar-playground__label">Seed</span>
+            <div class="avatar-playground__seed-row">
+              <input v-model="seed" type="text" class="avatar-playground__input" maxlength="64" />
+              <button type="button" class="avatar-playground__dice" title="随机 seed" @click="randomizeSeed">
+                🎲
+              </button>
             </div>
           </label>
-        </div>
 
-        <div v-if="showBgControl" class="avatar-playground__presets">
-          <button type="button" class="avatar-playground__preset" @click="applyPreset('6366f1', 'ffffff')">
-            靛蓝
-          </button>
-          <button type="button" class="avatar-playground__preset" @click="applyPreset('0ea5e9', 'ffffff')">
-            天蓝
-          </button>
-          <button type="button" class="avatar-playground__preset" @click="applyPreset('10b981', 'ffffff')">
-            翡翠
-          </button>
-          <button type="button" class="avatar-playground__preset" @click="clearColors()">
-            默认
-          </button>
+          <div v-if="isDevimgFamily" class="avatar-playground__devimg">
+            <label class="avatar-playground__field">
+              <span class="avatar-playground__label">shape 形状</span>
+              <div class="avatar-playground__select-wrap">
+                <select v-model="avatarShape" class="avatar-playground__select">
+                  <option value="circle">circle 圆形</option>
+                  <option value="square">square 方形</option>
+                </select>
+              </div>
+            </label>
+
+            <label v-if="showVariantPicker" class="avatar-playground__field">
+              <span class="avatar-playground__label">variant 背景</span>
+              <div class="avatar-playground__select-wrap">
+                <select v-model="variant" class="avatar-playground__select">
+                  <option value="gradient">gradient 渐变圆</option>
+                  <option value="mesh">mesh 网格渐变</option>
+                  <option value="pattern">pattern 纹理</option>
+                </select>
+              </div>
+            </label>
+
+            <label v-if="showPatternPicker" class="avatar-playground__field">
+              <span class="avatar-playground__label">pattern 纹理</span>
+              <div class="avatar-playground__select-wrap">
+                <select v-model="patternId" class="avatar-playground__select">
+                  <option value="">seed 自动</option>
+                  <optgroup v-for="group in patternGroups" :key="group.id" :label="group.title">
+                    <option v-for="item in group.options" :key="item.id" :value="item.id">
+                      {{ item.label }}
+                    </option>
+                  </optgroup>
+                </select>
+              </div>
+            </label>
+
+            <label class="avatar-playground__toggle">
+              <input v-model="showText" type="checkbox" />
+              <span>text 显示首字（中文首字 / 英文首字母）</span>
+            </label>
+          </div>
+
+          <div v-if="showColorSection" class="avatar-playground__colors">
+            <p class="avatar-playground__colors-title">
+              {{ showBgControl ? '品牌色（bg / fg）' : '文字色（fg）' }}
+            </p>
+
+            <div class="avatar-playground__color-row">
+              <label v-if="showBgControl" class="avatar-playground__color-field">
+                <span class="avatar-playground__label">bg 背景</span>
+                <div class="avatar-playground__color-input-wrap">
+                  <input
+                    type="color"
+                    class="avatar-playground__color-picker"
+                    :value="toColorPickerValue(bgColor, '6366f1')"
+                    @input="bgColor = normalizeHex(($event.target as HTMLInputElement).value)"
+                  />
+                  <input
+                    v-model="bgColor"
+                    type="text"
+                    class="avatar-playground__input avatar-playground__hex"
+                    placeholder="6366f1"
+                    maxlength="7"
+                  />
+                </div>
+              </label>
+
+              <label v-if="showFgControl" class="avatar-playground__color-field">
+                <span class="avatar-playground__label">fg 文字</span>
+                <div class="avatar-playground__color-input-wrap">
+                  <input
+                    type="color"
+                    class="avatar-playground__color-picker"
+                    :value="toColorPickerValue(fgColor, 'ffffff')"
+                    @input="fgColor = normalizeHex(($event.target as HTMLInputElement).value)"
+                  />
+                  <input
+                    v-model="fgColor"
+                    type="text"
+                    class="avatar-playground__input avatar-playground__hex"
+                    placeholder="ffffff"
+                    maxlength="7"
+                  />
+                </div>
+              </label>
+            </div>
+
+            <div v-if="showBgControl" class="avatar-playground__presets">
+              <button type="button" class="avatar-playground__preset" @click="applyPreset('6366f1', 'ffffff')">
+                靛蓝
+              </button>
+              <button type="button" class="avatar-playground__preset" @click="applyPreset('0ea5e9', 'ffffff')">
+                天蓝
+              </button>
+              <button type="button" class="avatar-playground__preset" @click="applyPreset('10b981', 'ffffff')">
+                翡翠
+              </button>
+              <button type="button" class="avatar-playground__preset" @click="clearColors()">
+                默认
+              </button>
+            </div>
+          </div>
+
+          <div v-if="isDevimgFamily" class="avatar-playground__quick-links">
+            <button type="button" class="avatar-playground__quick-link" @click="setPlaygroundTab('gallery')">
+              浏览全部纹理 →
+            </button>
+            <button type="button" class="avatar-playground__quick-link" @click="setPlaygroundTab('code')">
+              查看 API / HTML →
+            </button>
+          </div>
+
+          <p v-if="loadError" class="avatar-playground__error">{{ loadError }}</p>
         </div>
       </div>
 
-      <p v-if="loadError" class="avatar-playground__error">{{ loadError }}</p>
-    </div>
-
-    <div class="avatar-playground__panel avatar-playground__refs">
-      <div class="avatar-playground__ref-block">
-        <div class="avatar-playground__ref-head">
-          <span>HTTP API</span>
-          <button type="button" class="avatar-playground__copy" @click="copyText(apiUrl)">
-            复制
-          </button>
-        </div>
-        <code class="avatar-playground__code">{{ apiUrl }}</code>
+      <div class="avatar-playground__url-bar">
+        <code class="avatar-playground__url-text">{{ apiUrl }}</code>
+        <button type="button" class="avatar-playground__copy" @click="copyText(apiUrl)">复制 URL</button>
       </div>
-
-      <div class="avatar-playground__ref-block">
-        <div class="avatar-playground__ref-head">
-          <span>HTML</span>
-          <button type="button" class="avatar-playground__copy" @click="copyText(htmlSnippet)">
-            复制
-          </button>
-        </div>
-        <code class="avatar-playground__code">{{ htmlSnippet }}</code>
-      </div>
-
-      <p class="avatar-playground__hint">
-        同一 <code>style</code> + <code>seed</code>（及 devimg 的 <code>variant</code> / <code>text</code> / <code>shape</code> / <code>bg</code> / <code>fg</code>）始终生成相同头像；
-        点击左侧预览图可快速复制 URL。
-        许可说明见
-        <a href="/guide/avatar-licenses">自研与第三方许可</a>。
-      </p>
-    </div>
     </div>
 
-    <section v-if="patternGroups.length" class="avatar-playground__gallery">
+    <section
+      v-show="activeTab === 'gallery' && patternGroups.length"
+      class="avatar-playground__pane avatar-playground__gallery"
+      role="tabpanel"
+    >
       <div class="avatar-playground__gallery-head">
-        <h3 class="avatar-playground__gallery-title">纹理画廊</h3>
         <p class="avatar-playground__gallery-desc">
-          共 {{ patternCount }} 种 · 当前 seed：<code>{{ effectiveSeed }}</code> · 点击切换
+          共 {{ patternCount }} 种 · seed：<code>{{ effectiveSeed }}</code> · 点击缩略图试玩并跳回预览
         </p>
         <p v-if="patternCatalogStale" class="avatar-playground__gallery-warn">
           API 返回的 pattern 目录偏旧（可能为浏览器缓存）。画廊已用内置完整 {{ EXPECTED_PATTERN_COUNT }} 种列表；请硬刷新或重启 API。
@@ -663,6 +709,35 @@ onUnmounted(() => {
         </div>
       </div>
     </section>
+
+    <div v-show="activeTab === 'code'" class="avatar-playground__pane avatar-playground__panel avatar-playground__refs" role="tabpanel">
+      <div class="avatar-playground__ref-block">
+        <div class="avatar-playground__ref-head">
+          <span>HTTP API</span>
+          <button type="button" class="avatar-playground__copy" @click="copyText(apiUrl)">
+            复制
+          </button>
+        </div>
+        <code class="avatar-playground__code">{{ apiUrl }}</code>
+      </div>
+
+      <div class="avatar-playground__ref-block">
+        <div class="avatar-playground__ref-head">
+          <span>HTML</span>
+          <button type="button" class="avatar-playground__copy" @click="copyText(htmlSnippet)">
+            复制
+          </button>
+        </div>
+        <code class="avatar-playground__code">{{ htmlSnippet }}</code>
+      </div>
+
+      <p class="avatar-playground__hint">
+        同一 <code>style</code> + <code>seed</code>（及 devimg 的 <code>variant</code> / <code>text</code> / <code>shape</code> / <code>bg</code> / <code>fg</code>）始终生成相同头像；
+        在「快速试玩」中点击预览图也可复制 URL。
+        许可说明见
+        <a href="/guide/avatar-licenses">图即风格与三方许可</a>。
+      </p>
+    </div>
   </div>
 </template>
 
@@ -670,13 +745,62 @@ onUnmounted(() => {
 .avatar-playground {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   margin: 24px 0;
+}
+
+.avatar-playground__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+}
+
+.avatar-playground__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.avatar-playground__tab:hover {
+  color: var(--vp-c-text-1);
+  background: var(--vp-c-bg);
+}
+
+.avatar-playground__tab--active {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.avatar-playground__tab-badge {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vp-c-brand-1) 12%, transparent);
+  color: var(--vp-c-brand-1);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.avatar-playground__pane {
+  min-width: 0;
 }
 
 .avatar-playground__main {
   display: grid;
-  grid-template-columns: minmax(260px, 320px) 1fr;
+  grid-template-columns: minmax(220px, 280px) 1fr;
   gap: 20px;
 }
 
@@ -690,7 +814,64 @@ onUnmounted(() => {
 .avatar-playground__preview {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar-playground__preview-caption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  text-align: center;
+  word-break: break-all;
+}
+
+.avatar-playground__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avatar-playground__quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.avatar-playground__quick-link {
+  padding: 6px 12px;
+  border: 1px dashed var(--vp-c-divider);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--vp-c-brand-1);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.avatar-playground__quick-link:hover {
+  border-color: var(--vp-c-brand-1);
+  background: color-mix(in srgb, var(--vp-c-brand-1) 8%, transparent);
+}
+
+.avatar-playground__url-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg-soft);
+}
+
+.avatar-playground__url-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-all;
+  color: var(--vp-c-text-2);
 }
 
 .avatar-playground__image-btn {
@@ -952,13 +1133,6 @@ onUnmounted(() => {
   margin-bottom: 16px;
 }
 
-.avatar-playground__gallery-title {
-  margin: 0 0 6px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--vp-c-text-1);
-}
-
 .avatar-playground__gallery-desc {
   margin: 0;
   font-size: 12px;
@@ -1060,6 +1234,11 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .avatar-playground__main {
     grid-template-columns: 1fr;
+  }
+
+  .avatar-playground__url-bar {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>

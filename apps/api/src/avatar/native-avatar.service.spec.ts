@@ -12,6 +12,8 @@ describe('NativeAvatarService', () => {
     expect(svg).toContain('clipPath');
     expect(svg).toContain('张');
     expect(svg).toMatch(/stop-color="#[0-9a-f]{6}"/i);
+    expect(svg).toContain('dy="0.35em"');
+    expect(svg).not.toContain('dominant-baseline');
   });
 
   it('should render devimg with mesh variant and no text', () => {

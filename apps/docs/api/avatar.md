@@ -1,16 +1,20 @@
 # 头像 API
 
-DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含**自研 native** 与**三方 partner** 接入（DiceBear、Jdenticon、Minidenticons）。
+DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含 **图即风格** 与 **三方接入**（DiceBear、Jdenticon、Minidenticons）。
 
 | 类型 | 路由 | engine |
 | ------ | ------ | ------ |
-| 多风格 seed | `GET /avatar/:style/:seed/:size` | `native` / `partner` |
+| 多风格 seed | `GET /avatar/:style/:seed/:size` | `native`（图即）/ `partner`（三方） |
 | 风格列表 | `GET /avatar/styles` | — |
 | pattern 目录 | `GET /avatar/patterns` | — |
 
-中文首字请用自研 **`devimg`**（默认显示首字，支持 `variant` / `text` / `bg` / `fg`）。使用规范见 [公平使用](/guide/fair-use)；许可见 [头像许可](/guide/avatar-licenses)。
+中文首字请用 **`devimg`** 图即风格（默认显示首字，支持 `variant` / `text` / `bg` / `fg`）。使用规范见 [公平使用](/guide/fair-use)；许可见 [头像许可](/guide/avatar-licenses)。
+
+**本页结构**：上方 **风格试玩**（Tab：试玩 / 画廊 / 代码）→ 下方 **API 参考**（参数表与路由说明）。查纹理缩略图请用试玩区 **「纹理画廊」** Tab，不必在本页重复滚动长表。
 
 ## 风格试玩
+
+Playground 分三个 Tab：**快速试玩**（默认，调参数 + 预览）、**纹理画廊**（43 种 pattern 缩略图）、**代码参考**（HTTP / HTML 片段）。
 
 <!-- markdownlint-disable MD033 -->
 
@@ -22,13 +26,13 @@ DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含**自研 nati
 
 ## 风格目录
 
-当前共 **45** 种风格：**6** 自研（含 3 个别名）+ **39** 三方接入。完整 JSON 列表：`GET /avatar/styles`。
+当前共 **45** 种风格：**6** 种图即风格（含 3 个别名）+ **39** 种三方接入。完整 JSON 列表：`GET /avatar/styles`。
 
-### 引擎与三方库
+### 来源与三方库
 
-| 类型 | engine | provider | 风格数 | 库 / 站点 | npm |
+| 来源 | engine | provider | 风格数 | 库 / 站点 | npm |
 | ------ | ------ | ------ | ------: | ------ | ------ |
-| 自研 | `native` | `devimage` | 6 | DevImage 自研 SVG | — |
+| 图即风格 | `native` | `devimage` | 6 | 图即 SVG 生成 | — |
 | 三方 | `partner` | `dicebear` | 37 | [DiceBear](https://www.dicebear.com/) | [@dicebear/core](https://www.npmjs.com/package/@dicebear/core) |
 | 三方 | `partner` | `jdenticon` | 1 | [Jdenticon](https://jdenticon.com/) | [jdenticon](https://www.npmjs.com/package/jdenticon) |
 | 三方 | `partner` | `minidenticons` | 1 | [Minidenticons](https://github.com/laem/minidenticons) | [minidenticons](https://www.npmjs.com/package/minidenticons) |
@@ -37,9 +41,9 @@ DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含**自研 nati
 
 ---
 
-### 自研 native（devimage）
+### 图即风格
 
-DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 **`devimg`**，通过 query 控制背景与首字；**`devimg-geo`** 为独立几何风格；**`devimg-pattern`** 为 CSS 纹理 pattern 头像。
+由图即服务端 SVG 生成，**无第三方署名要求**。主入口 **`devimg`** 通过 query 控制背景与首字；**`devimg-geo`** 为几何弧环；**`devimg-pattern`** 为纹理 pattern 头像。
 
 #### 主风格
 
@@ -62,85 +66,17 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 
 #### pattern 纹理模板（43 种）
 
-完整 JSON 列表：`GET /avatar/patterns`。灵感来自 [CSS3 Patterns Gallery](https://leaverou.github.io/css3patterns/)（MIT），服务端以 SVG `<pattern>` 渲染；**符号类**使用 `c1` / `c2` / `c3`，**精品类**额外使用 `c4`；seed 自动选取模板，亦可用 `pattern` 指定。
+完整 JSON：`GET /avatar/patterns`；可视化浏览请用上方 Playground **「纹理画廊」** Tab（含符号 7 + 精品 4）。灵感来自 [CSS3 Patterns Gallery](https://leaverou.github.io/css3patterns/)（MIT），服务端以 SVG `<pattern>` 渲染；**符号类**使用 `c1` / `c2` / `c3` 点缀，**精品类**额外使用 `c4` 四色格线。
 
-**基础**
-
-| pattern | 说明 |
-| ------ | ------ |
-| `stripes` | 斜向条纹 |
-| `vertical-stripes` | 竖条纹 |
-| `horizontal-stripes` | 横条纹 |
-| `polka` | 波点 |
-| `checker` | 棋盘格 |
-| `diagonal-checker` | 斜棋盘 |
-| `grid` | 网格线 |
-| `lined-paper` | 横线纸 |
-
-**织物**
-
-| pattern | 说明 |
-| ------ | ------ |
-| `houndstooth` | 千鸟格（简化） |
-| `argyle` | 菱形格 |
-| `weave` | 编织篮纹 |
-| `tablecloth` | 桌布格 |
-| `carbon` | 碳纤维 |
-| `shippo` | 七宝纹 |
-
-**几何**
-
-| pattern | 说明 |
-| ------ | ------ |
-| `zigzag` | 锯齿 / V 形 |
-| `bricks` | 砖墙 |
-| `triangles` | 三角拼贴 |
-| `cross` | 十字格 |
-| `steps` | 阶梯纹 |
-
-**波纹**
-
-| pattern | 说明 |
-| ------ | ------ |
-| `dots-offset` | 错位波点 |
-| `concentric` | 同心圆环 |
-| `microbial` | 气泡叠层 |
-| `waves` | 横向波浪 |
-| `seigaiha` | 青海波 |
-
-**进阶几何**
-
-| pattern | 说明 |
-| ------ | ------ |
-| `half-rombes` | 半菱形 |
-| `marrakesh` | 摩洛哥星形 |
-| `atomic` | 原子网格 |
-| `cicada` | 蝉翼纹 |
-| `pyramid` | 金字塔 |
-| `arrows` | 箭头 |
-| `honeycomb` | 蜂窝 |
-| `japanese-cube` | 立体方块 |
-
-**符号**（使用 `c3` 点缀色）
-
-| pattern | 说明 |
-| ------ | ------ |
-| `stars` | 五角星 |
-| `hearts` | 心形 |
-| `yin-yang` | 阴阳 |
-| `starry-night` | 星空 |
-| `pinwheel` | 风车 |
-| `quatrefoil` | 四叶花 |
-| `scales` | 鱼鳞 |
-
-**精品**（四色 `c1`–`c4`）
-
-| pattern | 说明 |
-| ------ | ------ |
-| `tartan` | 苏格兰格 |
-| `madras` | 马德拉斯 plaid |
-| `gingham` | 四色格布 |
-| `plaid` | 十字 plaid |
+| 分组 | 数量 | 代表 pattern |
+| ------ | ------: | ------ |
+| 基础 | 8 | `stripes`, `polka`, `checker`, `grid` … |
+| 织物 | 6 | `houndstooth`, `carbon`, `shippo` … |
+| 几何 | 5 | `zigzag`, `bricks`, `triangles` … |
+| 波纹 | 5 | `waves`, `seigaiha`, `concentric` … |
+| 进阶几何 | 8 | `honeycomb`, `japanese-cube`, `atomic` … |
+| 符号 | 7 | `stars`, `yin-yang`, `starry-night` … |
+| 精品 | 4 | `tartan`, `madras`, `gingham`, `plaid` |
 
 ```text
 /avatar/devimg/张三/128
@@ -268,9 +204,9 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 | seed | 任意字符串；`devimg` 系列时 seed 常为用户名 |
 | size | 10–4000 像素（正方形） |
 
-### Query 参数（devimg 系列）
+### Query 参数（图即风格 · devimg 系列）
 
-自研 **`devimg`** 及兼容别名支持以下 query（别名未传参时使用内置默认，见 [兼容别名](#兼容别名)）：
+**`devimg`** 及兼容别名支持以下 query（别名未传参时使用内置默认，见 [兼容别名](#兼容别名)）：
 
 | 参数 | 格式 | 说明 | 示例 |
 | ------ | ------ | ------ | ------ |
@@ -298,6 +234,9 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 | pattern 纹理 | `/avatar/devimg-pattern/Luna/128` |
 | 指定波点 | `/avatar/devimg/Luna/128?variant=pattern&pattern=polka&text=0` |
 | 方形裁剪 | `/avatar/devimg/张三/128?shape=square` |
+| WebP（小程序等） | `/avatar/devimg/张三/128.webp` |
+| PNG（最大兼容） | `/avatar/devimg/张三/128.png` |
+| Query 指定 WebP | `/avatar/devimg/张三/128?format=webp` |
 
 ```html
 <img src="http://localhost:3000/avatar/devimg/张三/128" alt="张三" width="128" height="128" />
@@ -307,6 +246,31 @@ DevImage 自研算法生成，**无第三方署名要求**。渐变系统一为 
 
 ```bash
 curl "http://localhost:3000/avatar/devimg/张三/128?bg=6366f1&fg=ffffff" -o avatar.svg
+curl "http://localhost:3000/avatar/devimg/张三/128.webp" -o avatar.webp
+curl "http://localhost:3000/avatar/devimg/张三/128.png" -o avatar.png
+```
+
+### 输出格式
+
+默认返回 **SVG**（体积最小、任意尺寸清晰）。需要位图时（微信小程序 Skyline、部分原生 SDK 等）使用路径后缀或 `format` query：
+
+| 方式 | 示例 | Content-Type |
+| ------ | ------ | ------ |
+| 默认 SVG | `/avatar/devimg/张三/128` | `image/svg+xml` |
+| WebP 后缀（推荐栅格） | `/avatar/devimg/张三/128.webp` | `image/webp` |
+| PNG 后缀（最大兼容） | `/avatar/devimg/张三/128.png` | `image/png` |
+| Query | `/avatar/devimg/张三/128?format=webp` | `image/webp` |
+
+规则：
+
+- `format` 仅支持 `svg`（默认）、`webp`、`png`；非法值返回 `400`
+- 栅格 URL 与 SVG 共用相同 query（`variant`、`text`、`bg` 等）
+- 同一完整 URL 输出始终相同（`immutable` 缓存）；CDN 命中后源站无栅格化压力
+
+```html
+<!-- 小程序 / 需要位图 -->
+<img src="http://localhost:3000/avatar/devimg/张三/128.webp" width="128" height="128" />
+<img src="http://localhost:3000/avatar/devimg/张三/128.png" width="128" height="128" />
 ```
 
 ### 其他风格示例
@@ -348,9 +312,9 @@ curl http://localhost:3000/avatar/styles
 | 字段 | 说明 |
 | ------ | ------ |
 | `count` | 风格总数 |
-| `nativeCount` | 自研风格数 |
-| `partnerCount` | 第三方接入数 |
-| `styles[].engine` | `native` \| `partner` |
+| `nativeCount` | 图即风格数（JSON 字段名 `nativeCount`） |
+| `partnerCount` | 三方接入数 |
+| `styles[].engine` | `native`（图即）\| `partner`（三方） |
 | `styles[].provider` | `devimage` \| `dicebear` \| `jdenticon` \| `minidenticons` |
 | `styles[].group` | `gradient` \| `geometric` \| `text` \| `pixel` \| `character` \| `icon` |
 | `styles[].license` | 许可标识 |
@@ -364,6 +328,8 @@ curl http://localhost:3000/avatar/styles
 | 路由 | Cache-Control |
 | ------ | ------------- |
 | `/avatar/:style/:seed/:size` | `public, max-age=31536000, immutable` |
+| `/avatar/:style/:seed/:size.webp` | `public, max-age=31536000, immutable` |
+| `/avatar/:style/:seed/:size.png` | `public, max-age=31536000, immutable` |
 | `/avatar/styles` | `public, max-age=3600` |
 
-Content-Type：`image/svg+xml; charset=utf-8`
+Content-Type：默认 `image/svg+xml`；`.webp` 为 `image/webp`；`.png` 为 `image/png`；`?format=webp|png` 与后缀等价。

@@ -34,7 +34,7 @@ DevImage 是国内开发者的**零配置占位 CDN**，URL 可直接用于 `<im
 
 | 路由 | 参数 | 说明 |
 | ------ | ------ | ------ |
-| `GET /avatar/:style/:seed/:size` | `bg`, `fg` | native + partner 多风格（25+） |
+| `GET /avatar/:style/:seed/:size` | `bg`, `fg` | 图即风格 + 三方接入（45 种） |
 | `GET /avatar/styles` | — | 含 `engine` / `license` |
 
 中文首字：`/avatar/devimg/张三/128`
