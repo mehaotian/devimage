@@ -34,6 +34,16 @@ export class AvatarController {
   }
 
   /**
+   * 列出 devimg 纹理 pattern 目录
+   */
+  @Get('patterns')
+  @Header('Cache-Control', 'public, max-age=3600')
+  @ApiOperation({ summary: '列出 devimg 纹理 pattern 目录' })
+  listPatterns() {
+    return this.avatarStyleService.listPatterns();
+  }
+
+  /**
    * 多风格 seed 头像（native / partner SVG）
    */
   @Get(':style/:seed/:size')

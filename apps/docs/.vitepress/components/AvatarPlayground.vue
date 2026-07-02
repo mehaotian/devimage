@@ -24,6 +24,43 @@ const DEVIMG_FAMILY = new Set([
   'devimg-pattern',
 ]);
 
+interface PatternOption {
+  id: string;
+  label: string;
+}
+
+interface PatternGroupOption {
+  title: string;
+  options: PatternOption[];
+}
+
+/** API 不可用时的 fallback 目录 */
+const FALLBACK_PATTERN_GROUPS: PatternGroupOption[] = [
+  {
+    title: '基础',
+    options: [
+      { id: 'stripes', label: 'stripes 斜纹' },
+      { id: 'polka', label: 'polka 波点' },
+      { id: 'checker', label: 'checker 棋盘' },
+      { id: 'grid', label: 'grid 网格' },
+    ],
+  },
+  {
+    title: '波纹',
+    options: [
+      { id: 'waves', label: 'waves 波浪' },
+      { id: 'seigaiha', label: 'seigaiha 青海波' },
+    ],
+  },
+  {
+    title: '进阶几何',
+    options: [
+      { id: 'honeycomb', label: 'honeycomb 蜂窝' },
+      { id: 'japanese-cube', label: 'japanese-cube 立体方块' },
+    ],
+  },
+];
+
 const DEFAULT_STYLE = 'devimg';
 const DEFAULT_SEED = '张三';
 const PREVIEW_SIZE = 240;
@@ -43,6 +80,7 @@ const avatarShape = ref<'circle' | 'square'>('circle');
 const copied = ref(false);
 const loading = ref(true);
 const loadError = ref('');
+const patternGroups = ref<PatternGroupOption[]>(FALLBACK_PATTERN_GROUPS);
 
 let seedTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -282,6 +320,33 @@ function copyPreviewLink(): void {
 }
 
 /**
+ * 从 API 拉取 pattern 目录
+ */
+async function fetchPatternCatalog(): Promise<void> {
+  try {
+    const res = await fetch(`${API_BASE}/avatar/patterns`);
+    if (!res.ok) {
+      return;
+    }
+    const data = (await res.json()) as {
+      groups: { title: string; patterns: { id: string; title: string }[] }[];
+    };
+    if (!data.groups?.length) {
+      return;
+    }
+    patternGroups.value = data.groups.map((group) => ({
+      title: group.title,
+      options: group.patterns.map((item) => ({
+        id: item.id,
+        label: `${item.id} ${item.title}`,
+      })),
+    }));
+  } catch {
+    /* 使用 fallback */
+  }
+}
+
+/**
  * 从 API 拉取风格列表
  */
 async function fetchStyles(): Promise<void> {
@@ -342,6 +407,7 @@ watch(variant, (value) => {
 onMounted(() => {
   debouncedSeed.value = seed.value.trim() || DEFAULT_SEED;
   syncDevimgControls(selectedStyle.value);
+  void fetchPatternCatalog();
   void fetchStyles();
 });
 
@@ -429,12 +495,11 @@ onUnmounted(() => {
           <div class="avatar-playground__select-wrap">
             <select v-model="patternId" class="avatar-playground__select">
               <option value="">seed 自动</option>
-              <option value="stripes">stripes 斜纹</option>
-              <option value="polka">polka 波点</option>
-              <option value="checker">checker 棋盘</option>
-              <option value="houndstooth">houndstooth 千鸟格</option>
-              <option value="argyle">argyle 菱形</option>
-              <option value="grid">grid 网格</option>
+              <optgroup v-for="group in patternGroups" :key="group.title" :label="group.title">
+                <option v-for="item in group.options" :key="item.id" :value="item.id">
+                  {{ item.label }}
+                </option>
+              </optgroup>
             </select>
           </div>
         </label>

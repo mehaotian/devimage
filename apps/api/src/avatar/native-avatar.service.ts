@@ -10,7 +10,11 @@ import {
   buildGradientColors,
   buildRainbowMeshBlobs,
 } from './devimg-palette';
-import { isDevimgPatternId, renderDevimgPattern } from './devimg-patterns';
+import {
+  DEVIMG_PATTERN_IDS,
+  isDevimgPatternId,
+  renderDevimgPattern,
+} from './devimg-patterns/index';
 
 /** devimg 背景变体 */
 export type DevimgVariant = 'gradient' | 'mesh' | 'pattern';
@@ -114,9 +118,7 @@ export class NativeAvatarService {
     }
 
     if (options.pattern && !isDevimgPatternId(options.pattern)) {
-      throw new Error(
-        `Invalid pattern: ${options.pattern}. Use stripes, polka, checker, houndstooth, argyle or grid.`,
-      );
+      throw new Error(`Invalid pattern: ${options.pattern}. Use ${DEVIMG_PATTERN_IDS.join(', ')}.`);
     }
 
     if (variant === 'pattern' && options.bg) {

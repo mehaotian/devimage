@@ -11,6 +11,7 @@ import { DicebearAvatarService } from './dicebear-avatar.service';
 import { JdenticonAvatarService } from './jdenticon-avatar.service';
 import { MinidenticonsAvatarService } from './minidenticons-avatar.service';
 import { NativeAvatarService } from './native-avatar.service';
+import { buildPatternCatalog } from './devimg-patterns/index';
 
 export interface StyledAvatarRenderOptions {
   style: string;
@@ -41,6 +42,13 @@ export class AvatarStyleService {
    */
   listStyles(): AvatarStyleMeta[] {
     return listAvatarStyles();
+  }
+
+  /**
+   * 返回 devimg 纹理 pattern 分组目录
+   */
+  listPatterns() {
+    return buildPatternCatalog();
   }
 
   /**
