@@ -208,6 +208,56 @@
   text-align: left;
 }
 
+/* Hero 品牌 Logo */
+.dh-hero-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dh-hero-logo {
+  width: 80px;
+  height: 80px;
+  padding: 6px;
+  border-radius: 16px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--dh-border);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  animation: dh-float-card 7s ease-in-out infinite;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dh-hero-brand:hover .dh-hero-logo {
+  transform: scale(1.05) rotate(-2deg);
+}
+
+.dh-hero-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dh-hero-brand-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, var(--dh-accent) 0%, var(--dh-accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dh-hero-brand-cn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--vp-c-text-3);
+  letter-spacing: 0.25em;
+}
+
 .dh-badges {
   display: flex;
   flex-wrap: wrap;
@@ -1267,15 +1317,65 @@
 }
 
 .dh-footer-logo {
+  display: block;
   font-size: 1.125rem;
   font-weight: 800;
   color: var(--dh-accent);
 }
 
+.dh-footer-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dh-footer-brand-link:hover .dh-footer-logo {
+  color: var(--dh-accent-2);
+}
+
+.dh-footer-logo-img {
+  width: 40px;
+  height: 40px;
+  padding: 4px;
+  border-radius: 10px;
+  object-fit: contain;
+  flex-shrink: 0;
+  background: #fff;
+  border: 1px solid var(--dh-border);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
 .dh-footer-brand p {
   font-size: 0.8125rem;
   color: var(--vp-c-text-2);
-  margin: 8px 0 0;
+  margin: 4px 0 0;
+}
+
+.dark .dh-hero-logo,
+.dark .dh-footer-logo-img {
+  background: #fff;
+}
+
+/* 导航栏 Logo */
+.VPNavBarTitle .logo {
+  width: 30px;
+  height: 30px;
+  padding: 3px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: #fff;
+  border: 1px solid var(--dh-border);
+  box-sizing: border-box;
+}
+
+.dark .VPNavBarTitle .logo {
+  background: #fff;
+}
+
+.VPNavBarTitle .title {
+  font-weight: 700;
 }
 
 .dh-footer-col h4 {

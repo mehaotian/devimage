@@ -7,9 +7,13 @@ export default defineConfig({
   description: '图即 — 开发用的占位图 CDN。占位图、头像、场景图、Mock 数据，URL 即用。',
   lang: 'zh-CN',
   ignoreDeadLinks: true,
-  head: [['meta', { name: 'theme-color', content: '#6366f1' }]],
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.png', type: 'image/png' }],
+    ['meta', { name: 'theme-color', content: '#6366f1' }],
+  ],
   themeConfig: {
-    siteTitle: 'devimg · 图即',
+    logo: { src: '/logo-nav.png', alt: 'devimg' },
+    siteTitle: '图即',
     nav: [
       { text: '首页', link: '/' },
       { text: 'API 文档', link: '/api/placeholder' },

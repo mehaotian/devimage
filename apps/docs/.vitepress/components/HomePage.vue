@@ -221,6 +221,20 @@ onUnmounted(() => {
       <div class="dh-hero-split">
         <!-- 左侧文案 -->
         <div class="dh-hero-left reveal">
+          <a href="/" class="dh-hero-brand">
+            <img
+              src="/logo.png"
+              alt="devimg"
+              class="dh-hero-logo"
+              width="80"
+              height="80"
+              loading="eager"
+            />
+            <div class="dh-hero-brand-text">
+              <span class="dh-hero-brand-name">devimg</span>
+              <span class="dh-hero-brand-cn">图即</span>
+            </div>
+          </a>
           <div class="dh-badges">
             <span v-for="b in heroBadges" :key="b" class="dh-badge-pill">{{ b }}</span>
           </div>
@@ -455,8 +469,13 @@ onUnmounted(() => {
     <footer class="dh-footer">
       <div class="dh-footer-inner">
         <div class="dh-footer-brand">
-          <span class="dh-footer-logo">devimg</span>
-          <p>图即 — 开发用的占位图 CDN</p>
+          <a href="/" class="dh-footer-brand-link">
+            <img src="/logo-nav.png" alt="devimg" class="dh-footer-logo-img" width="40" height="40" />
+            <div>
+              <span class="dh-footer-logo">devimg</span>
+              <p>图即 — 开发用的占位图 CDN</p>
+            </div>
+          </a>
         </div>
         <div class="dh-footer-col">
           <h4>产品</h4>
