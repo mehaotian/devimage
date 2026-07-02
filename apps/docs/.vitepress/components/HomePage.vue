@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useReveal } from '../composables/useReveal';
+import HomeIcon from './HomeIcon.vue';
 
 const API_BASE =
   typeof __API_BASE__ !== 'undefined' ? __API_BASE__ : 'http://localhost:3000';
@@ -11,48 +12,80 @@ useReveal(rootRef);
 const heroBadges = ['稳定可靠', '开发者友好', 'URL 即用'];
 
 const stats = [
-  { icon: '🔗', value: '9+', label: 'API 路由' },
-  { icon: '⚡', value: 'SVG', label: '矢量实时输出' },
-  { icon: '🛠', value: '0', label: 'SDK / 配置项' },
-  { icon: '🆓', value: '100/min', label: '免费额度' },
+  {
+    icon: 'stat-link',
+    value: '9+',
+    label: 'API 路由',
+    hint: '占位 · 头像 · Mock',
+    color: 'purple',
+  },
+  {
+    icon: 'stat-bolt',
+    value: 'SVG',
+    label: '矢量实时输出',
+    hint: 'img 直出，可缩放',
+    color: 'amber',
+  },
+  {
+    icon: 'stat-tools',
+    value: '0',
+    label: 'SDK / 配置项',
+    hint: 'URL 复制即用',
+    color: 'slate',
+  },
+  {
+    icon: 'stat-free',
+    value: '100/min',
+    label: '免费额度',
+    hint: '开发阶段够用',
+    color: 'blue',
+  },
 ];
 
 const highlights = [
   {
-    icon: '📦',
+    icon: 'highlight-api',
     color: 'blue',
+    badge: '全覆盖',
     title: '丰富 API',
     desc: '占位图、头像、场景插画、Mock 数据 — 开发阶段常用的都在这。',
+    points: ['/:w/:h 占位图', '/avatar 字母头像', '/mock 假 REST'],
   },
   {
-    icon: '⚡',
+    icon: 'highlight-fast',
     color: 'green',
+    badge: '轻量',
     title: '轻量响应',
     desc: 'SVG 和 JSON 实时生成，img 和 fetch 直接调用，没有额外依赖。',
+    points: ['SVG 毫秒级', 'JSON 可缓存', '无 npm 包'],
   },
   {
-    icon: '✅',
+    icon: 'highlight-check',
     color: 'purple',
+    badge: '零门槛',
     title: '开发可用',
     desc: '占位资源随便用，不用注册，先把页面搭起来再说。',
+    points: ['无需账号', '免费额度', '文档有示例'],
   },
   {
-    icon: '📋',
+    icon: 'highlight-clipboard',
     color: 'orange',
+    badge: '即拷即用',
     title: '简单易用',
     desc: '复制 URL 到项目里就行，路径即参数，文档有示例照着写。',
+    points: ['路径即 API', 'Query 可选', '兼容常见写法'],
   },
 ];
 
 const resources = [
-  { icon: '🖼️', title: '占位图', desc: '随机色块 SVG', route: '/800/600', link: '/api/placeholder', count: '任意尺寸' },
-  { icon: '🎯', title: 'Seed 固定图', desc: '确定性配色', route: '/seed/demo/800/600', link: '/api/placeholder', count: 'UI 回归' },
-  { icon: '👤', title: '字母头像', desc: '中文首字 / 英文首字母', route: '/avatar/张三/128', link: '/api/avatar', count: '圆形 SVG' },
-  { icon: '🧩', title: '场景插画', desc: '404 / 空状态 / 断网', route: '/scene/404', link: '/api/scene', count: '4 种 variant' },
-  { icon: '👥', title: 'Mock 用户', desc: '中文姓名 + 头像', route: '/mock/users', link: '/api/mock', count: '最多 100 条' },
-  { icon: '📝', title: 'Mock 文章', desc: '标题 + 正文', route: '/mock/posts', link: '/api/mock', count: '列表数据' },
-  { icon: '🛒', title: 'Mock 商品', desc: '名称 + 价格 + 图', route: '/mock/products', link: '/api/mock', count: '列表数据' },
-  { icon: '🚫', title: '404 快捷', desc: '等价 /scene/404', route: '/404', link: '/api/scene', count: '快捷路由' },
+  { icon: 'res-placeholder', title: '占位图', desc: '随机色块 SVG', route: '/800/600', link: '/api/placeholder', count: '任意尺寸' },
+  { icon: 'res-seed', title: 'Seed 固定图', desc: '确定性配色', route: '/seed/demo/800/600', link: '/api/placeholder', count: 'UI 回归' },
+  { icon: 'res-avatar', title: '字母头像', desc: '中文首字 / 英文首字母', route: '/avatar/张三/128', link: '/api/avatar', count: '圆形 SVG' },
+  { icon: 'res-scene', title: '场景插画', desc: '404 / 空状态 / 断网', route: '/scene/404', link: '/api/scene', count: '4 种 variant' },
+  { icon: 'res-users', title: 'Mock 用户', desc: '中文姓名 + 头像', route: '/mock/users', link: '/api/mock', count: '最多 100 条' },
+  { icon: 'res-posts', title: 'Mock 文章', desc: '标题 + 正文', route: '/mock/posts', link: '/api/mock', count: '列表数据' },
+  { icon: 'res-products', title: 'Mock 商品', desc: '名称 + 价格 + 图', route: '/mock/products', link: '/api/mock', count: '列表数据' },
+  { icon: 'res-404', title: '404 快捷', desc: '等价 /scene/404', route: '/404', link: '/api/scene', count: '快捷路由' },
 ];
 
 const platformTabs = [
@@ -198,7 +231,8 @@ onUnmounted(() => {
           </p>
           <div class="dh-hero-actions">
             <a href="/guide/quick-start" class="dh-btn dh-btn-primary">
-              ⚡ 快速开始
+              <HomeIcon name="icon-bolt" :size="18" />
+              快速开始
             </a>
             <a href="/api/placeholder" class="dh-btn dh-btn-ghost">查看文档</a>
           </div>
@@ -206,9 +240,15 @@ onUnmounted(() => {
 
         <!-- 右侧演示卡片 -->
         <div class="dh-hero-demo reveal" style="--d: 0.12s">
-          <div class="dh-deco dh-deco-1" aria-hidden="true">🖼️</div>
-          <div class="dh-deco dh-deco-2" aria-hidden="true">&lt;/&gt;</div>
-          <div class="dh-deco dh-deco-3" aria-hidden="true">👤</div>
+          <div class="dh-deco dh-deco-1" aria-hidden="true">
+            <HomeIcon name="deco-image" :size="28" />
+          </div>
+          <div class="dh-deco dh-deco-2" aria-hidden="true">
+            <HomeIcon name="deco-code" :size="28" />
+          </div>
+          <div class="dh-deco dh-deco-3" aria-hidden="true">
+            <HomeIcon name="deco-avatar" :size="28" />
+          </div>
 
           <div class="dh-demo-card">
             <div class="dh-demo-card-tabs">
@@ -226,7 +266,8 @@ onUnmounted(() => {
             <div class="dh-demo-card-url">
               <span class="dh-url-text">{{ displayUrl }}</span>
               <button type="button" class="dh-copy" @click="copyUrl">
-                {{ copied ? '✓' : '📋' }}
+                <HomeIcon v-if="copied" name="icon-check" :size="16" />
+                <HomeIcon v-else name="icon-copy" :size="16" />
               </button>
             </div>
             <div class="dh-demo-card-label">响应示例</div>
@@ -240,30 +281,60 @@ onUnmounted(() => {
       </div>
     </section>
 
-    <!-- 数据统计条 -->
-    <section class="dh-stats reveal">
-      <div class="dh-stats-inner">
-        <div v-for="s in stats" :key="s.label" class="dh-stat">
-          <span class="dh-stat-icon">{{ s.icon }}</span>
-          <span class="dh-stat-value">{{ s.value }}</span>
-          <span class="dh-stat-label">{{ s.label }}</span>
-        </div>
+    <!-- 数据 + 核心优势（合并区块） -->
+    <section class="dh-value">
+      <div class="dh-value-bg" aria-hidden="true">
+        <div class="dh-value-orb dh-value-orb-1" />
+        <div class="dh-value-orb dh-value-orb-2" />
       </div>
-    </section>
 
-    <!-- 核心优势 4 列 -->
-    <section class="dh-section">
-      <div class="dh-highlights">
-        <div
-          v-for="(h, i) in highlights"
-          :key="h.title"
-          class="dh-highlight reveal"
-          :class="`dh-highlight-${h.color}`"
-          :style="{ '--d': `${i * 0.08}s` }"
-        >
-          <span class="dh-highlight-icon">{{ h.icon }}</span>
-          <h3>{{ h.title }}</h3>
-          <p>{{ h.desc }}</p>
+      <div class="dh-value-inner">
+        <!-- 统计卡片 -->
+        <div class="dh-value-stats">
+          <div
+            v-for="(s, i) in stats"
+            :key="s.label"
+            class="dh-stat-card reveal"
+            :class="`dh-stat-card-${s.color}`"
+            :style="{ '--d': `${i * 0.08}s` }"
+          >
+            <div class="dh-stat-icon-wrap">
+              <HomeIcon :name="s.icon" :size="32" />
+            </div>
+            <div class="dh-stat-body">
+              <span class="dh-stat-value">{{ s.value }}</span>
+              <span class="dh-stat-label">{{ s.label }}</span>
+              <span class="dh-stat-hint">{{ s.hint }}</span>
+            </div>
+            <div class="dh-stat-shine" aria-hidden="true" />
+          </div>
+        </div>
+
+        <!-- 核心优势 -->
+        <div class="dh-highlights">
+          <div
+            v-for="(h, i) in highlights"
+            :key="h.title"
+            class="dh-highlight reveal"
+            :class="`dh-highlight-${h.color}`"
+            :style="{ '--d': `${0.15 + i * 0.08}s` }"
+          >
+            <div class="dh-highlight-head">
+              <div class="dh-highlight-icon-wrap">
+                <HomeIcon :name="h.icon" :size="32" />
+              </div>
+              <span class="dh-highlight-badge">{{ h.badge }}</span>
+            </div>
+            <h3>{{ h.title }}</h3>
+            <p>{{ h.desc }}</p>
+            <ul class="dh-highlight-points">
+              <li v-for="pt in h.points" :key="pt">
+                <HomeIcon name="icon-check-sm" :size="14" />
+                {{ pt }}
+              </li>
+            </ul>
+            <div class="dh-highlight-glow" aria-hidden="true" />
+          </div>
         </div>
       </div>
     </section>
@@ -282,7 +353,9 @@ onUnmounted(() => {
           class="dh-resource reveal"
           :style="{ '--d': `${i * 0.06}s` }"
         >
-          <span class="dh-resource-icon">{{ r.icon }}</span>
+          <span class="dh-resource-icon">
+            <HomeIcon :name="r.icon" :size="32" />
+          </span>
           <div class="dh-resource-body">
             <h3>{{ r.title }}</h3>
             <p>{{ r.desc }}</p>
@@ -367,7 +440,9 @@ onUnmounted(() => {
     <!-- 全宽 CTA -->
     <section class="dh-cta-banner reveal">
       <div class="dh-cta-banner-inner">
-        <span class="dh-cta-rocket">🚀</span>
+        <span class="dh-cta-rocket">
+          <HomeIcon name="icon-rocket" :size="48" />
+        </span>
         <h2>准备好提升开发效率了吗？</h2>
         <p>不用注册，复制 URL 贴进项目，先把页面搭起来。</p>
         <a href="/guide/quick-start" class="dh-btn dh-btn-white">

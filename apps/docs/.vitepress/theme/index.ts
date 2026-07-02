@@ -1,11 +1,12 @@
 import DefaultTheme from 'vitepress/theme';
-import type { EnhanceAppContext } from 'vitepress';
 import HomePage from '../components/HomePage.vue';
+import HomeIcon from '../components/HomeIcon.vue';
 import './custom.css';
 
 export default {
   extends: DefaultTheme,
-  enhanceApp({ app }: EnhanceAppContext) {
+  enhanceApp({ app }) {
     app.component('HomePage', HomePage);
+    app.component('HomeIcon', HomeIcon);
   },
 };
