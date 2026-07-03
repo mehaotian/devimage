@@ -97,6 +97,20 @@ describe('NativeAvatarService', () => {
     expect(a).toBe(b);
   });
 
+  it('should render devimg-geo with varied layouts per seed', () => {
+    const a = service.renderSvg({ style: 'devimg-geo', seed: '张三-lapi', size: 128 });
+    const b = service.renderSvg({ style: 'devimg-geo', seed: 'Aneka-gi2p', size: 128 });
+    expect(a).not.toBe(b);
+    expect(a).toContain('<path');
+    expect((a.match(/<path/g) ?? []).length).toBeLessThanOrEqual(12);
+  });
+
+  it('should keep Felix-gxu5 geo orderly concentric rings', () => {
+    const svg = service.renderSvg({ style: 'devimg-geo', seed: 'Felix-gxu5', size: 128 });
+    expect((svg.match(/<path/g) ?? []).length).toBeLessThanOrEqual(12);
+    expect(svg).not.toContain('stroke-opacity');
+  });
+
   it('should render devimg-pattern with svg pattern tile', () => {
     const svg = service.renderSvg({ style: 'devimg-pattern', seed: 'Luna', size: 128 });
     expect(svg).toContain('clipPath');

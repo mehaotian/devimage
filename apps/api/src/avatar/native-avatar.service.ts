@@ -16,6 +16,7 @@ import {
   renderDevimgPattern,
 } from './devimg-patterns/index';
 import { isExperimentalNativeStyle, renderExperimentalNative } from './native-renderers/index';
+import { renderGeo } from './native-renderers/geo.renderer';
 
 /** devimg 背景变体 */
 export type DevimgVariant = 'gradient' | 'mesh' | 'pattern';
@@ -58,7 +59,7 @@ export class NativeAvatarService {
     const size = parseDimension(options.size, 'size');
 
     if (options.style === 'devimg-geo') {
-      return this.renderGeo(options.seed, size);
+      return renderGeo({ seed: options.seed, size });
     }
 
     if (isExperimentalNativeStyle(options.style)) {
@@ -302,35 +303,6 @@ export class NativeAvatarService {
   }
 
   /**
-   * 几何弧环：自研同心分段圆弧（独立风格，不在 devimg 族内）
-   */
-  private renderGeo(seed: string, size: number): string {
-    const hBase = seedToInt(seed, 'geo-h', 0, 360);
-    const cA = `#${hslToHex(hBase, 62, 55)}`;
-    const cB = `#${hslToHex((hBase + 35) % 360, 58, 68)}`;
-    const layers: string[] = [];
-
-    for (let ring = 0; ring < 5; ring++) {
-      const radius = 12 + ring * 8;
-      const segments = seedToInt(seed, `seg-${ring}`, 3, 7);
-      const rot = seedToInt(seed, `rot-${ring}`, 0, 360);
-      for (let s = 0; s < segments; s++) {
-        const start = rot + (360 / segments) * s + seedToInt(seed, `gap-${ring}-${s}`, 0, 20);
-        const sweep = seedToInt(seed, `sw-${ring}-${s}`, 25, 85);
-        const color = (ring + s) % 2 === 0 ? cA : cB;
-        layers.push(this.describeArc(50, 50, radius, start, sweep, color));
-      }
-    }
-
-    return [
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 100 100" fill="none">`,
-      `<circle cx="50" cy="50" r="10" fill="${cA}"/>`,
-      layers.join(''),
-      `</svg>`,
-    ].join('');
-  }
-
-  /**
    * 提取显示字符（中文首字 / 英文首字母）
    */
   private extractInitial(name: string): string {
@@ -343,26 +315,5 @@ export class NativeAvatarService {
       return first;
     }
     return first.toUpperCase();
-  }
-
-  /**
-   * 生成 SVG 圆弧 path（角度制）
-   */
-  private describeArc(
-    cx: number,
-    cy: number,
-    r: number,
-    startDeg: number,
-    sweepDeg: number,
-    color: string,
-  ): string {
-    const start = ((startDeg % 360) * Math.PI) / 180;
-    const end = (((startDeg + sweepDeg) % 360) * Math.PI) / 180;
-    const x1 = cx + r * Math.cos(start);
-    const y1 = cy + r * Math.sin(start);
-    const x2 = cx + r * Math.cos(end);
-    const y2 = cy + r * Math.sin(end);
-    const large = sweepDeg > 180 ? 1 : 0;
-    return `<path d="M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}" stroke="${color}" stroke-width="3.5" stroke-linecap="round"/>`;
   }
 }

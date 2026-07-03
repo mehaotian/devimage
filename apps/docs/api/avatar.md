@@ -48,7 +48,7 @@ Playground 分三个 Tab：**快速试玩**（默认，调参数 + 预览）、*
 | style | 名称 | 说明 | Query | 示例 |
 | ------ | ------ | ------ | ------ | ------ |
 | `devimg` | 图即头像 | 圆形头像：渐变/mesh/pattern 底 + 可选首字 | `variant`, `text`, `bg`, `fg`, `pattern` | `/avatar/devimg/张三/128` |
-| `devimg-geo` | 几何弧环 | 同心弧环 stroke，抽象 identicon | — | `/avatar/devimg-geo/Luna/128` |
+| `devimg-geo` | 几何弧环 | 同心弧环分层 + 层间相位错开，seed 控制段数与配色 | — | `/avatar/devimg-geo/Luna/128` |
 | `devimg-pattern` | 纹理 pattern | CSS 纹理满铺背景，seed 选模板与配色 | `text`, `shape`, `fg`, `pattern` | `/avatar/devimg-pattern/Luna/128` |
 
 #### devimg Query 参数
