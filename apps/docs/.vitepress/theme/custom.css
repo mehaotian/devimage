@@ -28,6 +28,7 @@
 }
 
 .avatar-playground__preview,
+.photo-playground__preview,
 .code-playground__preview,
 .api-playground__preview-col {
   position: sticky;

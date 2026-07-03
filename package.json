@@ -14,6 +14,8 @@
     "start:prod": "pnpm --filter @devimage/api start:prod",
     "test": "pnpm --filter @devimage/api test",
     "lint": "pnpm --filter @devimage/api lint",
+    "photo:manifest": "python3 scripts/photo-library/build_manifest.py",
+    "photo:upload": "python3 scripts/photo-library/upload_cos.py",
     "avatar:split": "pnpm --filter @devimage/avatar-assets split",
     "avatar:matte": "pnpm --filter @devimage/avatar-assets matte",
     "avatar:validate": "pnpm --filter @devimage/avatar-assets validate"

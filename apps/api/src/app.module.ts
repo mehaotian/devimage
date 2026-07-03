@@ -6,6 +6,7 @@ import { CodeModule } from './code/code.module';
 import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
 import { MockModule } from './mock/mock.module';
+import { PhotoModule } from './photo/photo.module';
 import { PlaceholderModule } from './placeholder/placeholder.module';
 import { SceneModule } from './scene/scene.module';
 import { SkeletonModule } from './skeleton/skeleton.module';
@@ -17,6 +18,7 @@ import { SkeletonModule } from './skeleton/skeleton.module';
     }),
     CommonModule,
     HealthModule,
+    PhotoModule,
     AvatarModule,
     CodeModule,
     MockModule,

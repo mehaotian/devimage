@@ -1,0 +1,1541 @@
+{
+  "version": 2,
+  "generated_at": "2026-07-03T11:35:28.627365+00:00",
+  "total": 8132,
+  "categories": [
+    {
+      "slug": "3DRender",
+      "label": "3DRender",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "AI插画",
+      "label": "AI插画",
+      "tier": "F-decor",
+      "count": 96,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "CG",
+      "label": "CG",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "LowPoly",
+      "label": "LowPoly",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "中国城市",
+      "label": "中国城市",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "urban-wide",
+      "scenes": [
+        "banner",
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "书籍",
+      "label": "书籍",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "office",
+      "scenes": [
+        "article",
+        "education"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "人物",
+      "label": "人物",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "portrait",
+      "scenes": [
+        "social",
+        "news"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "健身",
+      "label": "健身",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "sport-action",
+      "scenes": [
+        "health"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "像素风",
+      "label": "像素风",
+      "tier": "F-decor",
+      "count": 95,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "办公",
+      "label": "办公",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "office",
+      "scenes": [
+        "article",
+        "business",
+        "education"
+      ],
+      "alias_group": "office",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "办公桌",
+      "label": "办公桌",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "office",
+      "scenes": [
+        "article",
+        "business",
+        "education"
+      ],
+      "alias_group": "office",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "动漫",
+      "label": "动漫",
+      "tier": "E-vertical",
+      "count": 100,
+      "shot_type": "game-esports",
+      "scenes": [
+        "game"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "动物",
+      "label": "动物",
+      "tier": "E-vertical",
+      "count": 100,
+      "shot_type": "pet-animal",
+      "scenes": [
+        "social"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "包包",
+      "label": "包包",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "医院",
+      "label": "医院",
+      "tier": "E-vertical",
+      "count": 100,
+      "shot_type": "medical",
+      "scenes": [
+        "health"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "古建筑",
+      "label": "古建筑",
+      "tier": "E-vertical",
+      "count": 99,
+      "shot_type": "exterior-arch",
+      "scenes": [
+        "realestate",
+        "banner"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "咖啡",
+      "label": "咖啡",
+      "tier": "B-food",
+      "count": 100,
+      "shot_type": "food-plated",
+      "scenes": [
+        "food",
+        "article"
+      ],
+      "alias_group": "cafe",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "coffee cup close"
+    },
+    {
+      "slug": "咖啡馆",
+      "label": "咖啡馆",
+      "tier": "B-food",
+      "count": 96,
+      "shot_type": "food-env",
+      "scenes": [
+        "food",
+        "article"
+      ],
+      "alias_group": "cafe",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "商务",
+      "label": "商务",
+      "tier": "E-vertical",
+      "count": 96,
+      "shot_type": "business",
+      "scenes": [
+        "business"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "meeting"
+    },
+    {
+      "slug": "国风",
+      "label": "国风",
+      "tier": "F-decor",
+      "count": 99,
+      "shot_type": "art-digital",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "城市",
+      "label": "城市",
+      "tier": "D-travel",
+      "count": 99,
+      "shot_type": "urban-wide",
+      "scenes": [
+        "banner",
+        "news",
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "天气",
+      "label": "天气",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "天空",
+      "label": "天空",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": "nature-bg",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "太空",
+      "label": "太空",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner",
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "婚礼",
+      "label": "婚礼",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "social-people",
+      "scenes": [
+        "social"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "学校",
+      "label": "学校",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "social-people",
+      "scenes": [
+        "education"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "宠物",
+      "label": "宠物",
+      "tier": "E-vertical",
+      "count": 100,
+      "shot_type": "pet-animal",
+      "scenes": [
+        "social"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "室内",
+      "label": "室内",
+      "tier": "E-vertical",
+      "count": 100,
+      "shot_type": "interior",
+      "scenes": [
+        "realestate",
+        "hotel"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "room with depth"
+    },
+    {
+      "slug": "家具",
+      "label": "家具",
+      "tier": "E-vertical",
+      "count": 98,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "realestate",
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "furniture piece"
+    },
+    {
+      "slug": "家电",
+      "label": "家电",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "建筑",
+      "label": "建筑",
+      "tier": "E-vertical",
+      "count": 100,
+      "shot_type": "exterior-arch",
+      "scenes": [
+        "realestate"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "手机",
+      "label": "手机",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "抽象艺术",
+      "label": "抽象艺术",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "摩托",
+      "label": "摩托",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "数码产品",
+      "label": "数码产品",
+      "tier": "A-product",
+      "count": 96,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "不再扩子类；Mock 用 digital 组轮转"
+    },
+    {
+      "slug": "新闻",
+      "label": "新闻",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "editorial",
+      "scenes": [
+        "news"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "people or event"
+    },
+    {
+      "slug": "旅行",
+      "label": "旅行",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "hotel-travel",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "无人机",
+      "label": "无人机",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "服装",
+      "label": "服装",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "garment visible"
+    },
+    {
+      "slug": "木纹",
+      "label": "木纹",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": "texture",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "极简",
+      "label": "极简",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "texture",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "森林",
+      "label": "森林",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": "nature-bg",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "植物",
+      "label": "植物",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": "nature-bg",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "植物盆栽",
+      "label": "植物盆栽",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": "nature-bg",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "母婴",
+      "label": "母婴",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "baby/maternity products"
+    },
+    {
+      "slug": "水彩",
+      "label": "水彩",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "水果",
+      "label": "水果",
+      "tier": "B-food",
+      "count": 100,
+      "shot_type": "food-plated",
+      "scenes": [
+        "food",
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "汽车",
+      "label": "汽车",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "海洋",
+      "label": "海洋",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner"
+      ],
+      "alias_group": "nature-bg",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "游戏",
+      "label": "游戏",
+      "tier": "E-vertical",
+      "count": 98,
+      "shot_type": "game-esports",
+      "scenes": [
+        "game"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "火车",
+      "label": "火车",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "烟花",
+      "label": "烟花",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "social-people",
+      "scenes": [
+        "promo"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "玩具",
+      "label": "玩具",
+      "tier": "A-product",
+      "count": 99,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "玻璃",
+      "label": "玻璃",
+      "tier": "F-decor",
+      "count": 99,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": "texture",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "甜品",
+      "label": "甜品",
+      "tier": "B-food",
+      "count": 100,
+      "shot_type": "food-plated",
+      "scenes": [
+        "food"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "电商主图",
+      "label": "电商主图",
+      "tier": "A-product",
+      "count": 99,
+      "shot_type": "white-bg",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "single product"
+    },
+    {
+      "slug": "电子产品",
+      "label": "电子产品",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "电竞",
+      "label": "电竞",
+      "tier": "E-vertical",
+      "count": 99,
+      "shot_type": "game-esports",
+      "scenes": [
+        "game"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "电脑",
+      "label": "电脑",
+      "tier": "A-product",
+      "count": 97,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "石头",
+      "label": "石头",
+      "tier": "F-decor",
+      "count": 97,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": "texture",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "礼物",
+      "label": "礼物",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product",
+        "promo"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "科技",
+      "label": "科技",
+      "tier": "F-decor",
+      "count": 97,
+      "shot_type": "business",
+      "scenes": [
+        "business",
+        "news"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "纸张",
+      "label": "纸张",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": "texture",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "纹理",
+      "label": "纹理",
+      "tier": "F-decor",
+      "count": 100,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": "texture",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "美妆",
+      "label": "美妆",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "white-bg",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "cosmetics/skincare"
+    },
+    {
+      "slug": "美食",
+      "label": "美食",
+      "tier": "B-food",
+      "count": 100,
+      "shot_type": "food-plated",
+      "scenes": [
+        "food"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "plated food"
+    },
+    {
+      "slug": "耳机",
+      "label": "耳机",
+      "tier": "A-product",
+      "count": 99,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "自行车",
+      "label": "自行车",
+      "tier": "D-travel",
+      "count": 99,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "节日",
+      "label": "节日",
+      "tier": "F-decor",
+      "count": 95,
+      "shot_type": "social-people",
+      "scenes": [
+        "promo",
+        "banner"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "赛博朋克",
+      "label": "赛博朋克",
+      "tier": "F-decor",
+      "count": 95,
+      "shot_type": "art-digital",
+      "scenes": [
+        "gallery",
+        "banner"
+      ],
+      "alias_group": null,
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "轮船",
+      "label": "轮船",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "运动",
+      "label": "运动",
+      "tier": "C-content",
+      "count": 100,
+      "shot_type": "sport-action",
+      "scenes": [
+        "social",
+        "news",
+        "health"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "酒店",
+      "label": "酒店",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "hotel-travel",
+      "scenes": [
+        "hotel",
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "金属",
+      "label": "金属",
+      "tier": "F-decor",
+      "count": 98,
+      "shot_type": "texture",
+      "scenes": [
+        "gallery"
+      ],
+      "alias_group": "texture",
+      "mock_priority": 3,
+      "usage": [
+        "api",
+        "browse",
+        "decor"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "键盘",
+      "label": "键盘",
+      "tier": "A-product",
+      "count": 96,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "露营",
+      "label": "露营",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "hotel-travel",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "鞋子",
+      "label": "鞋子",
+      "tier": "A-product",
+      "count": 100,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": null,
+      "mock_priority": 1,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "风景",
+      "label": "风景",
+      "tier": "D-travel",
+      "count": 98,
+      "shot_type": "landscape-wide",
+      "scenes": [
+        "banner",
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "meta 完整；需补 tags banner-candidate"
+    },
+    {
+      "slug": "飞机",
+      "label": "飞机",
+      "tier": "D-travel",
+      "count": 100,
+      "shot_type": "vehicle",
+      "scenes": [
+        "travel"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "餐饮门店",
+      "label": "餐饮门店",
+      "tier": "B-food",
+      "count": 99,
+      "shot_type": "food-env",
+      "scenes": [
+        "food"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": "storefront or dining room"
+    },
+    {
+      "slug": "饮料",
+      "label": "饮料",
+      "tier": "B-food",
+      "count": 99,
+      "shot_type": "food-plated",
+      "scenes": [
+        "food"
+      ],
+      "alias_group": null,
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    },
+    {
+      "slug": "鼠标",
+      "label": "鼠标",
+      "tier": "A-product",
+      "count": 95,
+      "shot_type": "product-lifestyle",
+      "scenes": [
+        "product"
+      ],
+      "alias_group": "digital",
+      "mock_priority": 2,
+      "usage": [
+        "mock",
+        "api",
+        "browse"
+      ],
+      "description": ""
+    }
+  ],
+  "alias_groups": {
+    "digital": [
+      "数码产品",
+      "电子产品",
+      "手机",
+      "电脑",
+      "耳机",
+      "键盘",
+      "鼠标"
+    ],
+    "cafe": [
+      "咖啡",
+      "咖啡馆"
+    ],
+    "office": [
+      "办公",
+      "办公桌"
+    ],
+    "nature-bg": [
+      "森林",
+      "植物",
+      "植物盆栽",
+      "天空",
+      "海洋"
+    ],
+    "texture": [
+      "木纹",
+      "纹理",
+      "纸张",
+      "玻璃",
+      "金属",
+      "石头"
+    ]
+  }
+}

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { faker } from '@faker-js/faker/locale/zh_CN';
+import { PhotoService } from '../photo/photo.service';
 import { MOCK_POOL_MAX, sliceMockPool } from './mock-query';
 
 /**
@@ -7,6 +8,8 @@ import { MOCK_POOL_MAX, sliceMockPool } from './mock-query';
  */
 @Injectable()
 export class MockService {
+  constructor(private readonly photoService: PhotoService) {}
+
   /**
    * 对外公开的基础 URL（本地 / CDN）
    */
@@ -14,6 +17,21 @@ export class MockService {
     const fromEnv = process.env.DEVIMAGE_PUBLIC_URL ?? process.env.COS_CDN_DOMAIN;
     const base = (fromEnv ?? 'http://localhost:3000').replace(/\/$/, '');
     return base;
+  }
+
+  /**
+   * 真实图 URL（manifest 未加载时回退合成占位）
+   */
+  private buildScenePhotoUrl(w: number, h: number, scene: 'product' | 'news', id: number): string {
+    const base = this.getPublicBaseUrl();
+    if (this.photoService.isReady()) {
+      return this.photoService.buildPhotoUrl(base, w, h, {
+        scene: this.photoService.getMockScene(scene === 'product' ? 'products' : 'posts'),
+        seed: `${scene}-${id}`,
+      });
+    }
+    const text = scene === 'product' ? '商品' : '封面';
+    return `${base}/${w}/${h}?text=${encodeURIComponent(text)}`;
   }
 
   /**
@@ -113,6 +131,7 @@ export class MockService {
       userId: ((id - 1) % 10) + 1,
       title: faker.lorem.sentence(),
       body: faker.lorem.paragraphs(2),
+      cover: this.buildScenePhotoUrl(800, 450, 'news', id),
     };
   }
 
@@ -125,7 +144,7 @@ export class MockService {
       id,
       name: faker.commerce.productName(),
       price: Number(faker.commerce.price()),
-      image: `${this.getPublicBaseUrl()}/200/200?text=${encodeURIComponent('商品')}`,
+      image: this.buildScenePhotoUrl(400, 400, 'product', id),
     };
   }
 }

@@ -5,6 +5,7 @@ import AvatarPlayground from '../components/AvatarPlayground.vue';
 import PlaceholderPlayground from '../components/PlaceholderPlayground.vue';
 import ScenePlayground from '../components/ScenePlayground.vue';
 import MockPlayground from '../components/MockPlayground.vue';
+import PhotoPlayground from '../components/PhotoPlayground.vue';
 import CodePlayground from '../components/CodePlayground.vue';
 import SkeletonPlayground from '../components/SkeletonPlayground.vue';
 import ApiPlaygroundShell from '../components/ApiPlaygroundShell.vue';
@@ -19,6 +20,7 @@ export default {
     app.component('PlaceholderPlayground', PlaceholderPlayground);
     app.component('ScenePlayground', ScenePlayground);
     app.component('MockPlayground', MockPlayground);
+    app.component('PhotoPlayground', PhotoPlayground);
     app.component('CodePlayground', CodePlayground);
     app.component('SkeletonPlayground', SkeletonPlayground);
     app.component('ApiPlaygroundShell', ApiPlaygroundShell);

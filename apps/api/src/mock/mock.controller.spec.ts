@@ -1,12 +1,23 @@
 import { BadRequestException } from '@nestjs/common';
 import { MockController } from './mock.controller';
 import { MockService } from './mock.service';
+import { PhotoService } from '../photo/photo.service';
+
+/** 测试用 PhotoService 桩 */
+function createPhotoServiceStub(ready = false): PhotoService {
+  return {
+    isReady: () => ready,
+    buildPhotoUrl: (base: string, w: number, h: number, opts: { scene: string; seed: string }) =>
+      `${base}/photo/${w}/${h}?scene=${opts.scene}&seed=${encodeURIComponent(opts.seed)}`,
+    getMockScene: (resource: string) => (resource === 'products' ? 'product' : 'news'),
+  } as unknown as PhotoService;
+}
 
 describe('MockController', () => {
   let controller: MockController;
 
   beforeEach(() => {
-    controller = new MockController(new MockService());
+    controller = new MockController(new MockService(createPhotoServiceStub()));
   });
 
   it('should list default users', () => {
@@ -61,7 +72,7 @@ describe('MockService', () => {
 
   beforeEach(() => {
     process.env = { ...originalEnv };
-    service = new MockService();
+    service = new MockService(createPhotoServiceStub(false));
   });
 
   afterEach(() => {
@@ -74,10 +85,16 @@ describe('MockService', () => {
     expect(user?.avatar).toContain('https://api.example.com/avatar/devimg/');
   });
 
-  it('should default to localhost', () => {
+  it('should fallback to placeholder when manifest not ready', () => {
     delete process.env.DEVIMAGE_PUBLIC_URL;
     delete process.env.COS_CDN_DOMAIN;
     const products = service.listProducts(1);
-    expect(products[0]?.image).toContain('http://localhost:3000/200/200');
+    expect(products[0]?.image).toContain('http://localhost:3000/400/400');
+  });
+
+  it('should use photo url when manifest ready', () => {
+    const ready = new MockService(createPhotoServiceStub(true));
+    const product = ready.listProducts(1)[0];
+    expect(product?.image).toContain('/photo/400/400?scene=product&seed=product-1');
   });
 });

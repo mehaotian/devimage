@@ -1,3 +1,5 @@
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -7,9 +9,32 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 /**
+ * 加载 apps/api/.env（Nest 默认不读取 dotenv）
+ */
+function loadEnvFile(): void {
+  const envPath = join(__dirname, '..', '.env');
+  if (!existsSync(envPath)) {
+    return;
+  }
+  for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) {
+      continue;
+    }
+    const eq = trimmed.indexOf('=');
+    const key = trimmed.slice(0, eq).trim();
+    const value = trimmed.slice(eq + 1).trim();
+    if (key && process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+}
+
+/**
  * 启动 NestJS 应用（Fastify 适配器，面向高并发 SVG/JSON 响应）
  */
 async function bootstrap(): Promise<void> {
+  loadEnvFile();
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: false }),
