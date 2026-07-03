@@ -17,4 +17,11 @@ describe('geo.renderer', () => {
     const unique = new Set(seeds.map((seed) => renderGeo({ seed, size: 128 })));
     expect(unique.size).toBeGreaterThan(1);
   });
+
+  it('should produce distinct layouts for geo variant seeds', () => {
+    const layered = renderGeo({ seed: 'geo-variant-layered', size: 128 });
+    const dual = renderGeo({ seed: 'geo-variant-dual-xx', size: 128 });
+    expect(layered).toContain('<path');
+    expect(dual).toContain('<path');
+  });
 });

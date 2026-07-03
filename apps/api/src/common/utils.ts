@@ -1,10 +1,75 @@
+/** SVG 尺寸上限 */
+export const MAX_DIMENSION = 4000;
+
+/** 栅格化输出尺寸上限（防 CPU/内存滥用） */
+export const RASTER_MAX_DIMENSION = 1024;
+
+/** 默认最小尺寸 */
+export const MIN_DIMENSION = 10;
+
 /**
  * 校验并规范化尺寸参数（10–4000）
  */
 export function parseDimension(value: string | number, label: string): number {
   const num = typeof value === 'number' ? value : Number.parseInt(value, 10);
-  if (!Number.isFinite(num) || num < 10 || num > 4000) {
-    throw new Error(`Invalid ${label}: must be between 10 and 4000`);
+  if (!Number.isFinite(num) || num < MIN_DIMENSION || num > MAX_DIMENSION) {
+    throw new Error(`Invalid ${label}: must be between ${MIN_DIMENSION} and ${MAX_DIMENSION}`);
+  }
+  return num;
+}
+
+/**
+ * 校验栅格化尺寸（10–1024）
+ */
+export function parseRasterDimension(value: string | number, label: string): number {
+  const num = parseDimension(value, label);
+  if (num > RASTER_MAX_DIMENSION) {
+    throw new Error(
+      `Invalid ${label}: raster max is ${RASTER_MAX_DIMENSION}. Use SVG for larger sizes.`,
+    );
+  }
+  return num;
+}
+
+/**
+ * 解析可选 query 尺寸，缺省返回 defaultValue
+ */
+export function parseOptionalDimension(
+  value: string | undefined,
+  label: string,
+  defaultValue: number,
+): number {
+  if (value === undefined || value === '') {
+    return defaultValue;
+  }
+  return parseDimension(value, label);
+}
+
+/**
+ * 解析列表 count 参数（1–max，非法抛错）
+ */
+export function parseBoundedCount(
+  value: string | undefined,
+  defaultValue: number,
+  max: number,
+): number {
+  if (value === undefined || value === '') {
+    return defaultValue;
+  }
+  const num = Number.parseInt(value, 10);
+  if (!Number.isFinite(num) || num < 1 || num > max) {
+    throw new Error(`Invalid count: must be between 1 and ${max}`);
+  }
+  return num;
+}
+
+/**
+ * 解析正整数 path/query 参数
+ */
+export function parsePositiveInt(value: string, label: string, min = 1, max = Number.MAX_SAFE_INTEGER): number {
+  const num = Number.parseInt(value, 10);
+  if (!Number.isFinite(num) || num < min || num > max) {
+    throw new Error(`Invalid ${label}: must be between ${min} and ${max}`);
   }
   return num;
 }

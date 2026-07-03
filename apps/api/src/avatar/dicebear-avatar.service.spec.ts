@@ -1,4 +1,5 @@
 import { DicebearAvatarService } from './dicebear-avatar.service';
+import { DICEBEAR_STYLE_FILES } from './styles/registry';
 
 describe('DicebearAvatarService', () => {
   let service: DicebearAvatarService;
@@ -28,5 +29,11 @@ describe('DicebearAvatarService', () => {
     expect(() =>
       service.renderSvg({ style: 'devimg-geo', seed: 'x', size: 64 }),
     ).toThrow('Unknown partner style');
+  });
+
+  it.each(Object.keys(DICEBEAR_STYLE_FILES))('should render partner style %s', (styleId) => {
+    const svg = service.renderSvg({ style: styleId, seed: 'Luna', size: 64 });
+    expect(svg).toContain('<svg');
+    expect(svg).toContain('width="64"');
   });
 });

@@ -57,7 +57,7 @@ export class PlaceholderService {
     return [
       `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`,
       `<rect width="100%" height="100%" fill="#${bg}"/>`,
-      `<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"`,
+      `<text x="50%" y="50%" text-anchor="middle" dy="0.35em"`,
       ` fill="#${fg}" font-family="system-ui,sans-serif" font-size="${fontSize}">${safeText}</text>`,
       `</svg>`,
     ].join('');

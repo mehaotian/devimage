@@ -1,4 +1,5 @@
 import { escapeSvgText } from '../../common/utils';
+import { extractInitialChar } from '../../common/text';
 import { seedToInt } from '../../common/seed';
 import { DEVIMG_PATTERN_IDS } from '../devimg-patterns/catalog';
 import { buildPatternContext, renderDevimgPattern } from '../devimg-patterns/index';
@@ -8,21 +9,6 @@ import {
   type NativeRendererInput,
   wrapSvg,
 } from './helpers';
-
-/**
- * 提取首字（中文首字 / 英文首字母）
- */
-function extractInitialChar(name: string): string {
-  const trimmed = name.trim();
-  if (!trimmed) {
-    return '?';
-  }
-  const first = [...trimmed][0] ?? '?';
-  if (/[\u4e00-\u9fff]/.test(first)) {
-    return first;
-  }
-  return first.toUpperCase();
-}
 
 /**
  * 由字符 Unicode 推导笔画档（近似）与 pattern 索引

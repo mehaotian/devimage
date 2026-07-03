@@ -12,7 +12,7 @@ const ALL_STYLES: readonly AvatarStyleMeta[] = [
 const STYLE_MAP = new Map(ALL_STYLES.map((item) => [item.id, item]));
 
 /** DiceBear style id → JSON 定义路径 */
-const DICEBEAR_STYLE_FILES: Record<string, string> = {
+export const DICEBEAR_STYLE_FILES: Record<string, string> = {
   rings: 'rings',
   identicon: 'identicon',
   shapes: 'shapes',

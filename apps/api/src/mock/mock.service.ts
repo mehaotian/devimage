@@ -7,6 +7,14 @@ import { faker } from '@faker-js/faker/locale/zh_CN';
 @Injectable()
 export class MockService {
   /**
+   * 对外公开的基础 URL（本地 / CDN）
+   */
+  getPublicBaseUrl(): string {
+    const fromEnv = process.env.DEVIMAGE_PUBLIC_URL ?? process.env.COS_CDN_DOMAIN;
+    const base = (fromEnv ?? 'http://localhost:3000').replace(/\/$/, '');
+    return base;
+  }
+  /**
    * 生成用户列表
    */
   listUsers(count = 10): Array<Record<string, unknown>> {
@@ -43,7 +51,7 @@ export class MockService {
       id: i + 1,
       name: faker.commerce.productName(),
       price: Number(faker.commerce.price()),
-      image: `https://cdn.devimage.cn/200/200?text=${encodeURIComponent('商品')}`,
+      image: `${this.getPublicBaseUrl()}/200/200?text=${encodeURIComponent('商品')}`,
     }));
   }
 
@@ -56,7 +64,7 @@ export class MockService {
       id,
       name: faker.person.fullName(),
       email: faker.internet.email(),
-      avatar: `https://cdn.devimage.cn/avatar/devimg/${encodeURIComponent(faker.person.firstName())}/128`,
+      avatar: `${this.getPublicBaseUrl()}/avatar/devimg/${encodeURIComponent(faker.person.firstName())}/128`,
       phone: faker.phone.number(),
       address: faker.location.city(),
     };

@@ -1,18 +1,21 @@
 import sharp from 'sharp';
 import { AvatarRasterService } from './avatar-raster.service';
 import { AvatarStyleService } from './avatar-style.service';
+import { RasterRateLimitService } from '../common/raster-rate-limit.service';
 
 describe('AvatarRasterService', () => {
   let service: AvatarRasterService;
+  let rateLimit: RasterRateLimitService;
 
   beforeEach(() => {
+    rateLimit = new RasterRateLimitService();
     const avatarStyleService = {
       renderSvg: jest.fn().mockReturnValue(
         '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" fill="#6366f1"/></svg>',
       ),
     } as unknown as AvatarStyleService;
 
-    service = new AvatarRasterService(avatarStyleService);
+    service = new AvatarRasterService(avatarStyleService, rateLimit);
   });
 
   it('should render png buffer with png signature', async () => {
@@ -35,10 +38,16 @@ describe('AvatarRasterService', () => {
   });
 
   it('should produce deterministic png for same options', async () => {
-    const options = { style: 'devimg', seed: 'Felix', size: 128 };
+    const options = { style: 'devimg', seed: 'Felix', size: 128, raster: true };
     const a = await service.renderRaster(options, 'png');
     const b = await service.renderRaster(options, 'png');
     expect(a.equals(b)).toBe(true);
+  });
+
+  it('should reject raster size above max', async () => {
+    await expect(
+      service.renderRaster({ style: 'devimg', seed: 'Felix', size: 2048, raster: true }, 'png'),
+    ).rejects.toThrow('raster max');
   });
 
   it('should keep initial text near vertical center when rasterized', async () => {
@@ -53,7 +62,7 @@ describe('AvatarRasterService', () => {
         ].join(''),
       ),
     } as unknown as AvatarStyleService;
-    const rasterService = new AvatarRasterService(avatarStyleService);
+    const rasterService = new AvatarRasterService(avatarStyleService, rateLimit);
     const png = await rasterService.renderRaster(
       { style: 'devimg', seed: 'Aneka', size: 128 },
       'png',

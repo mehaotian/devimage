@@ -23,6 +23,8 @@ export interface StyledAvatarRenderOptions {
   bg?: string;
   fg?: string;
   pattern?: string;
+  /** 栅格化请求（应用更严格的尺寸上限） */
+  raster?: boolean;
 }
 
 /**

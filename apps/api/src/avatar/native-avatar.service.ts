@@ -5,7 +5,7 @@ import {
   parseDimension,
   parseHexColor,
 } from '../common/utils';
-import { seedToInt } from '../common/seed';
+import { extractInitialChar } from '../common/text';
 import {
   buildGradientColors,
   buildRainbowMeshBlobs,
@@ -293,27 +293,12 @@ export class NativeAvatarService {
    * 使用 dy 而非 dominant-baseline：librsvg（sharp 栅格化）不支持 central，会导致 PNG/WebP 文字上移
    */
   private buildInitialTextLayer(seed: string, fg?: string): string {
-    const initial = escapeSvgText(this.extractInitial(seed), 2);
+    const initial = escapeSvgText(extractInitialChar(seed), 2);
     const foreground = `#${parseHexColor(fg, 'ffffff')}`;
 
     return [
       `<text x="50" y="50" text-anchor="middle" dy="0.35em"`,
       ` fill="${foreground}" font-family="system-ui,sans-serif" font-size="42" font-weight="600">${initial}</text>`,
     ].join('');
-  }
-
-  /**
-   * 提取显示字符（中文首字 / 英文首字母）
-   */
-  private extractInitial(name: string): string {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      return '?';
-    }
-    const first = [...trimmed][0] ?? '?';
-    if (/[\u4e00-\u9fff]/.test(first)) {
-      return first;
-    }
-    return first.toUpperCase();
   }
 }

@@ -51,6 +51,7 @@ cp apps/api/.env.example apps/api/.env
 | `COS_BUCKET` | 如 `devimage-1250000000` |
 | `COS_PHOTO_PREFIX` | 照片缓存前缀，默认 `photos/` |
 | `COS_CDN_DOMAIN` | COS 绑定的 CDN 域名（可选） |
+| `DEVIMAGE_PUBLIC_URL` | 对外 API/CDN 根 URL（Mock JSON 内链） |
 
 ---
 
@@ -65,6 +66,19 @@ pm2 save && pm2 startup
 ---
 
 ## Nginx（腾讯云轻量服务器）
+
+生产建议使用仓库内参考配置 [`deploy/nginx/devimage.conf`](../../deploy/nginx/devimage.conf)，含：
+
+- **栅格限流**：`.webp` / `.png` 路由 **60 req/min/IP**（与 NestJS 双层防护）
+- **通用限流**：其余 API **1000 req/min/IP**
+- **`X-Real-IP`**：传递给 NestJS，供进程内栅格限流识别客户端
+
+```bash
+sudo cp deploy/nginx/devimage.conf /etc/nginx/conf.d/devimage.conf
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+精简示例（不含限流）：
 
 ```nginx
 upstream devimage_api {
@@ -83,14 +97,6 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
-}
-
-server {
-    listen 443 ssl http2;
-    server_name devimage.cn;
-
-    root /var/www/devimage/apps/docs/.vitepress/dist;
-    try_files $uri $uri/ /index.html;
 }
 ```
 

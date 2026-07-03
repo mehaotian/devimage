@@ -4,11 +4,15 @@ import {
   Header,
   Param,
   Query,
+  Req,
   BadRequestException,
   NotFoundException,
   StreamableFile,
+  HttpException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
+import type { FastifyRequest } from 'fastify';
 import {
   AvatarStyleService,
   type StyledAvatarRenderOptions,
@@ -17,16 +21,16 @@ import {
   AvatarRasterService,
   type AvatarRasterFormat,
 } from './avatar-raster.service';
+import {
+  pickStyledAvatarQuery,
+  pickStyledAvatarRasterQuery,
+  type StyledAvatarQuery,
+} from './styled-avatar-query';
+import { decodeRouteSeed } from '../common/text';
+import { resolveClientIp } from '../common/client-ip';
 
-interface StyledAvatarQuery {
-  variant?: string;
-  text?: string;
-  shape?: string;
-  bg?: string;
-  fg?: string;
-  pattern?: string;
-  format?: string;
-}
+/** 栅格化路由限流：每 IP 每分钟 60 次 */
+const RASTER_THROTTLE = { default: { limit: 60, ttl: 60_000 } };
 
 @ApiTags('avatar')
 @Controller('avatar')
@@ -40,6 +44,7 @@ export class AvatarController {
    * 列出可用头像风格（native + partner）
    */
   @Get('styles')
+  @SkipThrottle()
   @Header('Cache-Control', 'public, max-age=3600')
   @ApiOperation({ summary: '列出可用头像风格' })
   listStyles() {
@@ -58,6 +63,7 @@ export class AvatarController {
    * 列出 devimg 纹理 pattern 目录
    */
   @Get('patterns')
+  @SkipThrottle()
   @Header('Cache-Control', 'public, max-age=60, must-revalidate')
   @ApiOperation({ summary: '列出 devimg 纹理 pattern 目录' })
   listPatterns() {
@@ -68,26 +74,24 @@ export class AvatarController {
    * 多风格 seed 头像 WebP（栅格化，兼容小程序等场景）
    */
   @Get(':style/:seed/:size.webp')
+  @Throttle(RASTER_THROTTLE)
   @Header('Content-Type', 'image/webp')
   @Header('Cache-Control', 'public, max-age=31536000, immutable')
   @ApiOperation({ summary: '按 style + seed 生成 WebP 头像' })
   async getStyledAvatarWebp(
+    @Req() req: FastifyRequest,
     @Param('style') style: string,
     @Param('seed') seed: string,
     @Param('size') size: string,
-    @Query('variant') variant?: string,
-    @Query('text') text?: string,
-    @Query('shape') shape?: string,
-    @Query('bg') bg?: string,
-    @Query('fg') fg?: string,
-    @Query('pattern') pattern?: string,
+    @Query() query: Omit<StyledAvatarQuery, 'format'>,
   ): Promise<StreamableFile> {
     return this.renderRasterAvatar(
+      req,
       style,
       seed,
       size,
       'webp',
-      { variant, text, shape, bg, fg, pattern },
+      pickStyledAvatarRasterQuery(query),
     );
   }
 
@@ -95,26 +99,24 @@ export class AvatarController {
    * 多风格 seed 头像 PNG（栅格化，最大兼容性）
    */
   @Get(':style/:seed/:size.png')
+  @Throttle(RASTER_THROTTLE)
   @Header('Content-Type', 'image/png')
   @Header('Cache-Control', 'public, max-age=31536000, immutable')
   @ApiOperation({ summary: '按 style + seed 生成 PNG 头像' })
   async getStyledAvatarPng(
+    @Req() req: FastifyRequest,
     @Param('style') style: string,
     @Param('seed') seed: string,
     @Param('size') size: string,
-    @Query('variant') variant?: string,
-    @Query('text') text?: string,
-    @Query('shape') shape?: string,
-    @Query('bg') bg?: string,
-    @Query('fg') fg?: string,
-    @Query('pattern') pattern?: string,
+    @Query() query: Omit<StyledAvatarQuery, 'format'>,
   ): Promise<StreamableFile> {
     return this.renderRasterAvatar(
+      req,
       style,
       seed,
       size,
       'png',
-      { variant, text, shape, bg, fg, pattern },
+      pickStyledAvatarRasterQuery(query),
     );
   }
 
@@ -125,39 +127,26 @@ export class AvatarController {
   @Header('Cache-Control', 'public, max-age=31536000, immutable')
   @ApiOperation({ summary: '按 style + seed 生成 SVG 头像（可选 format 栅格化）' })
   async getStyledAvatar(
+    @Req() req: FastifyRequest,
     @Param('style') style: string,
     @Param('seed') seed: string,
     @Param('size') size: string,
-    @Query('variant') variant?: string,
-    @Query('text') text?: string,
-    @Query('shape') shape?: string,
-    @Query('bg') bg?: string,
-    @Query('fg') fg?: string,
-    @Query('pattern') pattern?: string,
-    @Query('format') format?: string,
+    @Query() query: StyledAvatarQuery,
   ): Promise<StreamableFile> {
-    const query: StyledAvatarQuery = {
-      variant,
-      text,
-      shape,
-      bg,
-      fg,
-      pattern,
-      format,
-    };
-    const rasterFormat = this.parseRasterFormat(format);
+    const picked = pickStyledAvatarQuery(query);
+    const rasterFormat = this.parseRasterFormat(picked.format);
 
     if (rasterFormat) {
-      return this.renderRasterAvatar(style, seed, size, rasterFormat, query);
+      return this.renderRasterAvatar(req, style, seed, size, rasterFormat, picked);
     }
 
-    if (format !== undefined && format !== '') {
+    if (picked.format !== undefined && picked.format !== '') {
       throw new BadRequestException(
-        `Unsupported format: ${format}. Use svg (default), webp, or png.`,
+        `Unsupported format: ${picked.format}. Use svg (default), webp, or png.`,
       );
     }
 
-    const svg = this.renderSvgAvatar(style, seed, size, query);
+    const svg = this.renderSvgAvatar(style, seed, size, picked);
     return new StreamableFile(Buffer.from(svg, 'utf-8'), {
       type: 'image/svg+xml; charset=utf-8',
       disposition: 'inline',
@@ -191,14 +180,24 @@ export class AvatarController {
     seed: string,
     size: string,
     query: StyledAvatarQuery,
+    raster = false,
   ): StyledAvatarRenderOptions {
     if (!this.avatarStyleService.isKnownStyle(style)) {
       throw new NotFoundException(`Unknown avatar style: ${style}`);
     }
 
+    let decodedSeed: string;
+    try {
+      decodedSeed = decodeRouteSeed(seed);
+    } catch (err) {
+      throw new BadRequestException(
+        err instanceof Error ? err.message : 'Invalid seed',
+      );
+    }
+
     return {
       style,
-      seed: decodeURIComponent(seed),
+      seed: decodedSeed,
       size: Number.parseInt(size, 10),
       variant: query.variant,
       text: query.text,
@@ -206,6 +205,7 @@ export class AvatarController {
       bg: query.bg,
       fg: query.fg,
       pattern: query.pattern,
+      raster,
     };
   }
 
@@ -223,6 +223,9 @@ export class AvatarController {
         this.buildRenderOptions(style, seed, size, query),
       );
     } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      }
       throw new BadRequestException(
         err instanceof Error ? err.message : 'Invalid parameters',
       );
@@ -233,6 +236,7 @@ export class AvatarController {
    * 渲染栅格化头像（PNG / WebP）
    */
   private async renderRasterAvatar(
+    req: FastifyRequest,
     style: string,
     seed: string,
     size: string,
@@ -241,15 +245,16 @@ export class AvatarController {
   ): Promise<StreamableFile> {
     try {
       const buffer = await this.avatarRasterService.renderRaster(
-        this.buildRenderOptions(style, seed, size, query),
+        this.buildRenderOptions(style, seed, size, query, true),
         format,
+        resolveClientIp(req),
       );
       return new StreamableFile(buffer, {
         type: format === 'png' ? 'image/png' : 'image/webp',
         disposition: 'inline',
       });
     } catch (err) {
-      if (err instanceof NotFoundException) {
+      if (err instanceof NotFoundException || err instanceof HttpException) {
         throw err;
       }
       throw new BadRequestException(

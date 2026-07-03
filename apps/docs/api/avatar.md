@@ -290,6 +290,8 @@ curl "http://localhost:3000/avatar/devimg/张三/128.png" -o avatar.png
 规则：
 
 - `format` 仅支持 `svg`（默认）、`webp`、`png`；非法值返回 `400`
+- **栅格化**（`.webp` / `.png` / `?format=webp|png`）尺寸上限 **1024**；更大尺寸请用 SVG（上限 4000）
+- 栅格化路由源站限流 **60 次/分钟/IP**（CDN 命中后无栅格压力）
 - 栅格 URL 与 SVG 共用相同 query（`variant`、`text`、`bg` 等）
 - 同一完整 URL 输出始终相同（`immutable` 缓存）；CDN 命中后源站无栅格化压力
 
