@@ -19,6 +19,29 @@
   --dh-accent-glow: rgba(99, 102, 241, 0.2);
 }
 
+/**
+ * API Playground 左侧预览吸顶：右侧表单滚动时预览保持可见，
+ * 滚出整块 Playground 区域后随页面离开视口。
+ */
+:root {
+  --vp-playground-sticky-top: calc(var(--vp-nav-height, 64px) + 12px);
+}
+
+.avatar-playground__preview,
+.code-playground__preview,
+.api-playground__preview-col {
+  position: sticky;
+  top: var(--vp-playground-sticky-top);
+  align-self: start;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --vp-playground-sticky-top: 12px;
+  }
+}
+
 /* 首页全宽 */
 .vp-doc._devimg-home {
   padding-top: 0 !important;

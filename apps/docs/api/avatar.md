@@ -1,5 +1,7 @@
 # 头像 API
 
+> **阶段说明**：头像模块已 **告一段落**（59 风格 + Playground + `/avatar/styles`），暂不再新增风格。码形占位（伪 QR / 伪条码）已上线，见 [码形占位 API](/api/qr)。
+
 DevImage 头像统一走 **`GET /avatar/:style/:seed/:size`**，含 **图即风格** 与 **三方接入**（DiceBear、Jdenticon、Minidenticons）。
 
 | 类型 | 路由 | engine |
@@ -124,7 +126,7 @@ Playground 分三个 Tab：**快速试玩**（默认，调参数 + 预览）、*
 <img src="http://localhost:3000/avatar/devimg-radical/张三/128" alt="张三" width="128" height="128" />
 ```
 
-> **伪二维码独立产品**：`devimg-matrix` 为头像试玩；独立占位路由（如 `/qr/:seed/:w/:h`）见仓库规划文档 `docs/伪二维码占位规划.md`。
+> **伪二维码 / 条形码独立产品**：`devimg-matrix` 为头像试玩；独立占位路由 `/qr/*`、`/barcode/*` 见仓库规划 `docs/伪二维码占位规划.md`（开发中）。
 
 ---
 

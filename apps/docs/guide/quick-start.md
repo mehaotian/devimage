@@ -55,6 +55,16 @@ pnpm dev
 
 风格列表与在线试玩见 [头像 API](/api/avatar)。
 
+## 码形占位（伪 QR · 伪条码）
+
+```html
+<img src="http://localhost:3000/qr/demo/128" alt="pseudo qr" width="128" height="128" />
+<img src="http://localhost:3000/qr/demo/320/80?variant=dots" alt="banner qr" width="320" height="80" />
+<img src="http://localhost:3000/barcode/sku-mock/320/80" alt="pseudo barcode" width="320" height="80" />
+```
+
+详见 [码形占位 API](/api/qr)。
+
 ## Mock 数据
 
 ```javascript

@@ -92,7 +92,26 @@ GET https://cdn.devimage.cn/skeleton/375/812
 
 ---
 
-## 5. Mock 数据 API
+## 5. 码形占位（伪 QR · 伪条码 · 差异化）
+
+| 场景 | 国内现状 | DevImage 路由 | 优先级 |
+| ------ | ---------- | --------------- | -------- |
+| 支付 / 登录 mock | 静态 PNG 或组件库 | `GET /qr/:seed/:size` | P1 |
+| 列表骨架「码」形 | 无统一服务 | `GET /qr/demo/128` | P1 |
+| 物流 / 收银 mock | 假 EAN 条纹图 | `GET /barcode/:seed/:w/:h` | P1 |
+| 样式 | 圆角模块、配色 | `?fg=&bg=&accent=&radius=` | P2 |
+
+```base
+GET https://cdn.devimage.cn/qr/checkout/256
+GET https://cdn.devimage.cn/qr/demo/128.webp
+GET https://cdn.devimage.cn/barcode/sku-mock/320/80?variant=ean13
+```
+
+> **边界**：以上均为 **不可扫描** 占位；真实 QR API（URL 传 `data`）不在 DevImage 占位范围，见 [码形占位规划 §8](./伪二维码占位规划.md)。
+
+---
+
+## 6. Mock 数据 API
 
 | 竞品 | 模式 | 示例 | DevImage 路由 | 优先级 |
 | ------ | ------ | ------ | --------------- | -------- |
@@ -112,7 +131,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 
 ---
 
-## 6. 响应头与缓存策略（对标最佳实践）
+## 7. 响应头与缓存策略（对标最佳实践）
 
 | 类型 | Cache-Control | Content-Type |
 | ------ | --------------- | -------------- |
@@ -124,7 +143,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 
 ---
 
-## 7. 参数命名统一规范
+## 8. 参数命名统一规范
 
 | 语义 | DevImage 主参数 | 兼容别名 |
 | ------ | ----------------- | ---------- |
@@ -138,7 +157,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 
 ---
 
-## 8. 迁移对照速查
+## 9. 迁移对照速查
 
 | 原 URL | DevImage 替换 |
 | -------- | --------------- |
@@ -150,7 +169,7 @@ GET https://cdn.devimage.cn/skeleton/375/812
 
 ---
 
-## 9. 版本与 OpenAPI
+## 10. 版本与 OpenAPI
 
 - API 版本前缀（管理类）：`/v1/...`
 - 图片 CDN 路径：**不加版本号**（URL 稳定优先，类似 picsum）

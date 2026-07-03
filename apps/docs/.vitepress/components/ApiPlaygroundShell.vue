@@ -32,20 +32,25 @@ async function copyText(text: string): Promise<void> {
 
 <template>
   <div class="api-playground">
-    <div class="api-playground__panel api-playground__preview">
-      <button
-        type="button"
-        class="api-playground__image-btn"
-        title="点击复制 URL"
-        @click="emit('copyPreview')"
-      >
-        <slot name="preview" />
-        <span v-if="copied" class="api-playground__copied">已复制 URL</span>
-      </button>
-      <slot name="controls" />
+    <div class="api-playground__main">
+      <div class="api-playground__panel api-playground__preview-col">
+        <button
+          type="button"
+          class="api-playground__image-btn"
+          title="点击复制 URL"
+          @click="emit('copyPreview')"
+        >
+          <slot name="preview" />
+          <span v-if="copied" class="api-playground__copied">已复制 URL</span>
+        </button>
+      </div>
+
+      <div class="api-playground__panel api-playground__controls-col">
+        <slot name="controls" />
+      </div>
     </div>
 
-    <div class="api-playground__panel api-playground__refs">
+    <div class="api-playground__refs">
       <div class="api-playground__ref-block">
         <div class="api-playground__ref-head">
           <span>HTTP API</span>
@@ -58,7 +63,7 @@ async function copyText(text: string): Promise<void> {
 
       <div class="api-playground__ref-block">
         <div class="api-playground__ref-head">
-          <span>HTML</span>
+          <span>HTML / 代码</span>
           <button type="button" class="api-playground__copy" @click="copyText(htmlSnippet)">
             {{ copyLabel }}
           </button>
@@ -74,10 +79,18 @@ async function copyText(text: string): Promise<void> {
 
 <style scoped>
 .api-playground {
-  display: grid;
-  grid-template-columns: minmax(260px, 320px) 1fr;
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   margin: 24px 0;
+  min-width: 0;
+}
+
+.api-playground__main {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 20px;
+  align-items: start;
 }
 
 .api-playground__panel {
@@ -85,12 +98,19 @@ async function copyText(text: string): Promise<void> {
   border-radius: 14px;
   padding: 18px;
   background: var(--vp-c-bg-soft);
+  min-width: 0;
 }
 
-.api-playground__preview {
+.api-playground__preview-col {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  align-items: center;
+}
+
+.api-playground__controls-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .api-playground__image-btn {
@@ -103,8 +123,32 @@ async function copyText(text: string): Promise<void> {
   padding: 12px;
   border: 1px dashed var(--vp-c-divider);
   border-radius: 12px;
-  background: var(--vp-c-bg);
+  background:
+    linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+    linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
   cursor: pointer;
+}
+
+.dark .api-playground__image-btn {
+  background:
+    linear-gradient(45deg, #334155 25%, transparent 25%),
+    linear-gradient(-45deg, #334155 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #334155 75%),
+    linear-gradient(-45deg, transparent 75%, #334155 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
 }
 
 .api-playground__copied {
@@ -123,6 +167,10 @@ async function copyText(text: string): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 14px;
+  background: var(--vp-c-bg-soft);
 }
 
 .api-playground__ref-block {
@@ -169,7 +217,7 @@ async function copyText(text: string): Promise<void> {
 }
 
 @media (max-width: 768px) {
-  .api-playground {
+  .api-playground__main {
     grid-template-columns: 1fr;
   }
 }

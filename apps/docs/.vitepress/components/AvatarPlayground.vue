@@ -1038,6 +1038,7 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: minmax(220px, 280px) 1fr;
   gap: 20px;
+  align-items: start;
 }
 
 .avatar-playground__panel {

@@ -72,7 +72,8 @@
 | Mock 文章/商品 | `/mock/posts` `/mock/products` | 扩展资源 |
 | picsum 兼容层 | `/photo/:w/:h` | COS 缓存精选图包（非实时 Pexels） |
 | 用量统计（内存） | 响应头 `X-DevImage-Requests` | 为 Freemium 预留 |
-| 伪二维码占位 | `GET /qr/:seed/:size` | 类 QR 视觉、不可扫描；详见 [伪二维码占位规划](./伪二维码占位规划.md)；头像 Lab 先验 `devimg-matrix` |
+| 码形占位 | `GET /qr/:seed/:size`、`GET /barcode/:seed/:w/:h` | 伪 QR / 伪条码，不可扫描；详见 [码形占位规划](./伪二维码占位规划.md) |
+| ~~头像多风格扩展~~ | — | **已告一段落**（59 风格 + Playground）；暂不再新增 |
 
 ### Phase 3 — P2  polish（Day 12–14）
 
@@ -89,6 +90,7 @@
 - Pexels 实时搜索
 - 用户注册 / 付费系统
 - 图标 / Lottie / 音效
+- **真实可扫描 QR / 条形码**（URL 传 payload 动态生成；见 [码形占位规划 §8](./伪二维码占位规划.md)）
 - 国内 ICP 备案（腾讯云 CDN 必需，建议 D7 启动）
 - 分布式多节点
 
@@ -101,8 +103,8 @@
 ```text
 apps/api/src/
 ├── placeholder/     # /:w/:h, /seed/
-├── avatar/          # /avatar/
-├── qr/              # /qr/ (Phase 2.5，见 docs/伪二维码占位规划.md)
+├── avatar/          # /avatar/ ✅ 告一段落，暂不再扩展
+├── code/            # /qr · /barcode · /code/styles（见 docs/伪二维码占位规划.md）
 ├── scene/           # /scene/, /404
 ├── mock/            # /mock/*
 ├── photo/           # /photo/ (Phase 2)

@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { AvatarModule } from './avatar/avatar.module';
+import { CodeModule } from './code/code.module';
 import { CommonModule } from './common/common.module';
 import { HealthModule } from './health/health.module';
-import { PlaceholderModule } from './placeholder/placeholder.module';
-import { AvatarModule } from './avatar/avatar.module';
 import { MockModule } from './mock/mock.module';
+import { PlaceholderModule } from './placeholder/placeholder.module';
 import { SceneModule } from './scene/scene.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { SceneModule } from './scene/scene.module';
     CommonModule,
     HealthModule,
     AvatarModule,
+    CodeModule,
     MockModule,
     SceneModule,
     PlaceholderModule,

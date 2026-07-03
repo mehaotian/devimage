@@ -21,8 +21,14 @@ describe('HealthService', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('should pass pseudo-code golden check', () => {
+    const result = service.checkPseudoCode();
+    expect(result.ok).toBe(true);
+  });
+
   it('should run all checks', async () => {
     const checks = await service.runChecks();
+    expect(checks).toHaveLength(4);
     expect(checks.every((item) => item.ok)).toBe(true);
   });
 });

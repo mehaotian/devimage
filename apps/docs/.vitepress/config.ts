@@ -39,6 +39,7 @@ export default defineConfig({
           items: [
             { text: '占位图', link: '/api/placeholder' },
             { text: '头像', link: '/api/avatar' },
+            { text: '码形占位', link: '/api/qr' },
             { text: '场景图', link: '/api/scene' },
             { text: 'Mock 数据', link: '/api/mock' },
           ],

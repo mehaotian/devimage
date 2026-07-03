@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import sharp from 'sharp';
 import { Avatar, Style } from '@dicebear/core';
 import { parseRasterDimension } from '../common/utils';
+import { verifyPseudoCodeGenerators } from '../common/pseudo-code-verify';
 import { loadDicebearStyleDefinition } from '../avatar/styles/registry';
 
 export interface DependencyCheck {
@@ -81,6 +82,17 @@ export class HealthService {
   }
 
   /**
+   * 检测伪码生成器与 golden 哈希一致
+   */
+  checkPseudoCode(): DependencyCheck {
+    const result = verifyPseudoCodeGenerators();
+    if (!result.ok) {
+      return { name: 'pseudo-code', ok: false, detail: result.detail };
+    }
+    return { name: 'pseudo-code', ok: true };
+  }
+
+  /**
    * 汇总全部依赖探针
    */
   async runChecks(): Promise<DependencyCheck[]> {
@@ -88,6 +100,7 @@ export class HealthService {
       this.checkSharp(),
       Promise.resolve(this.checkDicebear()),
       Promise.resolve(this.checkRasterLimits()),
+      Promise.resolve(this.checkPseudoCode()),
     ]);
   }
 }
