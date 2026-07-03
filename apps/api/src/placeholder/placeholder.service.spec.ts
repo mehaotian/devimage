@@ -35,4 +35,32 @@ describe('PlaceholderService', () => {
     const plain = service.resolveOptions('200', '200', {}, '张三');
     expect(encoded.bg).toBe(plain.bg);
   });
+
+  it('should render border and cross layers', () => {
+    const svg = service.renderSvg({
+      width: 200,
+      height: 100,
+      text: 'Demo',
+      bg: 'cccccc',
+      fg: '666666',
+      borderWidth: 2,
+      borderColor: '000000',
+      cross: true,
+    });
+    expect(svg).toContain('stroke-width="2"');
+    expect(svg).toContain('<line');
+  });
+
+  it('should render pattern style background', () => {
+    const svg = service.renderSvg({
+      width: 200,
+      height: 100,
+      text: 'Demo',
+      bg: 'cccccc',
+      fg: '666666',
+      seed: 'demo',
+      style: 'pattern',
+    });
+    expect(svg).toContain('transform="scale(2, 1)"');
+  });
 });

@@ -23,9 +23,14 @@
 | width | path | 是 | 10–4000 |
 | height | path | 是 | 10–4000 |
 | text | query | 否 | 显示文字，默认 `宽×高` |
-| bg | query | 否 | 背景色 hex，不含 `#` |
-| fg | query | 否 | 文字色 hex，不含 `#` |
+| bg | query | 否 | 背景色 hex，不含 `#`（别名 `bc`） |
+| fg | query | 否 | 文字色 hex，不含 `#`（别名 `tc`） |
 | format | query | 否 | `svg`（默认）\| `webp` \| `png` |
+| border | query | 否 | 边框宽度 0–20；`1`/`true` 为 2px |
+| borderColor | query | 否 | 边框色 hex |
+| cross | query | 否 | 对角线标记 `0`\|`1` |
+| style | query | 否 | `solid`（默认）\| `pattern` 纹理背景 |
+| pattern | query | 否 | `style=pattern` 时指定纹理 id |
 
 ### 示例
 
@@ -34,6 +39,22 @@
 <img src="http://localhost:3000/400/300?text=Hero&bg=6366f1&fg=ffffff" />
 <img src="http://localhost:3000/800/600.webp" />
 <img src="http://localhost:3000/800/600?format=webp" />
+<img src="http://localhost:3000/800/600?border=2&cross=1" />
+<img src="http://localhost:3000/800/600?style=pattern" />
+```
+
+### placehold 兼容别名
+
+| 形式 | 示例 |
+| ------ | ------ |
+| `宽x高` | `/800x600` |
+| 路径配色 | `/800/600/eee/fff` 或 `/800x600/eee/fff` |
+| 显式 SVG | `/800/600.svg` |
+| 栅格后缀 | `/800x600.webp` |
+
+```html
+<img src="http://localhost:3000/800x600?text=Banner" />
+<img src="http://localhost:3000/800/600/409eff/ffffff?text=Banner" />
 ```
 
 ### 响应

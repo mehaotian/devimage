@@ -13,8 +13,10 @@ const resources = [
 
 const resource = ref<(typeof resources)[number]['id']>('users');
 const count = ref(3);
-const userId = ref(1);
-const useSingle = ref(false);
+const page = ref(1);
+const limit = ref(5);
+const itemId = ref(1);
+const mode = ref<'list' | 'page' | 'single'>('list');
 const jsonPreview = ref('');
 const loading = ref(false);
 const error = ref('');
@@ -23,8 +25,11 @@ const copied = ref(false);
 let timer: ReturnType<typeof setTimeout> | null = null;
 
 const apiUrl = computed(() => {
-  if (useSingle.value && resource.value === 'users') {
-    return `${API_BASE}/mock/users/${userId.value}`;
+  if (mode.value === 'single') {
+    return `${API_BASE}/mock/${resource.value}/${itemId.value}`;
+  }
+  if (mode.value === 'page') {
+    return `${API_BASE}/mock/${resource.value}?_page=${page.value}&_limit=${limit.value}`;
   }
   return `${API_BASE}/mock/${resource.value}?count=${count.value}`;
 });
@@ -52,7 +57,7 @@ async function fetchPreview(): Promise<void> {
   }
 }
 
-watch([resource, count, userId, useSingle], () => {
+watch([resource, count, page, limit, itemId, mode], () => {
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => { void fetchPreview(); }, 400);
 }, { immediate: true });
@@ -85,13 +90,24 @@ onUnmounted(() => { if (timer) clearTimeout(timer); });
           <option v-for="item in resources" :key="item.id" :value="item.id">{{ item.label }}</option>
         </select>
       </label>
-      <label v-if="resource === 'users'" class="pg-check">
-        <input v-model="useSingle" type="checkbox" />
-        单条 GET /mock/users/:id
+      <label class="pg-field">
+        <span>模式</span>
+        <select v-model="mode" class="pg-input">
+          <option value="list">列表 count</option>
+          <option value="page">分页 _page/_limit</option>
+          <option value="single">单条 /:id</option>
+        </select>
       </label>
-      <label v-if="useSingle && resource === 'users'" class="pg-field">
-        <span>用户 id（1–100）</span>
-        <input v-model.number="userId" type="number" min="1" max="100" class="pg-input" />
+      <label v-if="mode === 'single'" class="pg-field">
+        <span>id（1–100）</span>
+        <input v-model.number="itemId" type="number" min="1" max="100" class="pg-input" />
+      </label>
+      <label v-else-if="mode === 'page'" class="pg-field">
+        <span>_page / _limit</span>
+        <div class="pg-row">
+          <input v-model.number="page" type="number" min="1" max="1000" class="pg-input" />
+          <input v-model.number="limit" type="number" min="1" max="100" class="pg-input" />
+        </div>
       </label>
       <label v-else class="pg-field">
         <span>count（最大 100）</span>
@@ -109,11 +125,11 @@ onUnmounted(() => { if (timer) clearTimeout(timer); });
 
 <style scoped>
 .pg-field { display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--vp-c-text-2); }
+.pg-row { display:flex; gap:8px; }
 .pg-input {
   padding:8px 10px; border:1px solid var(--vp-c-divider);
   border-radius:8px; background:var(--vp-c-bg); color:var(--vp-c-text-1); font-size:13px;
 }
-.pg-check { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--vp-c-text-2); }
 .mock-json {
   width:100%; max-height:280px; overflow:auto; margin:0; padding:12px;
   font-size:11px; line-height:1.5; text-align:left;

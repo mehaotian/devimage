@@ -34,6 +34,25 @@ describe('MockController', () => {
     const user = controller.getUser('5');
     expect(user.id).toBe(5);
   });
+
+  it('should paginate users', () => {
+    const page1 = controller.listUsers(undefined, '1', '5');
+    const page2 = controller.listUsers(undefined, '2', '5');
+    expect(page1).toHaveLength(5);
+    expect(page2).toHaveLength(5);
+    expect(page1[0]?.id).toBe(1);
+    expect(page2[0]?.id).toBe(6);
+  });
+
+  it('should return post for valid id', () => {
+    const post = controller.getPost('3');
+    expect(post.id).toBe(3);
+  });
+
+  it('should return product for valid id', () => {
+    const product = controller.getProduct('7');
+    expect(product.id).toBe(7);
+  });
 });
 
 describe('MockService', () => {

@@ -6,6 +6,7 @@ import PlaceholderPlayground from '../components/PlaceholderPlayground.vue';
 import ScenePlayground from '../components/ScenePlayground.vue';
 import MockPlayground from '../components/MockPlayground.vue';
 import CodePlayground from '../components/CodePlayground.vue';
+import SkeletonPlayground from '../components/SkeletonPlayground.vue';
 import ApiPlaygroundShell from '../components/ApiPlaygroundShell.vue';
 import './custom.css';
 
@@ -19,6 +20,7 @@ export default {
     app.component('ScenePlayground', ScenePlayground);
     app.component('MockPlayground', MockPlayground);
     app.component('CodePlayground', CodePlayground);
+    app.component('SkeletonPlayground', SkeletonPlayground);
     app.component('ApiPlaygroundShell', ApiPlaygroundShell);
   },
 };

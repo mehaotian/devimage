@@ -10,10 +10,13 @@ DevImage 是国内开发者的**零配置占位 CDN**，URL 可直接用于 `<im
 
 | 阶段 | 目标 | 核心能力 |
 | ------ | ------ | ---------- |
-| **一期 MVP** | 替代 picsum 慢、可公网使用 | 合成占位、头像、场景、Mock、文档 |
-| **二期** | picsum 真实图 + 差异化 | `/photo`、COS 缓存、WebP、骨架屏 |
+| **MVP（已完成）** | 基础占位 CDN | 合成占位、头像、场景文案、Mock、伪码 |
+| **功能补全一期** | picsum 替代 + 纯程序增强 | `/photo` 73 分类、骨架屏、placehold parity |
+| **功能补全二期** | 设计素材依赖 | scene 插画 Composer（**暂缓**） |
 | **三期** | 产品化 | API Key、Freemium、Mock 完整 REST |
 | **四期** | 平台化 | 图标 / Lottie / 音效 / 团队库 |
+
+> 详细排期见仓库 [`docs/占位与场景差异化规划.md`](https://github.com/devimage/devimage/blob/main/docs/占位与场景差异化规划.md)。
 
 ---
 
@@ -48,16 +51,18 @@ DevImage 是国内开发者的**零配置占位 CDN**，URL 可直接用于 `<im
 | `GET /scene/:variant` | `404` `empty` `network` `search` | 场景 SVG |
 | `GET /404` | — | 快捷 404 |
 
-Query：`w`（默认 800）、`h`（默认 600）
+Query：`w`（默认 800）、`h`（默认 600）、`theme`、`title`、`subtitle`、`accent`、`seed`
 
 ### Mock 数据
 
 | 路由 | Query | 响应 |
 | ------ | ------- | ------ |
-| `GET /mock/users` | `count` | 用户数组 |
+| `GET /mock/users` | `count` 或 `_page`/`_limit` | 用户数组 |
 | `GET /mock/users/:id` | — | 单个用户（id 1–100） |
-| `GET /mock/posts` | `count` | 文章数组 |
-| `GET /mock/products` | `count` | 商品数组 |
+| `GET /mock/posts` | `count` 或 `_page`/`_limit` | 文章数组 |
+| `GET /mock/posts/:id` | — | 单篇文章 |
+| `GET /mock/products` | `count` 或 `_page`/`_limit` | 商品数组 |
+| `GET /mock/products/:id` | — | 单个商品 |
 
 ### 系统
 
@@ -70,18 +75,46 @@ Query：`w`（默认 800）、`h`（默认 600）
 
 ---
 
-## 二期 📋
+## 功能补全一期（当前实施）📋
+
+> **原则**：不依赖设计 / AI 素材。**骨架屏 + 占位先动**。
+> 场景插画 Composer **二期 B**；图库 `/photo` **二期 A**（COS 未上传）。
+
+| 功能 | 路由 | 优先级 |
+| ------ | ------ | -------- |
+| 骨架屏 | `GET /skeleton/:w/:h` | **P0** ⭐ |
+| placehold 别名 | `/800x600`、路径配色、`?border=1` | **P0** ⭐ |
+| 占位 pattern | `?style=pattern` | P0 |
+| scene 文案增强 | `?theme`、`?title`、`?subtitle`、`?seed` | **P1** ✅ |
+| Mock 分页 / 单条 | `?_page`、`/mock/posts/:id` | **P1** ✅ |
+
+---
+
+## 功能补全二期 A（图库 · COS 上传后）📋
 
 | 功能 | 路由 |
 | ------ | ------ |
-| 真实照片（COS） | `GET /photo/:w/:h` |
-| 固定照片 ID | `GET /id/:id/:w/:h` |
-| 照片信息 | `GET /id/:id/info` |
-| 照片列表 | `GET /v2/list` |
-| WebP / PNG | `/:w/:h.webp` |
-| 骨架屏 | `GET /skeleton/:w/:h` |
-| placehold 别名 | `/800x600`、`?border=1` |
-| Mock 分页 | `?_page=1&_limit=10` |
+| 真实照片 73 分类 | `GET /photo/:w/:h?cat=` |
+| 固定照片 / 列表 | `/id/:id/:w/:h`、`/v2/list` |
+| Mock 商品图联动 | products.image → photo URL |
+
+---
+
+## 功能补全二期 B（场景插画 · 暂缓）📋
+
+| 功能 | 说明 |
+| ------ | ------ |
+| Scene Composer + figures/props 部件 | 需设计 / AI 素材验收通过 |
+| `/scene/:variant/:seed` 插画级输出 | 依赖 Composer |
+| `/scene/styles` | 场景目录 JSON |
+
+---
+
+## 已提前完成（原二期部分）✅
+
+- 占位图 WebP / PNG 栅格
+- Mock posts / products
+- 伪 QR / 伪条码（`/qr`、`/barcode`）
 
 ---
 
@@ -108,10 +141,13 @@ Query：`w`（默认 800）、`h`（默认 600）
 | ------ | ------ | ---------- |
 | 合成占位 | ✅ | ✅ |
 | 头像 | ✅ | ✅ |
-| 场景 | ✅ | ✅ |
-| Mock | ✅ | ✅（含 posts/products） |
-| 真实照片 | 二期 | ❌ |
-| WebP | 二期 | ❌ |
+| 场景 | ✅ | ✅（文案 query + seed 调色板） |
+| Mock | ✅ | ✅（分页 + 单条 posts/products） |
+| 骨架屏 | 功能补全一期 | ✅ |
+| 占位 parity/pattern | 功能补全一期 | ✅ |
+| 真实照片 | 功能补全二期 A | ❌ |
+| 占位 WebP/PNG | MVP | ✅ |
+| scene 插画 Composer | 功能补全二期 B | ❌ 暂缓 |
 | API Key | 三期 | ❌ |
 
 ---

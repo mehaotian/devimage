@@ -38,6 +38,7 @@ export default defineConfig({
           text: 'API 参考',
           items: [
             { text: '占位图', link: '/api/placeholder' },
+            { text: '骨架屏', link: '/api/skeleton' },
             { text: '头像', link: '/api/avatar' },
             { text: '码形占位', link: '/api/qr' },
             { text: '场景图', link: '/api/scene' },

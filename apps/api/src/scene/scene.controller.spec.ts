@@ -13,20 +13,27 @@ describe('SceneController', () => {
   });
 
   it('should render valid variant', () => {
-    const svg = controller.getScene('404');
+    const svg = controller.getScene('404', {});
     expect(svg).toContain('404');
   });
 
   it('should reject invalid variant', () => {
-    expect(() => controller.getScene('invalid')).toThrow(BadRequestException);
+    expect(() => controller.getScene('invalid', {})).toThrow(BadRequestException);
   });
 
   it('should reject invalid width query', () => {
-    expect(() => controller.getScene('404', 'bad', '600')).toThrow(BadRequestException);
+    expect(() => controller.getScene('404', { w: 'bad', h: '600' })).toThrow(
+      BadRequestException,
+    );
+  });
+
+  it('should apply theme query', () => {
+    const svg = controller.getScene('empty', { theme: 'dark', title: 'Test' });
+    expect(svg).toContain('Test');
   });
 
   it('should render 404 shortcut', () => {
-    const svg = shortcut.get404();
+    const svg = shortcut.get404({});
     expect(svg).toContain('404');
   });
 });

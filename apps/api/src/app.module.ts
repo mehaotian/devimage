@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { MockModule } from './mock/mock.module';
 import { PlaceholderModule } from './placeholder/placeholder.module';
 import { SceneModule } from './scene/scene.module';
+import { SkeletonModule } from './skeleton/skeleton.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SceneModule } from './scene/scene.module';
     CodeModule,
     MockModule,
     SceneModule,
+    SkeletonModule,
     PlaceholderModule,
   ],
   providers: [

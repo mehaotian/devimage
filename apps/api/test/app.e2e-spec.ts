@@ -41,6 +41,49 @@ describe('DevImage API (e2e)', () => {
     expect(response.body).toContain('<svg');
   });
 
+  it('GET /800x600 should return svg alias', async () => {
+    const response = await app.inject({ method: 'GET', url: '/800x600' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toContain('image/svg+xml');
+    expect(response.body).toContain('width="800"');
+  });
+
+  it('GET /800/600/eee/fff should use path colors', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/800/600/eee/fff?text=Banner',
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('fill="#eeeeee"');
+    expect(response.body).toContain('fill="#ffffff"');
+  });
+
+  it('GET /800/600.svg should return svg', async () => {
+    const response = await app.inject({ method: 'GET', url: '/800/600.svg' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toContain('image/svg+xml');
+  });
+
+  it('GET /800/600?border=2&cross=1 should render border and cross', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/800/600?border=2&cross=1',
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('stroke-width="2"');
+    expect(response.body).toContain('<line');
+  });
+
+  it('GET /skeleton/375/812?type=page should return skeleton svg', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/skeleton/375/812?type=page',
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toContain('image/svg+xml');
+    expect(response.body).toContain('<svg');
+  });
+
   it('GET /800/600.webp should return webp', async () => {
     const response = await app.inject({ method: 'GET', url: '/400/300.webp' });
     expect(response.statusCode).toBe(200);
@@ -97,6 +140,41 @@ describe('DevImage API (e2e)', () => {
     const response = await app.inject({ method: 'GET', url: '/scene/404' });
     expect(response.statusCode).toBe(200);
     expect(response.body).toContain('404');
+  });
+
+  it('GET /scene/empty?theme=dark&title=Hi should apply query', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/scene/empty?theme=dark&title=Hi&seed=demo',
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('Hi');
+    expect(response.body).toContain('fill="#');
+  });
+
+  it('GET /mock/users?_page=2&_limit=5 should paginate', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/mock/users?_page=2&_limit=5',
+    });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { id: number }[];
+    expect(body).toHaveLength(5);
+    expect(body[0]?.id).toBe(6);
+  });
+
+  it('GET /mock/posts/1 should return single post', async () => {
+    const response = await app.inject({ method: 'GET', url: '/mock/posts/1' });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { id: number };
+    expect(body.id).toBe(1);
+  });
+
+  it('GET /mock/products/2 should return single product', async () => {
+    const response = await app.inject({ method: 'GET', url: '/mock/products/2' });
+    expect(response.statusCode).toBe(200);
+    const body = response.json() as { id: number };
+    expect(body.id).toBe(2);
   });
 
   it('GET /scene/404?w=bad should return 400', async () => {
