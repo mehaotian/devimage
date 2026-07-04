@@ -1,6 +1,6 @@
 # 从 picsum 迁移
 
-[picsum.photos](https://picsum.photos) 在国内访问慢。DevImage 提供兼容 URL 与国内节点。
+若你已在用 [picsum.photos](https://picsum.photos)，多数路径可改为 DevImage 的等价 URL，seed 与尺寸规则相近。
 
 ## 对照表
 

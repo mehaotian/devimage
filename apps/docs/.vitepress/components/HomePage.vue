@@ -57,7 +57,7 @@ const highlights = [
     badge: '轻量',
     title: '轻量响应',
     desc: 'SVG 和 JSON 实时生成，img 和 fetch 直接调用，没有额外依赖。',
-    points: ['SVG 毫秒级', 'JSON 可缓存', '无 npm 包'],
+    points: ['SVG 实时生成', 'JSON 可缓存', '无 npm 包'],
   },
   {
     icon: 'highlight-check',
@@ -241,7 +241,7 @@ onUnmounted(() => {
           <h1 class="dh-hero-title">开发者的<br />图片基础设施</h1>
           <p class="dh-hero-desc">
             devimg（图即）提供占位图、字母头像、场景插画和 Mock 数据的 URL API。
-            常用的占位图服务多在海外，devimg 把它们收到一个域名下，复制链接就能用。
+            常用能力集中在一个域名下，复制链接即可用于页面或接口联调。
           </p>
           <div class="dh-hero-actions">
             <a href="/guide/quick-start" class="dh-btn dh-btn-primary">

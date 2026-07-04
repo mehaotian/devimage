@@ -2,7 +2,7 @@
 
 > 完整规格见仓库 [`docs/完整开发文档.md`](https://github.com/devimage/devimage/blob/main/docs/完整开发文档.md)
 
-DevImage 是国内开发者的**零配置占位 CDN**，URL 可直接用于 `<img src>` 和 `fetch()`。
+DevImage 是**占位图 CDN**：URL 可直接用于 `<img src>` 和 `fetch()`，无需注册或 SDK。
 
 ---
 

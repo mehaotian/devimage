@@ -1,6 +1,6 @@
 # 从 placehold 迁移
 
-[placehold.co](https://placehold.co) 在国内同样较慢。DevImage 支持等效参数。
+[placehold.co](https://placehold.co) 的 URL 习惯可映射到 DevImage，见下表。
 
 ## 对照表
 

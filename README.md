@@ -1,8 +1,6 @@
 # DevImage
 
-国内开发者占位资源 CDN — 替代 [picsum.photos](https://picsum.photos) 国内慢速问题。
-
-占位图 · 头像 · 404/空状态 · Mock JSON · 统一 URL API
+占位图 · 头像 · 场景图 · Mock 数据 — URL 即用，无需 SDK。
 
 ## 技术栈
 
