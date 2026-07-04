@@ -146,5 +146,26 @@ describe('NativeAvatarService', () => {
     const svg = service.renderSvg({ style: 'devimg-mandala', seed: 'Luna', size: 128 });
     expect(svg).toContain('<ellipse');
     expect(svg).toContain('width="128"');
+    expect(svg).toContain('devimg-shape-clip');
+  });
+
+  it('should render square devimg-mandala without shape clip', () => {
+    const svg = service.renderSvg({
+      style: 'devimg-mandala',
+      seed: 'Luna',
+      size: 128,
+      shape: 'square',
+    });
+    expect(svg).not.toContain('devimg-shape-clip');
+  });
+
+  it('should render square devimg-radical without circle clip', () => {
+    const svg = service.renderSvg({
+      style: 'devimg-radical',
+      seed: '张三',
+      size: 128,
+      shape: 'square',
+    });
+    expect(svg).not.toContain('<clipPath id="clip"');
   });
 });

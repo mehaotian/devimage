@@ -9,20 +9,31 @@ interface CategoryMeta {
   slug: string;
   label: string;
   tier?: string;
-  count: number;
   scenes: string[];
 }
 
-interface SceneMeta {
-  slug: string;
+interface SceneOption {
+  id: string;
   label: string;
-  categories: string[];
-  photo_count: number;
-  mock_pool_count: number;
-  mock_field?: string;
 }
 
-const SCENES = [
+interface PhotoPreset {
+  label: string;
+  mode: 'scene' | 'cat';
+  scene?: string;
+  cat?: string;
+  random: boolean;
+  seed: string;
+  w?: number;
+  h?: number;
+}
+
+interface CodeRecipe {
+  title: string;
+  path: string;
+}
+
+const SCENES: SceneOption[] = [
   { id: 'product', label: '商品' },
   { id: 'food', label: '餐饮' },
   { id: 'news', label: '新闻资讯' },
@@ -37,44 +48,161 @@ const SCENES = [
   { id: 'business', label: '商务金融' },
   { id: 'game', label: '游戏' },
   { id: 'promo', label: '促销活动' },
-  { id: 'gallery', label: '图集混排' },
-] as const;
+  { id: 'gallery', label: '通用' },
+];
 
 const TIER_LABELS: Record<string, string> = {
-  'A-product': 'A · 商品 Product',
-  'B-food': 'B · 餐饮 Food',
-  'C-content': 'C · 内容 Content',
-  'D-travel': 'D · 出行 Travel',
-  'E-vertical': 'E · 垂直 Vertical',
-  'F-decor': 'F · 装饰 Decor',
+  'A-product': '商品',
+  'B-food': '餐饮',
+  'C-content': '内容',
+  'D-travel': '出行',
+  'E-vertical': '垂直',
+  'F-decor': '装饰',
 };
 
 const TIER_ORDER = ['A-product', 'B-food', 'C-content', 'D-travel', 'E-vertical', 'F-decor'];
 
-const PREVIEW_W = 480;
-const PREVIEW_H = 360;
+const PLAY_PRESETS: PhotoPreset[] = [
+  {
+    label: '商品主图',
+    mode: 'scene',
+    scene: 'product',
+    random: false,
+    seed: 'product-5',
+    w: 400,
+    h: 400,
+  },
+  {
+    label: '资讯列表',
+    mode: 'scene',
+    scene: 'news',
+    random: true,
+    seed: '',
+    w: 320,
+    h: 200,
+  },
+  {
+    label: '首页 Banner',
+    mode: 'scene',
+    scene: 'banner',
+    random: false,
+    seed: 'hero-1',
+    w: 1200,
+    h: 400,
+  },
+  {
+    label: '美食专题',
+    mode: 'cat',
+    cat: '美食',
+    random: false,
+    seed: 'banner-1',
+    w: 640,
+    h: 480,
+  },
+];
+
+const SIZE_PRESETS = [
+  { label: '1:1', w: 400, h: 400 },
+  { label: '4:3', w: 640, h: 480 },
+  { label: '16:9', w: 640, h: 360 },
+  { label: 'Banner', w: 1200, h: 400 },
+] as const;
+
+const CODE_RECIPES: CodeRecipe[] = [
+  { title: '商品主图（固定）', path: '/photo/400/400?scene=product&seed=product-5' },
+  { title: '资讯列表（随机）', path: '/photo/320/200?scene=news' },
+  { title: '首页 Banner（固定）', path: '/photo/1200/400?scene=banner&seed=hero-1' },
+  { title: '餐饮封面（固定）', path: '/photo/480/320?scene=food&seed=store-1' },
+  { title: '美食题材（固定）', path: '/photo/640/480?cat=美食&seed=banner-1' },
+  { title: '咖啡题材（随机）', path: '/photo/800/600?cat=咖啡' },
+];
+
+const MIN_SIZE = 10;
+const MAX_SIZE = 4000;
+const PREVIEW_MAX_W = 480;
+const PREVIEW_MAX_H = 360;
+const SIZE_DEBOUNCE_MS = 400;
 const THUMB_W = 96;
 const THUMB_H = 72;
 const GALLERY_THUMB = 72;
 
-type PlaygroundTab = 'play' | 'catalog' | 'code';
+type PlaygroundTab = 'play' | 'browse' | 'code';
 type PickMode = 'scene' | 'cat';
 
 const activeTab = ref<PlaygroundTab>('play');
-const pickMode = ref<PickMode>('scene');
-const scene = ref<(typeof SCENES)[number]['id']>('product');
+const showMore = ref(false);
+const showCatPicker = ref(false);
+const useCat = ref(false);
+const isRandom = ref(false);
+const scene = ref('product');
 const cat = ref('美食');
-const seed = ref('demo');
+const seed = ref('product-5');
+const width = ref(400);
+const height = ref(400);
+const debouncedW = ref(400);
+const debouncedH = ref(400);
+const grayscale = ref(false);
+const blur = ref<number | ''>('');
+const format = ref<'webp' | 'jpeg' | 'png'>('webp');
 const randomNonce = ref(0);
 const copied = ref(false);
 const loading = ref(true);
 const loadError = ref('');
 
+let sizeTimer: ReturnType<typeof setTimeout> | null = null;
+
 const categories = ref<CategoryMeta[]>([]);
-const scenesMeta = ref<SceneMeta[]>([]);
+const showBrowseCats = ref(false);
+
+const pickMode = computed<PickMode>(() => (useCat.value ? 'cat' : 'scene'));
+
+const effectiveSeed = computed(() => (isRandom.value ? '' : seed.value.trim()));
+
+const effectiveBlur = computed(() => {
+  const n = typeof blur.value === 'number' ? blur.value : Number.parseInt(String(blur.value), 10);
+  if (!Number.isFinite(n) || n < 1) {
+    return undefined;
+  }
+  return Math.min(10, Math.round(n));
+});
 
 /**
- * 构建 /photo URL（与占位图相同 seed 语义）
+ * 当前生效的 URL 查询参数（与复制链接一致，不含预览专用 _）
+ */
+const activeQueryParams = computed(() => {
+  const params = new URLSearchParams();
+  if (pickMode.value === 'cat' && cat.value) {
+    params.set('cat', cat.value);
+  } else {
+    params.set('scene', scene.value);
+  }
+  if (effectiveSeed.value) {
+    params.set('seed', effectiveSeed.value);
+  }
+  if (grayscale.value) {
+    params.set('grayscale', '1');
+  }
+  if (effectiveBlur.value !== undefined) {
+    params.set('blur', String(effectiveBlur.value));
+  }
+  if (format.value !== 'webp') {
+    params.set('format', format.value);
+  }
+  return params;
+});
+
+/**
+ * 将尺寸 clamp 到 API 允许范围（10–4000）
+ */
+function clampSize(value: number): number {
+  if (!Number.isFinite(value)) {
+    return MIN_SIZE;
+  }
+  return Math.min(MAX_SIZE, Math.max(MIN_SIZE, Math.round(value)));
+}
+
+/**
+ * 构建 /photo URL
  */
 function buildPhotoUrl(
   opts: {
@@ -84,6 +212,9 @@ function buildPhotoUrl(
     scene?: string;
     cat?: string;
     seed?: string;
+    grayscale?: boolean;
+    blur?: number;
+    format?: 'webp' | 'jpeg' | 'png';
     cacheBust?: boolean;
   },
 ): string {
@@ -96,46 +227,104 @@ function buildPhotoUrl(
   const seedValue = opts.seed?.trim();
   if (seedValue) {
     params.set('seed', seedValue);
-  } else if (opts.cacheBust) {
+  }
+  if (opts.grayscale) {
+    params.set('grayscale', '1');
+  }
+  if (opts.blur !== undefined && opts.blur >= 1) {
+    params.set('blur', String(opts.blur));
+  }
+  if (opts.format && opts.format !== 'webp') {
+    params.set('format', opts.format);
+  }
+  if (opts.cacheBust && !seedValue) {
     params.set('_', String(randomNonce.value || Date.now()));
   }
-  return `${API_BASE}/photo/${opts.w}/${opts.h}?${params.toString()}`;
+  const qs = params.toString();
+  return qs
+    ? `${API_BASE}/photo/${opts.w}/${opts.h}?${qs}`
+    : `${API_BASE}/photo/${opts.w}/${opts.h}`;
 }
 
-const previewUrl = computed(() =>
-  buildPhotoUrl({
-    w: PREVIEW_W,
-    h: PREVIEW_H,
+/**
+ * 组装 buildPhotoUrl 的公共选项
+ */
+function urlOpts(cacheBust = false): {
+  w: number;
+  h: number;
+  mode: PickMode;
+  scene: string;
+  cat: string;
+  seed: string;
+  grayscale: boolean;
+  blur: number | undefined;
+  format: 'webp' | 'jpeg' | 'png';
+  cacheBust: boolean;
+} {
+  return {
+    w: debouncedW.value,
+    h: debouncedH.value,
     mode: pickMode.value,
     scene: scene.value,
     cat: cat.value,
-    seed: seed.value,
-    cacheBust: !seed.value.trim(),
-  }),
-);
+    seed: effectiveSeed.value,
+    grayscale: grayscale.value,
+    blur: effectiveBlur.value,
+    format: format.value,
+    cacheBust,
+  };
+}
 
-const apiUrl = computed(() =>
-  buildPhotoUrl({
-    w: 800,
-    h: 600,
-    mode: pickMode.value,
-    scene: scene.value,
-    cat: cat.value,
-    seed: seed.value,
-  }),
-);
+/**
+ * 将相对路径转为完整 API URL
+ */
+function toFullUrl(path: string): string {
+  return `${API_BASE}${path}`;
+}
+
+const previewUrl = computed(() => buildPhotoUrl(urlOpts(isRandom.value)));
+
+const apiUrl = computed(() => buildPhotoUrl(urlOpts(false)));
+
+const relativeApiPath = computed(() => {
+  const qs = activeQueryParams.value.toString();
+  return qs
+    ? `/photo/${debouncedW.value}/${debouncedH.value}?${qs}`
+    : `/photo/${debouncedW.value}/${debouncedH.value}`;
+});
 
 const htmlSnippet = computed(
-  () => `<img src="${apiUrl.value}" alt="DevImage photo" width="800" height="600" />`,
+  () =>
+    `<img src="${apiUrl.value}" alt="" width="${debouncedW.value}" height="${debouncedH.value}" />`,
 );
 
-const previewCaption = computed(() => {
-  const seedLabel = seed.value.trim() || '随机';
-  if (pickMode.value === 'cat') {
-    return `cat ${cat.value} · seed ${seedLabel}`;
-  }
-  return `scene ${scene.value} · seed ${seedLabel}`;
+/**
+ * 预览区显示尺寸（等比缩放至面板内）
+ */
+const previewDisplaySize = computed(() => {
+  const w = debouncedW.value;
+  const h = debouncedH.value;
+  const scale = Math.min(PREVIEW_MAX_W / w, PREVIEW_MAX_H / h, 1);
+  return { w: Math.round(w * scale), h: Math.round(h * scale) };
 });
+
+const activeScene = computed(() => SCENES.find((item) => item.id === scene.value));
+
+const previewCaption = computed(() => {
+  const sizeLabel = `${debouncedW.value}×${debouncedH.value}`;
+  const modeLabel = isRandom.value ? '随机' : '固定';
+  if (pickMode.value === 'cat') {
+    return `${sizeLabel} · ${cat.value} · ${modeLabel}`;
+  }
+  return `${sizeLabel} · ${activeScene.value?.label ?? scene.value} · ${modeLabel}`;
+});
+
+/**
+ * 预览区展示的 query 参数标签（与复制链接一致）
+ */
+const previewParamTags = computed(() =>
+  [...activeQueryParams.value.entries()].map(([key, value]) => `${key}=${value}`),
+);
 
 const categoriesByTier = computed(() => {
   const map = new Map<string, CategoryMeta[]>();
@@ -152,14 +341,6 @@ const categoriesByTier = computed(() => {
     items: (map.get(tier) ?? []).sort((a, b) => a.slug.localeCompare(b.slug, 'zh-CN')),
   }));
 });
-
-const catalogNavItems = computed(() => [
-  { id: 'photo-scenes', label: `scene 场景 (${scenesMeta.value.length})` },
-  ...categoriesByTier.value.map((group) => ({
-    id: group.id,
-    label: `${group.title} (${group.items.length})`,
-  })),
-]);
 
 /**
  * 切换主 Tab
@@ -181,90 +362,170 @@ async function copyText(text: string): Promise<void> {
 }
 
 /**
- * 从目录选中分类
+ * 应用快捷预设
  */
-function selectCatFromCatalog(slug: string): void {
-  pickMode.value = 'cat';
-  cat.value = slug;
-  seed.value = `${slug}-demo`;
-  copied.value = false;
-  activeTab.value = 'play';
-}
-
-/**
- * 从目录选中 scene
- */
-function selectSceneFromCatalog(slug: string): void {
-  pickMode.value = 'scene';
-  scene.value = slug as (typeof SCENES)[number]['id'];
-  seed.value = `${slug}-demo`;
-  copied.value = false;
-  activeTab.value = 'play';
-}
-
-/**
- * 清空 seed，预览随机图
- */
-function randomizePhoto(): void {
-  seed.value = '';
-  randomNonce.value = Date.now();
-}
-
-/**
- * 滚动到目录分组
- */
-function scrollToCatalogSection(sectionId: string): void {
-  if (activeTab.value !== 'catalog') {
-    activeTab.value = 'catalog';
+function applyPlayPreset(preset: PhotoPreset): void {
+  useCat.value = preset.mode === 'cat';
+  showMore.value = false;
+  showCatPicker.value = preset.mode === 'cat';
+  isRandom.value = preset.random;
+  if (preset.mode === 'scene' && preset.scene) {
+    scene.value = preset.scene;
   }
-  window.requestAnimationFrame(() => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (preset.mode === 'cat' && preset.cat) {
+    cat.value = preset.cat;
+  }
+  seed.value = preset.seed || 'demo';
+  if (preset.w !== undefined) {
+    width.value = preset.w;
+  }
+  if (preset.h !== undefined) {
+    height.value = preset.h;
+  }
+  randomNonce.value = Date.now();
+  copied.value = false;
+  activeTab.value = 'play';
+}
+
+/**
+ * 应用常用宽高比
+ */
+function applySizePreset(w: number, h: number): void {
+  width.value = w;
+  height.value = h;
+  copied.value = false;
+}
+
+/**
+ * 从浏览区选中用途
+ */
+function selectSceneFromBrowse(slug: string): void {
+  useCat.value = false;
+  showMore.value = false;
+  scene.value = slug;
+  isRandom.value = false;
+  seed.value = `${slug}-demo`;
+  copied.value = false;
+  activeTab.value = 'play';
+}
+
+/**
+ * 构建题材缩略图 URL
+ */
+function buildCatThumbUrl(catSlug: string): string {
+  return buildPhotoUrl({
+    w: THUMB_W,
+    h: THUMB_H,
+    mode: 'cat',
+    cat: catSlug,
+    seed: `${catSlug}-demo`,
   });
 }
 
 /**
- * 拉取分类与 scene 元数据
+ * 从试玩区题材列表选中
  */
-async function fetchCatalog(): Promise<void> {
+function selectCatFromPicker(slug: string): void {
+  useCat.value = true;
+  cat.value = slug;
+  if (!isRandom.value) {
+    seed.value = `${slug}-demo`;
+  }
+  copied.value = false;
+}
+
+/**
+ * 从浏览区选中题材
+ */
+function selectCatFromBrowse(slug: string): void {
+  selectCatFromPicker(slug);
+  isRandom.value = false;
+  seed.value = `${slug}-demo`;
+  showCatPicker.value = false;
+  activeTab.value = 'play';
+}
+
+/**
+ * 切换随机模式并刷新预览
+ */
+function setRandomMode(random: boolean): void {
+  isRandom.value = random;
+  if (random) {
+    shuffleRandom();
+  } else if (!seed.value.trim()) {
+    seed.value = 'demo';
+  }
+  copied.value = false;
+}
+
+/**
+ * 随机模式下换一张预览图
+ */
+function shuffleRandom(): void {
+  randomNonce.value = Date.now();
+  copied.value = false;
+}
+
+/**
+ * 拉取题材列表（更多选项用）
+ */
+async function fetchCategories(): Promise<void> {
   loading.value = true;
   loadError.value = '';
   try {
-    const [catRes, sceneRes] = await Promise.all([
-      fetch(`${API_BASE}/photo/categories`, { cache: 'no-store' }),
-      fetch(`${API_BASE}/photo/scenes`, { cache: 'no-store' }),
-    ]);
-    if (!catRes.ok || !sceneRes.ok) {
+    const res = await fetch(`${API_BASE}/photo/categories`, { cache: 'no-store' });
+    if (!res.ok) {
       throw new Error('HTTP error');
     }
-    const catData = (await catRes.json()) as { categories: CategoryMeta[] };
-    const sceneData = (await sceneRes.json()) as { scenes: SceneMeta[] };
-    categories.value = catData.categories ?? [];
-    scenesMeta.value = sceneData.scenes ?? [];
+    const data = (await res.json()) as { categories: CategoryMeta[] };
+    categories.value = data.categories ?? [];
     if (!categories.value.some((item) => item.slug === cat.value)) {
       cat.value = categories.value[0]?.slug ?? '美食';
     }
-  } catch (err) {
-    loadError.value =
-      err instanceof Error ? err.message : '无法加载目录，请确认 API 已启动且 COS 已配置';
+  } catch {
+    loadError.value = '预览加载失败，请确认本地服务已启动';
   } finally {
     loading.value = false;
   }
 }
 
-watch([pickMode, scene, cat, seed], () => {
+watch([width, height], () => {
+  if (sizeTimer) {
+    clearTimeout(sizeTimer);
+  }
+  sizeTimer = setTimeout(() => {
+    debouncedW.value = clampSize(width.value);
+    debouncedH.value = clampSize(height.value);
+  }, SIZE_DEBOUNCE_MS);
+}, { immediate: true });
+
+watch([useCat, scene, cat, seed, isRandom, grayscale, blur, format], () => {
   copied.value = false;
+  if (isRandom.value) {
+    shuffleRandom();
+  }
+});
+
+watch(useCat, (catMode) => {
+  if (!catMode) {
+    showCatPicker.value = false;
+  }
 });
 
 onMounted(() => {
-  void fetchCatalog();
+  void fetchCategories();
 });
 
-onUnmounted(() => { /* noop */ });
+onUnmounted(() => {
+  if (sizeTimer) {
+    clearTimeout(sizeTimer);
+  }
+});
 </script>
 
 <template>
   <div class="photo-playground">
-    <div class="photo-playground__tabs" role="tablist" aria-label="真实图库试玩">
+    <div class="photo-playground__tabs" role="tablist" aria-label="真实照片试玩">
       <button
         type="button"
         role="tab"
@@ -273,18 +534,17 @@ onUnmounted(() => { /* noop */ });
         :aria-selected="activeTab === 'play'"
         @click="setPlaygroundTab('play')"
       >
-        快速试玩
+        试玩
       </button>
       <button
         type="button"
         role="tab"
         class="photo-playground__tab"
-        :class="{ 'photo-playground__tab--active': activeTab === 'catalog' }"
-        :aria-selected="activeTab === 'catalog'"
-        @click="setPlaygroundTab('catalog')"
+        :class="{ 'photo-playground__tab--active': activeTab === 'browse' }"
+        :aria-selected="activeTab === 'browse'"
+        @click="setPlaygroundTab('browse')"
       >
-        目录
-        <span class="photo-playground__tab-badge">{{ categories.length || 82 }}</span>
+        浏览
       </button>
       <button
         type="button"
@@ -294,7 +554,7 @@ onUnmounted(() => { /* noop */ });
         :aria-selected="activeTab === 'code'"
         @click="setPlaygroundTab('code')"
       >
-        代码参考
+        复制代码
       </button>
     </div>
 
@@ -304,72 +564,223 @@ onUnmounted(() => { /* noop */ });
           <button
             type="button"
             class="photo-playground__image-btn"
-            :title="copied ? '已复制链接' : '点击复制 URL'"
+            :title="copied ? '已复制' : '点击复制链接'"
             @click="copyText(apiUrl)"
           >
             <img
               :key="previewUrl"
               :src="previewUrl"
               :alt="previewCaption"
-              :width="PREVIEW_W"
-              :height="PREVIEW_H"
+              :width="previewDisplaySize.w"
+              :height="previewDisplaySize.h"
               class="photo-playground__image"
             />
-            <span v-if="copied" class="photo-playground__copied">已复制 URL</span>
+            <span v-if="copied" class="photo-playground__copied">已复制</span>
           </button>
           <p class="photo-playground__preview-caption">{{ previewCaption }}</p>
+          <div v-if="previewParamTags.length" class="photo-playground__param-tags" aria-label="当前 URL 参数">
+            <code v-for="tag in previewParamTags" :key="tag" class="photo-playground__param-tag">{{ tag }}</code>
+          </div>
+          <code class="photo-playground__preview-path">{{ relativeApiPath }}</code>
         </div>
 
         <div class="photo-playground__panel photo-playground__controls">
-          <label class="photo-playground__field">
-            <span class="photo-playground__label">mode 选取方式</span>
-            <div class="photo-playground__select-wrap">
-              <select v-model="pickMode" class="photo-playground__select">
-                <option value="scene">scene 业务场景（英文 slug）</option>
-                <option value="cat">cat 中文分类</option>
-              </select>
+          <div class="photo-playground__presets">
+            <span class="photo-playground__label">快捷示例</span>
+            <div class="photo-playground__presets-row">
+              <button
+                v-for="preset in PLAY_PRESETS"
+                :key="preset.label"
+                type="button"
+                class="photo-playground__preset"
+                @click="applyPlayPreset(preset)"
+              >
+                {{ preset.label }}
+              </button>
             </div>
-          </label>
+          </div>
 
           <label class="photo-playground__field">
-            <span class="photo-playground__label">seed（留空则随机）</span>
-            <div class="photo-playground__seed-row">
-              <input v-model="seed" type="text" class="photo-playground__input" maxlength="64" placeholder="demo" />
-              <button type="button" class="photo-playground__dice" title="随机选图" @click="randomizePhoto">
-                🎲
+            <span class="photo-playground__label">宽 × 高</span>
+            <div class="photo-playground__size-row">
+              <input
+                v-model.number="width"
+                type="number"
+                min="10"
+                max="4000"
+                class="photo-playground__input"
+                aria-label="宽度"
+              />
+              <span class="photo-playground__size-sep">×</span>
+              <input
+                v-model.number="height"
+                type="number"
+                min="10"
+                max="4000"
+                class="photo-playground__input"
+                aria-label="高度"
+              />
+            </div>
+            <div class="photo-playground__presets-row photo-playground__presets-row--size">
+              <button
+                v-for="item in SIZE_PRESETS"
+                :key="item.label"
+                type="button"
+                class="photo-playground__preset"
+                @click="applySizePreset(item.w, item.h)"
+              >
+                {{ item.label }}
               </button>
             </div>
           </label>
 
-          <label v-if="pickMode === 'scene'" class="photo-playground__field">
-            <span class="photo-playground__label">scene 场景</span>
-            <div class="photo-playground__select-wrap">
-              <select v-model="scene" class="photo-playground__select">
-                <option v-for="item in SCENES" :key="item.id" :value="item.id">
-                  {{ item.id }} · {{ item.label }}
-                </option>
-              </select>
+          <div class="photo-playground__field">
+            <span class="photo-playground__label">选图方式</span>
+            <div class="photo-playground__pick-row">
+              <div class="photo-playground__radio-row">
+                <label class="photo-playground__radio">
+                  <input
+                    type="radio"
+                    name="photo-pick-mode"
+                    :checked="!isRandom"
+                    @change="setRandomMode(false)"
+                  />
+                  固定这张
+                </label>
+                <label class="photo-playground__radio">
+                  <input
+                    type="radio"
+                    name="photo-pick-mode"
+                    :checked="isRandom"
+                    @change="setRandomMode(true)"
+                  />
+                  每次随机
+                </label>
+              </div>
+              <button
+                v-if="isRandom"
+                type="button"
+                class="photo-playground__shuffle"
+                title="换一张随机图"
+                @click="shuffleRandom"
+              >
+                🎲 换一张
+              </button>
             </div>
-          </label>
+            <input
+              v-if="!isRandom"
+              v-model="seed"
+              type="text"
+              class="photo-playground__input"
+              maxlength="64"
+              placeholder="标识（同标识同一张图）"
+            />
+          </div>
 
-          <label v-if="pickMode === 'cat'" class="photo-playground__field">
-            <span class="photo-playground__label">cat 分类（中文 slug）</span>
-            <div class="photo-playground__select-wrap">
-              <select v-model="cat" class="photo-playground__select" :disabled="loading">
-                <option v-for="item in categories" :key="item.slug" :value="item.slug">
-                  {{ item.slug }}（{{ item.count }}）
-                </option>
-              </select>
+          <template v-if="!useCat">
+            <label class="photo-playground__field">
+              <span class="photo-playground__label">用途</span>
+              <div class="photo-playground__select-wrap">
+                <select v-model="scene" class="photo-playground__select">
+                  <option v-for="item in SCENES" :key="item.id" :value="item.id">
+                    {{ item.label }}
+                  </option>
+                </select>
+              </div>
+            </label>
+          </template>
+          <p v-else class="photo-playground__current-cat">
+            当前题材：<strong>{{ cat }}</strong>
+            <button type="button" class="photo-playground__link-btn" @click="useCat = false">
+              改回按用途
+            </button>
+          </p>
+
+          <div class="photo-playground__cat-picker-wrap">
+            <button
+              type="button"
+              class="photo-playground__more-toggle"
+              :aria-expanded="showCatPicker"
+              @click="showCatPicker = !showCatPicker"
+            >
+              <span>
+                具体题材（cat）
+                <span v-if="categories.length" class="photo-playground__cat-count">{{ categories.length }} 项</span>
+              </span>
+              <span class="photo-playground__more-chevron">{{ showCatPicker ? '▾' : '▸' }}</span>
+            </button>
+
+            <div v-show="showCatPicker" class="photo-playground__cat-picker">
+              <p v-if="loading" class="photo-playground__cat-picker-hint">加载题材列表…</p>
+              <p v-else-if="!categories.length" class="photo-playground__cat-picker-hint">暂无题材数据</p>
+              <div v-else class="photo-playground__cat-picker-scroll">
+                <div
+                  v-for="group in categoriesByTier"
+                  :key="`picker-${group.id}`"
+                  class="photo-playground__cat-picker-group"
+                >
+                  <h5 class="photo-playground__cat-picker-group-title">{{ group.title }}</h5>
+                  <div class="photo-playground__gallery-grid">
+                    <button
+                      v-for="item in group.items"
+                      :key="`picker-${item.slug}`"
+                      type="button"
+                      class="photo-playground__gallery-item"
+                      :class="{ 'photo-playground__gallery-item--active': useCat && cat === item.slug }"
+                      :title="item.slug"
+                      @click="selectCatFromPicker(item.slug)"
+                    >
+                      <LazyGalleryImg
+                        :src="buildCatThumbUrl(item.slug)"
+                        :alt="item.slug"
+                        :size="GALLERY_THUMB"
+                      />
+                      <span class="photo-playground__gallery-label">{{ item.slug }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </label>
+          </div>
 
-          <div class="photo-playground__quick-links">
-            <button type="button" class="photo-playground__quick-link" @click="setPlaygroundTab('catalog')">
-              浏览目录 →
-            </button>
-            <button type="button" class="photo-playground__quick-link" @click="setPlaygroundTab('code')">
-              查看 API / HTML →
-            </button>
+          <button
+            type="button"
+            class="photo-playground__more-toggle"
+            :aria-expanded="showMore"
+            @click="showMore = !showMore"
+          >
+            {{ showMore ? '收起更多选项' : '更多选项' }}
+            <span class="photo-playground__more-chevron">{{ showMore ? '▾' : '▸' }}</span>
+          </button>
+
+          <div v-show="showMore" class="photo-playground__more">
+            <label class="photo-playground__field">
+              <span class="photo-playground__label">输出格式 format</span>
+              <div class="photo-playground__select-wrap">
+                <select v-model="format" class="photo-playground__select">
+                  <option value="webp">webp（默认）</option>
+                  <option value="jpeg">jpeg</option>
+                  <option value="png">png</option>
+                </select>
+              </div>
+            </label>
+
+            <label class="photo-playground__check">
+              <input v-model="grayscale" type="checkbox" />
+              灰度 grayscale=1
+            </label>
+
+            <label class="photo-playground__field">
+              <span class="photo-playground__label">模糊 blur（1–10，留空关闭）</span>
+              <input
+                v-model.number="blur"
+                type="number"
+                min="1"
+                max="10"
+                class="photo-playground__input"
+                placeholder="留空"
+              />
+            </label>
           </div>
 
           <p v-if="loadError" class="photo-playground__error">{{ loadError }}</p>
@@ -378,103 +789,75 @@ onUnmounted(() => { /* noop */ });
 
       <div class="photo-playground__url-bar">
         <code class="photo-playground__url-text">{{ apiUrl }}</code>
-        <button type="button" class="photo-playground__copy" @click="copyText(apiUrl)">复制 URL</button>
+        <button type="button" class="photo-playground__copy" @click="copyText(apiUrl)">复制链接</button>
+        <button type="button" class="photo-playground__copy" @click="copyText(htmlSnippet)">复制 HTML</button>
       </div>
     </div>
 
     <section
-      v-if="activeTab === 'catalog'"
+      v-if="activeTab === 'browse'"
       class="photo-playground__pane photo-playground__catalog"
       role="tabpanel"
     >
-      <div class="photo-playground__catalog-head">
-        <p class="photo-playground__catalog-desc">
-          共 {{ categories.length || 82 }} 个中文分类 · {{ scenesMeta.length || 15 }} 个英文 scene · 缩略图懒加载
-        </p>
-        <nav class="photo-playground__catalog-nav" aria-label="目录分组跳转">
-          <button
-            v-for="item in catalogNavItems"
-            :key="item.id"
-            type="button"
-            class="photo-playground__catalog-nav-btn"
-            @click="scrollToCatalogSection(item.id)"
-          >
-            {{ item.label }}
-          </button>
-        </nav>
+      <p class="photo-playground__catalog-desc">点击缩略图即可回到试玩区预览。</p>
+
+      <h4 class="photo-playground__catalog-title">按用途</h4>
+      <div class="photo-playground__gallery-grid">
+        <button
+          v-for="item in SCENES"
+          :key="`scene-${item.id}`"
+          type="button"
+          class="photo-playground__gallery-item"
+          :class="{ 'photo-playground__gallery-item--active': !useCat && scene === item.id }"
+          @click="selectSceneFromBrowse(item.id)"
+        >
+          <LazyGalleryImg
+            :src="buildPhotoUrl({ w: THUMB_W, h: THUMB_H, mode: 'scene', scene: item.id, seed: `${item.id}-demo` })"
+            :alt="item.label"
+            :size="GALLERY_THUMB"
+          />
+          <span class="photo-playground__gallery-label">{{ item.label }}</span>
+        </button>
       </div>
 
-      <div id="photo-scenes" class="photo-playground__catalog-group">
-        <h4 class="photo-playground__catalog-group-title">scene 业务场景（英文 slug · 中文 label）</h4>
-        <div class="photo-playground__scene-table-wrap">
-          <table class="photo-playground__scene-table">
-            <thead>
-              <tr>
-                <th>slug</th>
-                <th>label</th>
-                <th>photos</th>
-                <th>Mock 字段</th>
-                <th>预览</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in scenesMeta" :key="item.slug">
-                <td><code>{{ item.slug }}</code></td>
-                <td>{{ item.label }}</td>
-                <td>{{ item.photo_count }}</td>
-                <td>{{ item.mock_field ?? '—' }}</td>
-                <td>
-                  <button type="button" class="photo-playground__table-btn" @click="selectSceneFromCatalog(item.slug)">
-                    试玩
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="photo-playground__gallery-grid">
-          <button
-            v-for="item in scenesMeta.slice(0, 15)"
-            :key="`scene-${item.slug}`"
-            type="button"
-            class="photo-playground__gallery-item"
-            :title="`${item.slug} · ${item.label}`"
-            @click="selectSceneFromCatalog(item.slug)"
-          >
-            <LazyGalleryImg
-              :src="buildPhotoUrl({ w: THUMB_W, h: THUMB_H, mode: 'scene', scene: item.slug, seed: `${item.slug}-demo` })"
-              :alt="item.slug"
-              :size="GALLERY_THUMB"
-            />
-            <span class="photo-playground__gallery-label">{{ item.slug }}</span>
-          </button>
-        </div>
-      </div>
-
-      <div
-        v-for="group in categoriesByTier"
-        :id="group.id"
-        :key="group.id"
-        class="photo-playground__catalog-group"
+      <button
+        type="button"
+        class="photo-playground__more-toggle photo-playground__browse-cat-toggle"
+        :aria-expanded="showBrowseCats"
+        @click="showBrowseCats = !showBrowseCats"
       >
-        <h4 class="photo-playground__catalog-group-title">{{ group.title }}</h4>
-        <div class="photo-playground__gallery-grid">
-          <button
-            v-for="item in group.items"
-            :key="item.slug"
-            type="button"
-            class="photo-playground__gallery-item"
-            :class="{ 'photo-playground__gallery-item--active': pickMode === 'cat' && cat === item.slug }"
-            :title="`${item.slug} · ${item.count} 张`"
-            @click="selectCatFromCatalog(item.slug)"
-          >
-            <LazyGalleryImg
-              :src="buildPhotoUrl({ w: THUMB_W, h: THUMB_H, mode: 'cat', cat: item.slug, seed: `${item.slug}-demo` })"
-              :alt="item.slug"
-              :size="GALLERY_THUMB"
-            />
-            <span class="photo-playground__gallery-label">{{ item.slug }}</span>
-          </button>
+        <span>
+          按题材
+          <span v-if="categories.length" class="photo-playground__cat-count">{{ categories.length }} 项</span>
+        </span>
+        <span class="photo-playground__more-chevron">{{ showBrowseCats ? '▾' : '▸' }}</span>
+      </button>
+
+      <div v-show="showBrowseCats">
+        <p v-if="loading" class="photo-playground__catalog-desc">加载题材列表…</p>
+        <div
+          v-for="group in categoriesByTier"
+          :key="group.id"
+          class="photo-playground__cat-picker-group"
+        >
+          <h5 class="photo-playground__cat-picker-group-title">{{ group.title }}</h5>
+          <div class="photo-playground__gallery-grid">
+            <button
+              v-for="item in group.items"
+              :key="item.slug"
+              type="button"
+              class="photo-playground__gallery-item"
+              :class="{ 'photo-playground__gallery-item--active': useCat && cat === item.slug }"
+              @click="selectCatFromBrowse(item.slug)"
+            >
+              <LazyGalleryImg
+                :src="buildCatThumbUrl(item.slug)"
+                :alt="item.slug"
+                :size="GALLERY_THUMB"
+              />
+              <span class="photo-playground__gallery-label">{{ item.slug }}</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -482,7 +865,7 @@ onUnmounted(() => { /* noop */ });
     <div v-show="activeTab === 'code'" class="photo-playground__pane photo-playground__panel photo-playground__refs" role="tabpanel">
       <div class="photo-playground__ref-block">
         <div class="photo-playground__ref-head">
-          <span>HTTP API</span>
+          <span>当前链接</span>
           <button type="button" class="photo-playground__copy" @click="copyText(apiUrl)">复制</button>
         </div>
         <code class="photo-playground__code">{{ apiUrl }}</code>
@@ -490,16 +873,24 @@ onUnmounted(() => { /* noop */ });
 
       <div class="photo-playground__ref-block">
         <div class="photo-playground__ref-head">
-          <span>HTML</span>
+          <span>当前 HTML</span>
           <button type="button" class="photo-playground__copy" @click="copyText(htmlSnippet)">复制</button>
         </div>
         <code class="photo-playground__code">{{ htmlSnippet }}</code>
       </div>
 
-      <p class="photo-playground__hint">
-        本地预览：根目录 <code>pnpm dev</code>；有 <code>seed</code> 时同 URL 永远同图，无 seed 时每次随机。
-        picsum 迁移仍可用 <code>/id/:id/:w/:h</code>（目录专用，非占位语义）。
-      </p>
+      <div class="photo-playground__recipes">
+        <h4 class="photo-playground__recipes-title">常用示例</h4>
+        <div v-for="recipe in CODE_RECIPES" :key="recipe.path" class="photo-playground__recipe">
+          <div class="photo-playground__recipe-head">
+            <strong class="photo-playground__recipe-title">{{ recipe.title }}</strong>
+            <button type="button" class="photo-playground__copy" @click="copyText(toFullUrl(recipe.path))">
+              复制
+            </button>
+          </div>
+          <code class="photo-playground__code">{{ toFullUrl(recipe.path) }}</code>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -523,9 +914,6 @@ onUnmounted(() => { /* noop */ });
 }
 
 .photo-playground__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
   padding: 8px 14px;
   border: 0;
   border-radius: 8px;
@@ -540,15 +928,6 @@ onUnmounted(() => { /* noop */ });
   color: var(--vp-c-brand-1);
   background: var(--vp-c-bg);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-
-.photo-playground__tab-badge {
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--vp-c-brand-1) 12%, transparent);
-  color: var(--vp-c-brand-1);
-  font-size: 11px;
-  font-weight: 600;
 }
 
 .photo-playground__main {
@@ -584,7 +963,7 @@ onUnmounted(() => { /* noop */ });
 }
 
 .photo-playground__image {
-  width: 100%;
+  max-width: 100%;
   height: auto;
   border-radius: 8px;
   object-fit: cover;
@@ -609,10 +988,66 @@ onUnmounted(() => { /* noop */ });
   text-align: center;
 }
 
+.photo-playground__param-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.photo-playground__param-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vp-c-brand-1) 10%, transparent);
+  color: var(--vp-c-text-2);
+  font-size: 11px;
+}
+
+.photo-playground__preview-path {
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  word-break: break-all;
+  text-align: center;
+  color: var(--vp-c-text-3);
+}
+
 .photo-playground__controls {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.photo-playground__presets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.photo-playground__presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.photo-playground__presets-row--size {
+  margin-top: 6px;
+}
+
+.photo-playground__preset {
+  padding: 5px 10px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 999px;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-1);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.photo-playground__preset:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
 }
 
 .photo-playground__field {
@@ -624,6 +1059,145 @@ onUnmounted(() => { /* noop */ });
 .photo-playground__label {
   font-size: 12px;
   color: var(--vp-c-text-2);
+}
+
+.photo-playground__pick-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.photo-playground__radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.photo-playground__shuffle {
+  padding: 6px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.photo-playground__shuffle:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+
+.photo-playground__check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+}
+
+.photo-playground__radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--vp-c-text-1);
+  cursor: pointer;
+}
+
+.photo-playground__current-cat {
+  margin: 0;
+  font-size: 13px;
+  color: var(--vp-c-text-2);
+}
+
+.photo-playground__current-cat strong {
+  color: var(--vp-c-text-1);
+}
+
+.photo-playground__cat-picker-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--vp-c-bg);
+}
+
+.photo-playground__cat-picker-wrap .photo-playground__more-toggle {
+  padding: 10px 12px;
+  border-radius: 0;
+}
+
+.photo-playground__cat-count {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--vp-c-text-3);
+}
+
+.photo-playground__cat-picker {
+  border-top: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg-soft);
+}
+
+.photo-playground__cat-picker-hint {
+  margin: 0;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+}
+
+.photo-playground__cat-picker-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 10px 12px 12px;
+}
+
+.photo-playground__cat-picker-group + .photo-playground__cat-picker-group {
+  margin-top: 14px;
+}
+
+.photo-playground__cat-picker-group-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+
+.photo-playground__browse-cat-toggle {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.photo-playground__more-chevron {
+  color: var(--vp-c-text-3);
+}
+
+.photo-playground__more {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px dashed var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.photo-playground__link-btn {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vp-c-brand-1);
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .photo-playground__select-wrap {
@@ -644,18 +1218,21 @@ onUnmounted(() => { /* noop */ });
   outline: none;
 }
 
-.photo-playground__seed-row {
+.photo-playground__size-row {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.photo-playground__dice {
-  width: 42px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 10px;
-  background: var(--vp-c-bg);
-  cursor: pointer;
-  font-size: 18px;
+.photo-playground__size-row .photo-playground__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.photo-playground__size-sep {
+  flex-shrink: 0;
+  color: var(--vp-c-text-3);
+  font-size: 13px;
 }
 
 .photo-playground__select {
@@ -667,26 +1244,11 @@ onUnmounted(() => { /* noop */ });
   outline: none;
 }
 
-.photo-playground__quick-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.photo-playground__quick-link {
-  padding: 6px 12px;
-  border: 1px dashed var(--vp-c-divider);
-  border-radius: 8px;
-  background: transparent;
-  color: var(--vp-c-brand-1);
-  font-size: 12px;
-  cursor: pointer;
-}
-
 .photo-playground__url-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 14px;
   padding: 10px 12px;
   border: 1px solid var(--vp-c-divider);
@@ -696,7 +1258,7 @@ onUnmounted(() => { /* noop */ });
 
 .photo-playground__url-text {
   flex: 1;
-  min-width: 0;
+  min-width: 200px;
   font-size: 12px;
   word-break: break-all;
   color: var(--vp-c-text-2);
@@ -709,6 +1271,7 @@ onUnmounted(() => { /* noop */ });
   background: var(--vp-c-bg);
   font-size: 12px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .photo-playground__catalog {
@@ -719,64 +1282,20 @@ onUnmounted(() => { /* noop */ });
 }
 
 .photo-playground__catalog-desc {
-  margin: 0;
+  margin: 0 0 16px;
   font-size: 12px;
   color: var(--vp-c-text-2);
 }
 
-.photo-playground__catalog-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.photo-playground__catalog-nav-btn {
-  padding: 4px 10px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
-  background: var(--vp-c-bg);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.photo-playground__catalog-group {
-  margin-top: 20px;
-  scroll-margin-top: 72px;
-}
-
-.photo-playground__catalog-group-title {
-  margin: 0 0 10px;
+.photo-playground__catalog-title {
+  margin: 16px 0 10px;
   font-size: 13px;
   font-weight: 600;
   color: var(--vp-c-text-2);
 }
 
-.photo-playground__scene-table-wrap {
-  overflow-x: auto;
-  margin-bottom: 12px;
-}
-
-.photo-playground__scene-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.photo-playground__scene-table th,
-.photo-playground__scene-table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--vp-c-divider);
-  text-align: left;
-}
-
-.photo-playground__table-btn {
-  padding: 2px 8px;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 6px;
-  background: var(--vp-c-bg);
-  font-size: 11px;
-  cursor: pointer;
+.photo-playground__catalog-title:first-of-type {
+  margin-top: 0;
 }
 
 .photo-playground__gallery-grid {
@@ -810,6 +1329,20 @@ onUnmounted(() => { /* noop */ });
   word-break: break-all;
 }
 
+.photo-playground__more-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
 .photo-playground__refs {
   display: flex;
   flex-direction: column;
@@ -825,8 +1358,44 @@ onUnmounted(() => { /* noop */ });
 .photo-playground__ref-head {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 13px;
   color: var(--vp-c-text-2);
+}
+
+.photo-playground__recipes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.photo-playground__recipes-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+
+.photo-playground__recipe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.photo-playground__recipe-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.photo-playground__recipe-title {
+  font-size: 13px;
+  color: var(--vp-c-text-1);
 }
 
 .photo-playground__code {
@@ -834,32 +1403,21 @@ onUnmounted(() => { /* noop */ });
   padding: 12px;
   border-radius: 10px;
   border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
+  background: var(--vp-c-bg-soft);
   font-size: 12px;
   word-break: break-all;
   white-space: pre-wrap;
 }
 
-.photo-playground__hint,
 .photo-playground__error {
   margin: 0;
   font-size: 12px;
-  line-height: 1.6;
-  color: var(--vp-c-text-2);
-}
-
-.photo-playground__error {
   color: #ef4444;
 }
 
 @media (max-width: 768px) {
   .photo-playground__main {
     grid-template-columns: 1fr;
-  }
-
-  .photo-playground__url-bar {
-    flex-direction: column;
-    align-items: stretch;
   }
 }
 </style>

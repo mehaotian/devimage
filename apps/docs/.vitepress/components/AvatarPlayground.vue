@@ -38,6 +38,40 @@ const PREVIEW_SIZE = 240;
 const STYLE_GALLERY_SIZE = 72;
 const PATTERN_GALLERY_SIZE = 64;
 const SEED_DEBOUNCE_MS = 400;
+const SIZE_DEBOUNCE_MS = 400;
+const MIN_AVATAR_SIZE = 16;
+const MAX_AVATAR_SIZE = 4000;
+const PREVIEW_MAX = 240;
+
+interface AvatarPreset {
+  label: string;
+  style: string;
+  seed: string;
+  size?: number;
+  text?: boolean;
+  variant?: 'gradient' | 'mesh' | 'pattern';
+  shape?: 'circle' | 'square';
+  bg?: string;
+  fg?: string;
+}
+
+const PLAY_PRESETS: AvatarPreset[] = [
+  { label: '中文首字', style: 'devimg', seed: '张三', size: 128 },
+  { label: '卡通风格', style: 'lorelei', seed: 'Luna', size: 128 },
+  { label: '纯图案', style: 'devimg', seed: 'Luna', size: 128, text: false },
+  { label: '方形', style: 'devimg', seed: '张三', size: 128, shape: 'square' },
+];
+
+const SIZE_PRESETS = [32, 64, 128, 256] as const;
+
+const CODE_RECIPES = [
+  { title: '中文首字', path: '/avatar/devimg/张三/128' },
+  { title: '纯图案无字', path: '/avatar/devimg/Luna/128?text=0' },
+  { title: '品牌色', path: '/avatar/devimg/张三/128?bg=6366f1&fg=ffffff' },
+  { title: '卡通 Lorelei', path: '/avatar/lorelei/Luna/128' },
+  { title: '方形', path: '/avatar/devimg/张三/128?shape=square' },
+  { title: 'WebP 位图', path: '/avatar/devimg/张三/128.webp' },
+] as const;
 
 const DEVIMG_CORE_IDS = ['devimg', 'devimg-geo', 'devimg-pattern'];
 
@@ -65,6 +99,8 @@ const selectedStyle = ref(DEFAULT_STYLE);
 const seed = ref(DEFAULT_SEED);
 /** 防抖后的 seed，避免输入时每个字符都请求 API */
 const debouncedSeed = ref(DEFAULT_SEED);
+const avatarSize = ref(128);
+const debouncedAvatarSize = ref(128);
 const bgColor = ref('');
 const fgColor = ref('');
 const variant = ref<'gradient' | 'mesh' | 'pattern'>('gradient');
@@ -80,15 +116,36 @@ const patternCatalogStale = ref(false);
 type PlaygroundTab = 'play' | 'gallery' | 'code';
 const activeTab = ref<PlaygroundTab>('play');
 const patternsExpanded = ref(false);
+const showMore = ref(false);
 
 let seedTimer: ReturnType<typeof setTimeout> | null = null;
+let sizeTimer: ReturnType<typeof setTimeout> | null = null;
 
 const providerLabels: Record<string, string> = {
-  devimage: '图即风格',
+  devimage: '图即',
   dicebear: 'DiceBear',
   jdenticon: 'Jdenticon',
   minidenticons: 'Minidenticons',
 };
+
+interface StyleSelectGroup {
+  id: string;
+  label: string;
+  items: StyleMeta[];
+}
+
+const DEVIMG_SELECT_GROUP_ORDER = [
+  'gradient',
+  'text',
+  'geometric',
+  'abstract',
+  'symbol',
+  'retro',
+  'filter',
+  'pixel',
+  'character',
+  'icon',
+];
 
 /**
  * 规范化 hex 输入（去掉 #，仅保留 6 位）
@@ -157,20 +214,32 @@ function buildAvatarUrl(
     if (patternValue) {
       params.set('pattern', patternValue);
     }
+  } else if (style.startsWith('devimg-')) {
+    const shapeValue = query?.shape ?? 'circle';
+    if (shapeValue === 'square') {
+      params.set('shape', 'square');
+    }
   }
 
   const bg = normalizeHex(query?.bg ?? '');
   const fg = normalizeHex(query?.fg ?? '');
   const skipBg =
     style === 'devimg-pattern' || (style === 'devimg' && (query?.variant ?? 'gradient') === 'pattern');
-  if (bg.length === 6 && !skipBg) {
+  if (DEVIMG_FAMILY.has(style) && bg.length === 6 && !skipBg) {
     params.set('bg', bg);
   }
-  if (fg.length === 6) {
+  if (DEVIMG_FAMILY.has(style) && fg.length === 6) {
     params.set('fg', fg);
   }
   const qs = params.toString();
   return qs ? `${base}?${qs}` : base;
+}
+
+/**
+ * 判断是否为图即自研风格（与三方接入区分，便于版权展示）
+ */
+function isDevimageStyle(item: StyleMeta): boolean {
+  return item.provider === 'devimage' || item.engine === 'native';
 }
 
 const effectiveSeed = computed(() => debouncedSeed.value.trim() || DEFAULT_SEED);
@@ -180,6 +249,10 @@ const activeStyleMeta = computed(() =>
 );
 
 const isDevimgFamily = computed(() => DEVIMG_FAMILY.has(selectedStyle.value));
+
+const isActiveNativeDevimage = computed(
+  () => Boolean(activeStyleMeta.value && isDevimageStyle(activeStyleMeta.value)),
+);
 
 const supportsColorQuery = computed(
   () =>
@@ -191,17 +264,32 @@ const isPatternMode = computed(
   () => selectedStyle.value === 'devimg-pattern' || variant.value === 'pattern',
 );
 
+const showShapeControl = computed(() => isActiveNativeDevimage.value);
+
 const showVariantPicker = computed(
   () => isDevimgFamily.value && selectedStyle.value !== 'devimg-pattern',
 );
 
 const showPatternPicker = computed(() => isDevimgFamily.value && isPatternMode.value);
 
+const showTextToggle = computed(() => isDevimgFamily.value);
+
 const showBgControl = computed(() => isDevimgFamily.value && !isPatternMode.value);
 
 const showFgControl = computed(() => isDevimgFamily.value && showText.value);
 
 const showColorSection = computed(() => showBgControl.value || showFgControl.value);
+
+const showDevimgAdvancedControls = computed(
+  () => showVariantPicker.value || showPatternPicker.value || showTextToggle.value,
+);
+
+const hasMoreOptions = computed(
+  () =>
+    showShapeControl.value ||
+    showDevimgAdvancedControls.value ||
+    showColorSection.value,
+);
 
 const devimgQuery = computed(() => ({
   variant: variant.value,
@@ -213,30 +301,100 @@ const devimgQuery = computed(() => ({
 }));
 
 const previewUrl = computed(() =>
-  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, PREVIEW_SIZE, devimgQuery.value),
+  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, debouncedAvatarSize.value, devimgQuery.value),
 );
 
 const apiUrl = computed(() =>
-  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, 128, devimgQuery.value),
+  buildAvatarUrl(selectedStyle.value, effectiveSeed.value, debouncedAvatarSize.value, devimgQuery.value),
 );
+
+const relativeApiPath = computed(() => apiUrl.value.replace(API_BASE, ''));
+
+/**
+ * 预览区展示的 query 参数标签
+ */
+const previewParamTags = computed(() => {
+  try {
+    const params = new URL(apiUrl.value).searchParams;
+    return [...params.entries()].map(([key, value]) => `${key}=${value}`);
+  } catch {
+    return [];
+  }
+});
+
+const previewDisplaySize = computed(() =>
+  Math.min(debouncedAvatarSize.value, PREVIEW_MAX),
+);
+
+const previewCaption = computed(() => {
+  const title = activeStyleMeta.value?.title ?? selectedStyle.value;
+  return `${debouncedAvatarSize.value}px · ${title} · ${effectiveSeed.value}`;
+});
 
 const htmlSnippet = computed(
   () =>
-    `<img src="${apiUrl.value}" alt="${effectiveSeed.value} avatar" width="128" height="128" />`,
+    `<img src="${apiUrl.value}" alt="${effectiveSeed.value}" width="${debouncedAvatarSize.value}" height="${debouncedAvatarSize.value}" />`,
 );
 
-const groupedByProvider = computed(() => {
-  const map = new Map<string, StyleMeta[]>();
-  for (const item of styles.value) {
-    if (item.provider === 'devimage' && item.aliasOf) {
-      continue;
-    }
-    const key = item.provider ?? item.engine;
-    const list = map.get(key) ?? [];
+/**
+ * 将可见风格按「来源 · 题材」拆成下拉 optgroup，内置与三方不混排
+ */
+function buildStyleSelectGroups(
+  items: StyleMeta[],
+  groupOrder: readonly string[],
+  providerKey: string,
+  providerLabel: string,
+): StyleSelectGroup[] {
+  const filtered = items.filter((item) => !item.aliasOf);
+  const byGroup = new Map<string, StyleMeta[]>();
+  for (const item of filtered) {
+    const list = byGroup.get(item.group) ?? [];
     list.push(item);
-    map.set(key, list);
+    byGroup.set(item.group, list);
   }
-  return map;
+  return groupOrder
+    .filter((groupId) => byGroup.has(groupId))
+    .map((groupId) => ({
+      id: `${providerKey}-${groupId}`,
+      label: `${providerLabel} · ${GROUP_LABELS[groupId] ?? groupId}`,
+      items: byGroup.get(groupId) ?? [],
+    }));
+}
+
+const styleSelectGroups = computed((): StyleSelectGroup[] => {
+  const visible = styles.value.filter((item) => !item.aliasOf);
+  const groups: StyleSelectGroup[] = [];
+
+  groups.push(
+    ...buildStyleSelectGroups(
+      visible.filter(isDevimageStyle),
+      DEVIMG_SELECT_GROUP_ORDER,
+      'devimg',
+      providerLabels.devimage,
+    ),
+  );
+
+  groups.push(
+    ...buildStyleSelectGroups(
+      visible.filter((item) => item.provider === 'dicebear'),
+      DICEBEAR_GROUP_ORDER,
+      'dicebear',
+      providerLabels.dicebear,
+    ),
+  );
+
+  for (const provider of ['jdenticon', 'minidenticons'] as const) {
+    const partnerItems = visible.filter((item) => item.provider === provider);
+    if (partnerItems.length) {
+      groups.push({
+        id: provider,
+        label: providerLabels[provider],
+        items: partnerItems,
+      });
+    }
+  }
+
+  return groups;
 });
 
 /**
@@ -274,6 +432,68 @@ function buildPatternThumbUrl(seedValue: string, pattern: string, shape: 'circle
     shape,
     pattern,
   });
+}
+
+/**
+ * 将尺寸 clamp 到 API 允许范围
+ */
+function clampAvatarSize(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 128;
+  }
+  return Math.min(MAX_AVATAR_SIZE, Math.max(MIN_AVATAR_SIZE, Math.round(value)));
+}
+
+/**
+ * 应用快捷预设
+ */
+function applyPlayPreset(preset: AvatarPreset): void {
+  selectedStyle.value = preset.style;
+  seed.value = preset.seed;
+  debouncedSeed.value = preset.seed;
+  if (preset.size !== undefined) {
+    avatarSize.value = preset.size;
+    debouncedAvatarSize.value = preset.size;
+  }
+  syncDevimgControls(preset.style);
+  if (preset.text !== undefined) {
+    showText.value = preset.text;
+  }
+  if (preset.variant !== undefined) {
+    variant.value = preset.variant;
+  }
+  if (preset.shape !== undefined) {
+    avatarShape.value = preset.shape;
+  }
+  if (preset.bg) {
+    bgColor.value = preset.bg;
+  } else {
+    bgColor.value = '';
+  }
+  if (preset.fg) {
+    fgColor.value = preset.fg;
+  } else {
+    fgColor.value = '';
+  }
+  showMore.value = false;
+  copied.value = false;
+  activeTab.value = 'play';
+}
+
+/**
+ * 应用常用尺寸
+ */
+function applySizePreset(size: number): void {
+  avatarSize.value = size;
+  debouncedAvatarSize.value = clampAvatarSize(size);
+  copied.value = false;
+}
+
+/**
+ * 将相对路径转为完整 API URL
+ */
+function toFullUrl(path: string): string {
+  return `${API_BASE}${path}`;
 }
 
 /**
@@ -415,7 +635,7 @@ const devimgAlgoGroups = computed(() => {
   }
   return DEVIMG_ALGO_GROUP_ORDER.filter((groupId) => byGroup.has(groupId)).map((groupId) => ({
     id: `devimg-${groupId}`,
-    title: `图即 · ${GROUP_LABELS[groupId] ?? groupId}`,
+    title: GROUP_LABELS[groupId] ?? groupId,
     items: byGroup.get(groupId) ?? [],
   }));
 });
@@ -434,7 +654,7 @@ const partnerGallerySections = computed(() => {
     if (items?.length) {
       sections.push({
         id: `dicebear-${groupId}`,
-        title: `DiceBear · ${GROUP_LABELS[groupId] ?? groupId}`,
+        title: `${providerLabels.dicebear} · ${GROUP_LABELS[groupId] ?? groupId}`,
         items,
       });
     }
@@ -444,7 +664,7 @@ const partnerGallerySections = computed(() => {
     if (items.length) {
       sections.push({
         id: provider,
-        title: providerLabels[provider] ?? provider,
+        title: providerLabels[provider],
         items,
       });
     }
@@ -453,12 +673,20 @@ const partnerGallerySections = computed(() => {
 });
 
 const galleryNavItems = computed(() => {
-  const items: { id: string; label: string }[] = [
-    { id: 'gallery-devimg-core', label: '图即 · 基础' },
-    ...devimgAlgoGroups.value.map((group) => ({ id: group.id, label: group.title })),
-    ...partnerGallerySections.value.map((section) => ({ id: section.id, label: section.title })),
-    { id: 'gallery-patterns', label: `纹理 pattern (${patternCount.value})` },
+  const items: { id: string; label: string; divider?: boolean }[] = [
+    { id: 'gallery-devimg-core', label: '图即 · 推荐' },
+    ...devimgAlgoGroups.value.map((group) => ({
+      id: group.id,
+      label: `${providerLabels.devimage} · ${group.title}`,
+    })),
   ];
+  if (partnerGallerySections.value.length) {
+    items.push({ id: 'gallery-partner-divider', label: '开源接入', divider: true });
+    items.push(
+      ...partnerGallerySections.value.map((section) => ({ id: section.id, label: section.title })),
+    );
+  }
+  items.push({ id: 'gallery-patterns', label: '图即 · 纹理' });
   if (patternGroups.value.length) {
     for (const group of patternGroups.value) {
       items.push({ id: `pattern-group-${group.id}`, label: group.title });
@@ -478,7 +706,9 @@ function scrollToGallerySection(sectionId: string): void {
     activeTab.value = 'gallery';
   }
   window.requestAnimationFrame(() => {
-    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const targetId =
+      sectionId === 'gallery-partner-divider' ? 'gallery-partner-divider' : sectionId;
+    document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 }
 
@@ -550,11 +780,23 @@ watch(seed, (value) => {
   }, SEED_DEBOUNCE_MS);
 });
 
+watch([avatarSize], () => {
+  if (sizeTimer) {
+    clearTimeout(sizeTimer);
+  }
+  sizeTimer = setTimeout(() => {
+    debouncedAvatarSize.value = clampAvatarSize(avatarSize.value);
+  }, SIZE_DEBOUNCE_MS);
+}, { immediate: true });
+
 watch(selectedStyle, (styleId) => {
   copied.value = false;
   syncDevimgControls(styleId);
   if (!supportsColorQuery.value) {
     clearColors();
+  }
+  if (!hasMoreOptions.value) {
+    showMore.value = false;
   }
 });
 
@@ -575,6 +817,9 @@ onUnmounted(() => {
   if (seedTimer) {
     clearTimeout(seedTimer);
   }
+  if (sizeTimer) {
+    clearTimeout(sizeTimer);
+  }
 });
 </script>
 
@@ -589,7 +834,7 @@ onUnmounted(() => {
         :aria-selected="activeTab === 'play'"
         @click="setPlaygroundTab('play')"
       >
-        快速试玩
+        试玩
       </button>
       <button
         type="button"
@@ -599,8 +844,7 @@ onUnmounted(() => {
         :aria-selected="activeTab === 'gallery'"
         @click="setPlaygroundTab('gallery')"
       >
-        画廊
-        <span class="avatar-playground__tab-badge">{{ galleryTotalCount }}</span>
+        浏览
       </button>
       <button
         type="button"
@@ -610,7 +854,7 @@ onUnmounted(() => {
         :aria-selected="activeTab === 'code'"
         @click="setPlaygroundTab('code')"
       >
-        代码参考
+        复制代码
       </button>
     </div>
 
@@ -620,24 +864,66 @@ onUnmounted(() => {
           <button
             type="button"
             class="avatar-playground__image-btn"
-            :title="copied ? '已复制链接' : '点击复制固定 seed 链接'"
+            :title="copied ? '已复制' : '点击复制链接'"
             @click="copyPreviewLink"
           >
             <img
               :src="previewUrl"
-              :alt="`${selectedStyle} · ${effectiveSeed}`"
-              width="240"
-              height="240"
+              :alt="previewCaption"
+              :width="previewDisplaySize"
+              :height="previewDisplaySize"
               class="avatar-playground__image"
             />
-            <span v-if="copied" class="avatar-playground__copied">已复制 URL</span>
+            <span v-if="copied" class="avatar-playground__copied">已复制</span>
           </button>
-          <p class="avatar-playground__preview-caption">
-            {{ selectedStyle }} · {{ effectiveSeed }}
-          </p>
+          <p class="avatar-playground__preview-caption">{{ previewCaption }}</p>
+          <div v-if="previewParamTags.length" class="avatar-playground__param-tags" aria-label="当前 URL 参数">
+            <code v-for="tag in previewParamTags" :key="tag" class="avatar-playground__param-tag">{{ tag }}</code>
+          </div>
+          <code class="avatar-playground__preview-path">{{ relativeApiPath }}</code>
         </div>
 
         <div class="avatar-playground__panel avatar-playground__controls">
+          <div class="avatar-playground__presets">
+            <span class="avatar-playground__label">快捷示例</span>
+            <div class="avatar-playground__presets-row">
+              <button
+                v-for="preset in PLAY_PRESETS"
+                :key="preset.label"
+                type="button"
+                class="avatar-playground__preset"
+                @click="applyPlayPreset(preset)"
+              >
+                {{ preset.label }}
+              </button>
+            </div>
+          </div>
+
+          <label class="avatar-playground__field">
+            <span class="avatar-playground__label">尺寸（边长 px）</span>
+            <div class="avatar-playground__size-row">
+              <input
+                v-model.number="avatarSize"
+                type="number"
+                min="16"
+                max="4000"
+                class="avatar-playground__input"
+                aria-label="头像尺寸"
+              />
+            </div>
+            <div class="avatar-playground__presets-row">
+              <button
+                v-for="size in SIZE_PRESETS"
+                :key="size"
+                type="button"
+                class="avatar-playground__preset"
+                @click="applySizePreset(size)"
+              >
+                {{ size }}
+              </button>
+            </div>
+          </label>
+
           <label class="avatar-playground__field">
             <span class="avatar-playground__label">风格</span>
             <div class="avatar-playground__select-wrap">
@@ -647,11 +933,11 @@ onUnmounted(() => {
                 :disabled="loading"
               >
                 <optgroup
-                  v-for="[provider, items] in groupedByProvider"
-                  :key="provider"
-                  :label="providerLabels[provider] ?? provider"
+                  v-for="group in styleSelectGroups"
+                  :key="group.id"
+                  :label="group.label"
                 >
-                  <option v-for="item in items" :key="item.id" :value="item.id">
+                  <option v-for="item in group.items" :key="item.id" :value="item.id">
                     {{ item.title }}
                   </option>
                 </optgroup>
@@ -660,42 +946,54 @@ onUnmounted(() => {
           </label>
 
           <label class="avatar-playground__field">
-            <span class="avatar-playground__label">Seed</span>
+            <span class="avatar-playground__label">标识（名字 / 用户名）</span>
             <div class="avatar-playground__seed-row">
-              <input v-model="seed" type="text" class="avatar-playground__input" maxlength="64" />
-              <button type="button" class="avatar-playground__dice" title="随机 seed" @click="randomizeSeed">
+              <input v-model="seed" type="text" class="avatar-playground__input" maxlength="64" placeholder="张三" />
+              <button type="button" class="avatar-playground__dice" title="随机标识" @click="randomizeSeed">
                 🎲
               </button>
             </div>
           </label>
 
-          <div v-if="isDevimgFamily" class="avatar-playground__devimg">
-            <label class="avatar-playground__field">
-              <span class="avatar-playground__label">shape 形状</span>
-              <div class="avatar-playground__select-wrap">
-                <select v-model="avatarShape" class="avatar-playground__select">
-                  <option value="circle">circle 圆形</option>
-                  <option value="square">square 方形</option>
-                </select>
-              </div>
-            </label>
+          <button
+            v-if="hasMoreOptions"
+            type="button"
+            class="avatar-playground__more-toggle"
+            :aria-expanded="showMore"
+            @click="showMore = !showMore"
+          >
+            {{ showMore ? '收起更多选项' : '更多选项' }}
+            <span class="avatar-playground__more-chevron">{{ showMore ? '▾' : '▸' }}</span>
+          </button>
 
+          <div v-show="showMore && hasMoreOptions" class="avatar-playground__more">
+          <label v-if="showShapeControl" class="avatar-playground__field">
+            <span class="avatar-playground__label">形状</span>
+            <div class="avatar-playground__select-wrap">
+              <select v-model="avatarShape" class="avatar-playground__select">
+                <option value="circle">圆形</option>
+                <option value="square">方形</option>
+              </select>
+            </div>
+          </label>
+
+          <div v-if="showDevimgAdvancedControls" class="avatar-playground__devimg">
             <label v-if="showVariantPicker" class="avatar-playground__field">
-              <span class="avatar-playground__label">variant 背景</span>
+              <span class="avatar-playground__label">背景类型</span>
               <div class="avatar-playground__select-wrap">
                 <select v-model="variant" class="avatar-playground__select">
-                  <option value="gradient">gradient 渐变圆</option>
-                  <option value="mesh">mesh 网格渐变</option>
-                  <option value="pattern">pattern 纹理</option>
+                  <option value="gradient">渐变</option>
+                  <option value="mesh">网格光斑</option>
+                  <option value="pattern">纹理</option>
                 </select>
               </div>
             </label>
 
             <label v-if="showPatternPicker" class="avatar-playground__field">
-              <span class="avatar-playground__label">pattern 纹理</span>
+              <span class="avatar-playground__label">纹理样式</span>
               <div class="avatar-playground__select-wrap">
                 <select v-model="patternId" class="avatar-playground__select">
-                  <option value="">seed 自动</option>
+                  <option value="">自动</option>
                   <optgroup v-for="group in patternGroups" :key="group.id" :label="group.title">
                     <option v-for="item in group.options" :key="item.id" :value="item.id">
                       {{ item.label }}
@@ -705,20 +1003,20 @@ onUnmounted(() => {
               </div>
             </label>
 
-            <label class="avatar-playground__toggle">
+            <label v-if="showTextToggle" class="avatar-playground__toggle">
               <input v-model="showText" type="checkbox" />
-              <span>text 显示首字（中文首字 / 英文首字母）</span>
+              <span>显示首字</span>
             </label>
           </div>
 
           <div v-if="showColorSection" class="avatar-playground__colors">
             <p class="avatar-playground__colors-title">
-              {{ showBgControl ? '品牌色（bg / fg）' : '文字色（fg）' }}
+              {{ showBgControl ? '背景色 / 文字色' : '文字色' }}
             </p>
 
             <div class="avatar-playground__color-row">
               <label v-if="showBgControl" class="avatar-playground__color-field">
-                <span class="avatar-playground__label">bg 背景</span>
+                <span class="avatar-playground__label">背景</span>
                 <div class="avatar-playground__color-input-wrap">
                   <input
                     type="color"
@@ -737,7 +1035,7 @@ onUnmounted(() => {
               </label>
 
               <label v-if="showFgControl" class="avatar-playground__color-field">
-                <span class="avatar-playground__label">fg 文字</span>
+                <span class="avatar-playground__label">文字</span>
                 <div class="avatar-playground__color-input-wrap">
                   <input
                     type="color"
@@ -771,14 +1069,6 @@ onUnmounted(() => {
               </button>
             </div>
           </div>
-
-          <div v-if="isDevimgFamily" class="avatar-playground__quick-links">
-            <button type="button" class="avatar-playground__quick-link" @click="setPlaygroundTab('gallery')">
-              浏览画廊 →
-            </button>
-            <button type="button" class="avatar-playground__quick-link" @click="setPlaygroundTab('code')">
-              查看 API / HTML →
-            </button>
           </div>
 
           <p v-if="loadError" class="avatar-playground__error">{{ loadError }}</p>
@@ -787,7 +1077,8 @@ onUnmounted(() => {
 
       <div class="avatar-playground__url-bar">
         <code class="avatar-playground__url-text">{{ apiUrl }}</code>
-        <button type="button" class="avatar-playground__copy" @click="copyText(apiUrl)">复制 URL</button>
+        <button type="button" class="avatar-playground__copy" @click="copyText(apiUrl)">复制链接</button>
+        <button type="button" class="avatar-playground__copy" @click="copyText(htmlSnippet)">复制 HTML</button>
       </div>
     </div>
 
@@ -798,22 +1089,17 @@ onUnmounted(() => {
       role="tabpanel"
     >
       <div class="avatar-playground__gallery-head">
-        <p class="avatar-playground__gallery-desc">
-          共 {{ galleryStyleCount }} 种风格 + {{ patternCount }} 种纹理 · seed：<code>{{ effectiveSeed }}</code> · 点击缩略图试玩
-        </p>
-        <p class="avatar-playground__gallery-warn">
-          缩略图按滚动懒加载；纹理 pattern 默认折叠。请勿批量爬取，详见
-          <a href="/guide/fair-use">公平使用</a>。
-        </p>
+        <p class="avatar-playground__gallery-desc">点击缩略图即可回到试玩区预览。</p>
         <p v-if="patternCatalogStale" class="avatar-playground__gallery-warn">
-          API 返回的 pattern 目录偏旧（可能为浏览器缓存）。画廊已用内置完整 {{ EXPECTED_PATTERN_COUNT }} 种列表；请硬刷新或重启 API。
+          纹理列表可能不是最新，请刷新页面后重试。
         </p>
-        <nav class="avatar-playground__gallery-nav" aria-label="画廊分组跳转">
+        <nav class="avatar-playground__gallery-nav" aria-label="浏览分组跳转">
           <button
             v-for="item in galleryNavItems"
             :key="item.id"
             type="button"
             class="avatar-playground__gallery-nav-btn"
+            :class="{ 'avatar-playground__gallery-nav-btn--divider': item.divider }"
             @click="scrollToGallerySection(item.id)"
           >
             {{ item.label }}
@@ -825,7 +1111,7 @@ onUnmounted(() => {
         id="gallery-devimg-core"
         class="avatar-playground__gallery-group"
       >
-        <h4 class="avatar-playground__gallery-group-title">图即 · 基础</h4>
+        <h4 class="avatar-playground__gallery-group-title">图即 · 推荐</h4>
         <div class="avatar-playground__gallery-grid">
           <button
             v-for="item in devimgCoreStyles"
@@ -841,7 +1127,7 @@ onUnmounted(() => {
               :alt="item.id"
               :size="STYLE_GALLERY_SIZE"
             />
-            <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+            <span class="avatar-playground__gallery-label">{{ item.title }}</span>
           </button>
         </div>
       </div>
@@ -852,7 +1138,9 @@ onUnmounted(() => {
         :key="group.id"
         class="avatar-playground__gallery-group"
       >
-        <h4 class="avatar-playground__gallery-group-title">{{ group.title }}</h4>
+        <h4 class="avatar-playground__gallery-group-title">
+          {{ providerLabels.devimage }} · {{ group.title }}
+        </h4>
         <div class="avatar-playground__gallery-grid">
           <button
             v-for="item in group.items"
@@ -868,9 +1156,21 @@ onUnmounted(() => {
               :alt="item.id"
               :size="STYLE_GALLERY_SIZE"
             />
-            <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+            <span class="avatar-playground__gallery-label">{{ item.title }}</span>
           </button>
         </div>
+      </div>
+
+      <div
+        v-if="partnerGallerySections.length"
+        id="gallery-partner-divider"
+        class="avatar-playground__gallery-divider"
+      >
+        <span class="avatar-playground__gallery-divider-label">开源接入</span>
+        <span class="avatar-playground__gallery-divider-hint">
+          以下风格由第三方项目提供，许可见
+          <a href="/guide/avatar-licenses">头像许可</a>
+        </span>
       </div>
 
       <div
@@ -895,7 +1195,7 @@ onUnmounted(() => {
               :alt="item.id"
               :size="STYLE_GALLERY_SIZE"
             />
-            <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+            <span class="avatar-playground__gallery-label">{{ item.title }}</span>
           </button>
         </div>
       </div>
@@ -908,7 +1208,7 @@ onUnmounted(() => {
           @click="patternsExpanded = !patternsExpanded"
         >
           <span class="avatar-playground__gallery-group-title avatar-playground__gallery-group-title--btn">
-            图即 · 纹理 pattern（{{ patternCount }} 种）
+            纹理样式
           </span>
           <span class="avatar-playground__gallery-collapse-hint">
             {{ patternsExpanded ? '收起' : '展开预览' }}
@@ -938,7 +1238,7 @@ onUnmounted(() => {
                   :alt="item.id"
                   :size="PATTERN_GALLERY_SIZE"
                 />
-                <span class="avatar-playground__gallery-label">{{ item.id }}</span>
+                <span class="avatar-playground__gallery-label">{{ item.label }}</span>
               </button>
             </div>
           </div>
@@ -949,7 +1249,7 @@ onUnmounted(() => {
     <div v-show="activeTab === 'code'" class="avatar-playground__pane avatar-playground__panel avatar-playground__refs" role="tabpanel">
       <div class="avatar-playground__ref-block">
         <div class="avatar-playground__ref-head">
-          <span>HTTP API</span>
+          <span>当前链接</span>
           <button type="button" class="avatar-playground__copy" @click="copyText(apiUrl)">
             复制
           </button>
@@ -959,7 +1259,7 @@ onUnmounted(() => {
 
       <div class="avatar-playground__ref-block">
         <div class="avatar-playground__ref-head">
-          <span>HTML</span>
+          <span>当前 HTML</span>
           <button type="button" class="avatar-playground__copy" @click="copyText(htmlSnippet)">
             复制
           </button>
@@ -967,11 +1267,22 @@ onUnmounted(() => {
         <code class="avatar-playground__code">{{ htmlSnippet }}</code>
       </div>
 
+      <div class="avatar-playground__recipes">
+        <h4 class="avatar-playground__recipes-title">常用示例</h4>
+        <div v-for="recipe in CODE_RECIPES" :key="recipe.path" class="avatar-playground__recipe">
+          <div class="avatar-playground__recipe-head">
+            <strong class="avatar-playground__recipe-title">{{ recipe.title }}</strong>
+            <button type="button" class="avatar-playground__copy" @click="copyText(toFullUrl(recipe.path))">
+              复制
+            </button>
+          </div>
+          <code class="avatar-playground__code">{{ toFullUrl(recipe.path) }}</code>
+        </div>
+      </div>
+
       <p class="avatar-playground__hint">
-        同一 <code>style</code> + <code>seed</code>（及 devimg 的 <code>variant</code> / <code>text</code> / <code>shape</code> / <code>bg</code> / <code>fg</code>）始终生成相同头像；
-        在「快速试玩」中点击预览图也可复制 URL。
-        许可说明见
-        <a href="/guide/avatar-licenses">图即风格与三方许可</a>。
+        同一链接始终生成相同头像。许可说明见
+        <a href="/guide/avatar-licenses">头像许可</a>。
       </p>
     </div>
   </div>
@@ -1063,6 +1374,111 @@ onUnmounted(() => {
   word-break: break-all;
 }
 
+.avatar-playground__param-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.avatar-playground__param-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vp-c-brand-1) 10%, transparent);
+  color: var(--vp-c-text-2);
+  font-size: 11px;
+}
+
+.avatar-playground__preview-path {
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  word-break: break-all;
+  text-align: center;
+  color: var(--vp-c-text-3);
+}
+
+.avatar-playground__presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.avatar-playground__presets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.avatar-playground__size-row {
+  display: flex;
+  gap: 8px;
+}
+
+.avatar-playground__more-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.avatar-playground__more-chevron {
+  color: var(--vp-c-text-3);
+}
+
+.avatar-playground__more {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px dashed var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.avatar-playground__recipes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avatar-playground__recipes-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+
+.avatar-playground__recipe {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+}
+
+.avatar-playground__recipe-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-playground__recipe-title {
+  font-size: 13px;
+  color: var(--vp-c-text-1);
+}
+
 .avatar-playground__controls {
   display: flex;
   flex-direction: column;
@@ -1093,8 +1509,9 @@ onUnmounted(() => {
 
 .avatar-playground__url-bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-top: 14px;
   padding: 10px 12px;
   border: 1px solid var(--vp-c-divider);
@@ -1408,6 +1825,37 @@ onUnmounted(() => {
 .avatar-playground__gallery-nav-btn:hover {
   border-color: var(--vp-c-brand-1);
   color: var(--vp-c-brand-1);
+}
+
+.avatar-playground__gallery-nav-btn--divider {
+  border-style: dashed;
+  color: var(--vp-c-text-3);
+  cursor: default;
+  pointer-events: auto;
+}
+
+.avatar-playground__gallery-divider {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0 16px;
+  padding: 12px 14px;
+  border: 1px dashed var(--vp-c-divider);
+  border-radius: 10px;
+  background: var(--vp-c-bg);
+  scroll-margin-top: 72px;
+}
+
+.avatar-playground__gallery-divider-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
+}
+
+.avatar-playground__gallery-divider-hint {
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  line-height: 1.5;
 }
 
 .avatar-playground__gallery-group {

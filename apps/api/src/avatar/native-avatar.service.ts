@@ -16,6 +16,7 @@ import {
   renderDevimgPattern,
 } from './devimg-patterns/index';
 import { isExperimentalNativeStyle, renderExperimentalNative } from './native-renderers/index';
+import { applyAvatarShapeClip } from './native-renderers/helpers';
 import { renderGeo } from './native-renderers/geo.renderer';
 
 /** devimg 背景变体 */
@@ -57,13 +58,15 @@ export class NativeAvatarService {
    */
   renderSvg(options: NativeAvatarOptions): string {
     const size = parseDimension(options.size, 'size');
+    const shape = this.parseShape(options.shape);
 
     if (options.style === 'devimg-geo') {
-      return renderGeo({ seed: options.seed, size });
+      return applyAvatarShapeClip(renderGeo({ seed: options.seed, size }), shape);
     }
 
     if (isExperimentalNativeStyle(options.style)) {
-      return renderExperimentalNative(options.style, options.seed, size);
+      const svg = renderExperimentalNative(options.style, options.seed, size, shape);
+      return applyAvatarShapeClip(svg, shape);
     }
 
     if (this.isDevimgFamily(options.style)) {
@@ -72,6 +75,19 @@ export class NativeAvatarService {
     }
 
     throw new Error(`Unknown native style: ${options.style}`);
+  }
+
+  /**
+   * 解析 shape query，默认圆形
+   */
+  private parseShape(shape?: string): DevimgShape {
+    if (shape === 'square') {
+      return 'square';
+    }
+    if (shape !== undefined && shape !== 'circle' && shape !== '') {
+      throw new Error(`Invalid shape: ${shape}. Use circle or square.`);
+    }
+    return 'circle';
   }
 
   /**
@@ -135,7 +151,7 @@ export class NativeAvatarService {
       throw new Error(`Invalid text: ${text}. Use 0 or 1.`);
     }
 
-    const shape = options.shape ?? 'circle';
+    const shape = this.parseShape(options.shape);
     if (shape !== 'circle' && shape !== 'square') {
       throw new Error(`Invalid shape: ${shape}. Use circle or square.`);
     }

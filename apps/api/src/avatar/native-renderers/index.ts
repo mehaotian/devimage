@@ -39,10 +39,15 @@ export function isExperimentalNativeStyle(style: string): boolean {
 /**
  * 调用实验性 native 渲染器
  */
-export function renderExperimentalNative(style: string, seed: string, size: number): string {
+export function renderExperimentalNative(
+  style: string,
+  seed: string,
+  size: number,
+  shape: 'circle' | 'square' = 'circle',
+): string {
   const renderer = EXPERIMENTAL_NATIVE_RENDERERS[style];
   if (!renderer) {
     throw new Error(`Unknown experimental native style: ${style}`);
   }
-  return renderer({ seed, size });
+  return renderer({ seed, size, shape });
 }

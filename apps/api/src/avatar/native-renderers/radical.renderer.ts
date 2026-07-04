@@ -28,7 +28,7 @@ function deriveRadicalMotif(char: string, seed: string): { patternId: string; st
  * 渲染部首纹理头像：首字 Unicode → pattern + 居中首字
  */
 export function renderRadical(input: NativeRendererInput): string {
-  const { seed, size } = input;
+  const { seed, size, shape = 'circle' } = input;
   const initial = extractInitialChar(seed);
   const { patternId, strokeBucket } = deriveRadicalMotif(initial, seed);
   const patternSeed = `${seed}:radical:${initial}:${strokeBucket}`;
@@ -37,14 +37,14 @@ export function renderRadical(input: NativeRendererInput): string {
   const fg = `#${ctx.c3}`;
 
   const body = [
-    circleClipOpen(),
+    shape === 'circle' ? circleClipOpen() : '',
     pattern.defs,
     pattern.body,
     `<text x="50" y="50" text-anchor="middle" dy="0.35em"`,
     ` fill="${fg}" font-family="system-ui,sans-serif" font-size="38" font-weight="600" opacity="0.92">`,
     escapeSvgText(initial, 2),
     `</text>`,
-    circleClipClose(),
+    shape === 'circle' ? circleClipClose() : '',
   ].join('');
 
   return wrapSvg(size, body);

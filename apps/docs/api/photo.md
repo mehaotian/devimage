@@ -1,12 +1,13 @@
-# 真实图库 API
+# 真实照片占位
 
-CC0 精选照片（当前 **8132** 张），语义与 **占位图 / 头像一致**：**seed 确定性选图，无 seed 随机**。原图存 COS，API 仅通过 `cos_key` 读取。
+国内可用的**真实感照片占位**：写进 `<img src="…">` 就能用，无需配置图床。
 
-Mock JSON 内 `products.image`、`posts.cover` 使用 `seed=product-{id}` / `seed=news-{id}`，不再使用 `?id=`。
+- **固定**：同一链接始终同一张图（适合商品详情、Banner）
+- **随机**：每次打开可能不同（适合列表、瀑布流）
 
-## 图库试玩 {#试玩}
+用法与 [纯色占位](/api/placeholder)、[seed 占位](/api/placeholder#seed) 相同。使用规范见 [公平使用](/guide/fair-use)。
 
-Playground 分三个 Tab：**快速试玩**（scene / cat + seed）、**目录**、**代码参考**。
+## 在线试玩
 
 <!-- markdownlint-disable MD033 -->
 
@@ -16,101 +17,80 @@ Playground 分三个 Tab：**快速试玩**（scene / cat + seed）、**目录**
 
 ---
 
-## 选取语义（与占位图统一）
+## 示例
 
-| 参数 | 行为 | Cache-Control |
-| ------ | ------ | ------------- |
-| 有 `seed` | 同 seed + 同 scene/cat → **永远同一张**（允许不同 seed 碰撞） | `immutable` |
-| 无 `seed` | 每次请求从池内 **随机** 一张 | `max-age=60, must-revalidate` |
-| `?id=` | **已废弃**，返回 400，请改用 `seed` | — |
+### 商品主图（固定）
 
 ```html
-<!-- 确定性（Mock 商品 5 号封面） -->
 <img src="http://localhost:3000/photo/400/400?scene=product&seed=product-5" />
+```
 
-<!-- 随机（每次可能不同） -->
-<img src="http://localhost:3000/photo/800/600?scene=news" />
+### 资讯列表（随机）
 
-<!-- 中文分类 + seed -->
+每次刷新可能换一张，URL 里不要加 `seed`：
+
+```html
+<img src="http://localhost:3000/photo/320/200?scene=news" />
+```
+
+### 首页 Banner（固定）
+
+```html
+<img src="http://localhost:3000/photo/1200/400?scene=banner&seed=hero-1" />
+```
+
+### 指定题材（可选）
+
+试玩区展开 **更多选项**，可按「美食」「咖啡」等题材筛选：
+
+```html
 <img src="http://localhost:3000/photo/640/480?cat=美食&seed=banner-1" />
 ```
 
 ---
 
-## 双层目录
+## 用途一览
 
-| 层级 | 参数 | 语言 | 说明 |
-| ------ | ------ | ------ | ------ |
-| scene | `?scene=product` | **英文 slug** | 业务场景池，Mock 默认映射 |
-| cat | `?cat=美食` | **中文 slug** | 82 个采集分类 |
+试玩里「用途」下拉与下表对应（URL 参数为 `scene`）：
 
-scene 与 cat **二选一**。
-
----
-
-## scene 场景目录（英文 slug · 中文 label）
-
-完整 JSON：`GET /photo/scenes`
-
-| slug | label | Mock 字段 |
+| 用途 | scene | 适合页面 |
 | ------ | ------ | ------ |
-| `product` | 商品 | `products.image` |
-| `food` | 餐饮 | `restaurants.image` |
-| `news` | 新闻资讯 | `posts.cover` |
-| `article` | 文章博客 | — |
-| `travel` | 出行 | `trips.image` |
-| `hotel` | 酒店民宿 | `hotels.image` |
-| `banner` | 首页轮播 | — |
-| `social` | 社交动态 | — |
-| `education` | 教育 | — |
-| `health` | 健康医疗 | — |
-| `realestate` | 房产家居 | — |
-| `business` | 商务金融 | — |
-| `game` | 游戏 | — |
-| `promo` | 促销活动 | — |
-| `gallery` | 图集混排 | — |
+| 商品 | `product` | 电商主图、商品卡片 |
+| 餐饮 | `food` | 餐厅、外卖 |
+| 新闻资讯 | `news` | 资讯列表、头条 |
+| 文章博客 | `article` | 博客封面 |
+| 出行 | `travel` | 行程、票务 |
+| 酒店民宿 | `hotel` | 住宿详情 |
+| 首页轮播 | `banner` | 宽屏 Hero |
+| 社交动态 | `social` | 信息流配图 |
+| 教育 | `education` | 课程封面 |
+| 健康医疗 | `health` | 医疗、健身 |
+| 房产家居 | `realestate` | 房源、装修 |
+| 商务金融 | `business` | 企业、金融 |
+| 游戏 | `game` | 游戏封面 |
+| 促销活动 | `promo` | 活动 Banner |
+| 通用 | `gallery` | 不限题材 |
 
 ---
 
-## cat 分类目录（中文 slug · tier 分组）
+## 参数参考
 
-完整 JSON：`GET /photo/categories`
-
-| tier | 英文 | 代表 cat |
-| ------ | ------ | ------ |
-| `A-product` | Product | 电商主图、服装、手机 |
-| `B-food` | Food | 美食、咖啡、餐饮门店 |
-| `C-content` | Content | 新闻、人物、书籍 |
-| `D-travel` | Travel | 旅行、飞机、汽车 |
-| `E-vertical` | Vertical | 室内、商务、医院 |
-| `F-decor` | Decor | 纹理、天空、3DRender |
-
----
-
-## `GET /photo/:w/:h`
+`GET /photo/:width/:height`
 
 | 参数 | 说明 |
 | ------ | ------ |
-| scene | 英文 scene slug |
-| cat | 中文分类 slug |
-| seed | 确定性选图；**省略则随机** |
+| scene | 用途（见上表），与 cat 二选一 |
+| cat | 具体题材（中文，如 `美食`），与 scene 二选一 |
+| seed | 有则固定；省略则随机 |
 | grayscale | `1` 灰度 |
 | blur | 1–10 模糊 |
 | format | `webp`（默认）`jpeg` `png` |
 
----
-
-## picsum 迁移（目录专用，非占位主力）
-
-| 路由 | 说明 |
-| ------ | ------ |
-| `GET /id/:id/:w/:h` | 按 manifest 全局 id（picsum 兼容） |
-| `GET /id/:id/info` | 元信息 JSON |
-| `GET /v2/list` | 分页列表 |
+宽、高范围 **10–4000**，与 [占位图](/api/placeholder) 相同。
 
 ---
 
-## 本地开发（无 CDN）
+## 其他
 
-1. `apps/api/.env` 配置 COS 密钥与 `COS_REGION`
-2. `pnpm dev` → API `<http://localhost:3000>` · 文档 `<http://localhost:5173/api/photo>`
+- 从 picsum 迁移：[从 picsum 迁移](/migrate/from-picsum)
+- 使用 DevImage [Mock 数据](/api/mock) 时，商品/资讯等图片地址已自动指向本服务

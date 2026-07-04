@@ -5,6 +5,7 @@ import { seedToInt, seedToUnit } from '../../common/seed';
 export interface NativeRendererInput {
   readonly seed: string;
   readonly size: number;
+  readonly shape?: 'circle' | 'square';
 }
 
 /** native 风格渲染函数签名 */
@@ -50,6 +51,33 @@ export function circleClipOpen(): string {
  */
 export function circleClipClose(): string {
   return `</g>`;
+}
+
+/**
+ * 为算法 native SVG 套上圆形裁剪（方形或未裁剪时原样返回）
+ */
+export function applyAvatarShapeClip(svg: string, shape: 'circle' | 'square'): string {
+  if (shape === 'square') {
+    return svg;
+  }
+  if (svg.includes('<clipPath id="clip"') || svg.includes('clip-path="url(#clip)"')) {
+    return svg;
+  }
+
+  return svg.replace(
+    /^(<svg[\s\S]*?>)([\s\S]*)(<\/svg>)$/i,
+    (_match, openTag: string, inner: string, closeTag: string) => {
+      const clipDef =
+        '<defs><clipPath id="devimg-shape-clip"><circle cx="50" cy="50" r="50"/></clipPath></defs>';
+      const defsMatch = inner.match(/^(\s*<defs[\s\S]*?<\/defs>)/);
+      if (defsMatch) {
+        const defsBlock = defsMatch[1];
+        const rest = inner.slice(defsBlock.length);
+        return `${openTag}${defsBlock}${clipDef}<g clip-path="url(#devimg-shape-clip)">${rest}</g>${closeTag}`;
+      }
+      return `${openTag}${clipDef}<g clip-path="url(#devimg-shape-clip)">${inner}</g>${closeTag}`;
+    },
+  );
 }
 
 /**

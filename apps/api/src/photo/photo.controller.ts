@@ -42,8 +42,12 @@ export class PhotoController {
   @Get('categories')
   @Header('Cache-Control', 'public, max-age=3600')
   @ApiOperation({ summary: '图库分类列表' })
-  listCategories(): { categories: ReturnType<PhotoManifestService['getCategories']> } {
-    return { categories: this.manifestService.getCategories() };
+  listCategories(): {
+    categories: Array<Omit<ReturnType<PhotoManifestService['getCategories']>[number], 'count'>>;
+  } {
+    return {
+      categories: this.manifestService.getCategories().map(({ count: _count, ...cat }) => cat),
+    };
   }
 
   /**
@@ -52,8 +56,19 @@ export class PhotoController {
   @Get('scenes')
   @Header('Cache-Control', 'public, max-age=3600')
   @ApiOperation({ summary: '业务场景列表' })
-  listScenes(): { scenes: ReturnType<PhotoManifestService['getScenesMeta']> } {
-    return { scenes: this.manifestService.getScenesMeta() };
+  listScenes(): {
+    scenes: Array<
+      Omit<
+        ReturnType<PhotoManifestService['getScenesMeta']>[number],
+        'photo_count' | 'mock_pool_count'
+      >
+    >;
+  } {
+    return {
+      scenes: this.manifestService
+        .getScenesMeta()
+        .map(({ photo_count: _pc, mock_pool_count: _mpc, ...scene }) => scene),
+    };
   }
 
   /**
