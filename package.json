@@ -18,7 +18,17 @@
     "photo:upload": "python3 scripts/photo-library/upload_cos.py",
     "avatar:split": "pnpm --filter @devimage/avatar-assets split",
     "avatar:matte": "pnpm --filter @devimage/avatar-assets matte",
-    "avatar:validate": "pnpm --filter @devimage/avatar-assets validate"
+    "avatar:validate": "pnpm --filter @devimage/avatar-assets validate",
+    "deploy": "bash deploy/scripts/deploy.sh",
+    "deploy:pull": "bash deploy/scripts/pull.sh",
+    "deploy:build": "bash deploy/scripts/build.sh",
+    "deploy:start": "bash deploy/scripts/start.sh",
+    "deploy:stop": "bash deploy/scripts/stop.sh",
+    "deploy:restart": "bash deploy/scripts/restart.sh",
+    "deploy:status": "bash deploy/scripts/status.sh",
+    "deploy:logs": "bash deploy/scripts/logs.sh",
+    "deploy:health": "bash deploy/scripts/health.sh",
+    "deploy:remote": "bash deploy/scripts/remote.sh"
   },
   "devDependencies": {
     "typescript": "^5.8.2"

@@ -2,7 +2,10 @@
 
 DevImage 生产环境采用 **腾讯云轻量应用服务器 + COS 对象存储 + CDN**。
 
-详细步骤见规划文档 [腾讯云 COS 部署指南](../../docs/腾讯云COS部署指南.md)。
+详细步骤见：
+
+- [腾讯云 COS 部署指南](../../docs/腾讯云COS部署指南.md)
+- [生产部署与运维手册](../../docs/生产部署与运维手册.md)（`pnpm deploy` 启停与发版）
 
 ---
 
@@ -10,18 +13,48 @@ DevImage 生产环境采用 **腾讯云轻量应用服务器 + COS 对象存储 
 
 ```text
 开发者
-  → 腾讯云 CDN（cdn.devimage.cn / devimage.cn）
-      → Nginx（轻量服务器）
-          → NestJS API :3000
-      → COS（/photo 缓存图，Phase 2）
+  → 腾讯云 CDN（cdn.devimg.cn）
+      → Nginx（轻量服务器 :80）
+          → NestJS API :3010
+  → https://devimg.cn（文档站，源站 Nginx + Let's Encrypt）
 ```
 
 | 组件 | 用途 |
 | ------ | ------ |
 | 轻量/CVM | API 进程、Nginx |
 | COS | 照片缓存、精选图包 |
-| CDN | 静态资源加速（需 ICP 备案） |
+| CDN | 占位图国内加速（需 ICP 备案） |
 | PM2 | Node 进程守护 |
+
+---
+
+## 服务器一键发版
+
+在服务器仓库根目录（如 `/home/ht/devimg`）：
+
+```bash
+pnpm deploy
+```
+
+等价于：`git pull` → 安装依赖与构建 → PM2 reload → 健康检查。
+
+常用命令：
+
+```bash
+pnpm deploy:status
+pnpm deploy:restart
+pnpm deploy:logs
+pnpm deploy:stop
+pnpm deploy:start
+```
+
+本机构建文档站示例 URL 时：
+
+```bash
+VITE_API_BASE=https://cdn.devimg.cn \
+VITE_DOCS_ORIGIN=https://devimg.cn \
+pnpm build:docs
+```
 
 ---
 
@@ -44,22 +77,27 @@ cp apps/api/.env.example apps/api/.env
 
 | 变量 | 说明 |
 | ------ | ------ |
-| `PORT` | API 端口，默认 3000 |
+| `PORT` | API 端口；生产建议 `3010` |
+| `DEVIMAGE_PUBLIC_URL` | 对外 CDN 根，如 `https://cdn.devimg.cn` |
 | `TENCENT_SECRET_ID` | 腾讯云 CAM 子账号 SecretId |
 | `TENCENT_SECRET_KEY` | CAM SecretKey（仅 COS 权限） |
-| `COS_REGION` | 如 `ap-guangzhou` |
+| `COS_REGION` | 如 `ap-beijing` |
 | `COS_BUCKET` | 如 `devimage-1250000000` |
 | `COS_PHOTO_PREFIX` | 照片缓存前缀，默认 `photos/` |
-| `COS_CDN_DOMAIN` | COS 绑定的 CDN 域名（可选） |
-| `DEVIMAGE_PUBLIC_URL` | 对外 API/CDN 根 URL（Mock JSON 内链） |
+| `COS_CDN_DOMAIN` | COS/CDN 域名（可选） |
+| `VITE_API_BASE` | 文档构建时的 API 示例前缀 |
+| `VITE_DOCS_ORIGIN` | 文档构建时的文档站地址 |
 
 ---
 
 ## PM2 启动 API
 
+推荐使用仓库配置：
+
 ```bash
-cd /var/www/devimage
-pm2 start apps/api/dist/main.js --name devimage-api
+pnpm deploy:start
+# 或
+pm2 start deploy/ecosystem.config.cjs
 pm2 save && pm2 startup
 ```
 
@@ -67,86 +105,34 @@ pm2 save && pm2 startup
 
 ## Nginx（腾讯云轻量服务器）
 
-生产建议使用仓库内参考配置 [`deploy/nginx/devimage.conf`](../../deploy/nginx/devimage.conf)，含：
-
-- **栅格限流**：`.webp` / `.png` 路由 **60 req/min/IP**（与 NestJS 双层防护）
-- **通用限流**：其余 API **1000 req/min/IP**
-- **`X-Real-IP`**：传递给 NestJS，供进程内栅格限流识别客户端
+生产参考 [`deploy/nginx/devimg.conf`](../../deploy/nginx/devimg.conf)。历史限流版见 [`deploy/nginx/devimage.conf`](../../deploy/nginx/devimage.conf)。
 
 ```bash
-sudo cp deploy/nginx/devimage.conf /etc/nginx/conf.d/devimage.conf
+sudo cp deploy/nginx/devimg.conf /etc/nginx/sites-available/devimg
+sudo ln -sfn /etc/nginx/sites-available/devimg /etc/nginx/sites-enabled/devimg
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-精简示例（不含限流）：
+文档站 HTTPS：
 
-```nginx
-upstream devimage_api {
-    server 127.0.0.1:3000;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name cdn.devimage.cn;
-
-    ssl_certificate     /etc/nginx/ssl/cdn.pem;
-    ssl_certificate_key /etc/nginx/ssl/cdn.key;
-
-    location / {
-        proxy_pass http://devimage_api;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
+```bash
+sudo certbot --nginx -d devimg.cn -d www.devimg.cn
 ```
 
 ---
 
-## COS 存储结构
+## CDN 注意点
 
-```text
-devimage-125xxxxxx/
-├── photos/{id}/{w}x{h}.webp    # API 写入的缓存图
-└── assets/seed-pack/           # CC0 精选图包
+1. 回源协议：**HTTP**，端口 **80**，HOST：`cdn.devimg.cn`
+2. **HTTPS 配置**页：开启「HTTPS 服务」并绑定托管证书（用户访问用 HTTPS）
+3. 若返回 `514`：检查 HTTPS 是否开启、IP 限频与黑白名单（见[腾讯云文档](https://cloud.tencent.com/document/product/228/56824)）
+
+---
+
+## 健康检查
+
+```bash
+curl -sS https://cdn.devimg.cn/health
+curl -sS -o /dev/null -w "%{http_code}\n" https://cdn.devimg.cn/400/300
+curl -sS -o /dev/null -w "%{http_code}\n" https://devimg.cn/
 ```
-
----
-
-## CDN 配置要点
-
-1. 域名 **ICP 备案** 后接入腾讯云 CDN
-2. `cdn.devimage.cn` 源站指向轻量服务器公网 IP
-3. `/seed/*`、`/avatar/*` 配置较长缓存（immutable）
-4. Phase 2：`/photo/*` 可 302 到 COS CDN 域名
-
----
-
-## 缓存策略
-
-| 路由 | Cache-Control | CDN |
-| ------ | --------------- | ----- |
-| `/seed/*` | immutable, 1y | 长缓存 |
-| `/avatar/*` | immutable, 1y | 长缓存 |
-| `/:w/:h` 随机 | 1h | 短缓存 |
-| `/mock/*` | 5min | 短缓存 |
-| `/photo/*` | immutable | COS + CDN |
-
----
-
-## 监控
-
-- 健康检查：`GET /health`
-- 腾讯云可观测平台 / 云监控
-- PM2：`pm2 logs devimage-api`
-
----
-
-## 预估成本（MVP）
-
-| 项目 | 月费 |
-| ------ | ------ |
-| 轻量 2C4G | ¥45–65 |
-| COS + CDN 按量 | ¥10–30 |
-| **合计** | **¥55–95** |
-
-详见 [Freemium 定价与成本模型](../../docs/Freemium定价与成本模型.md)。

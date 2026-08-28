@@ -2,25 +2,13 @@
 
 DevImage 提供 **URL 即 API** 的占位资源服务，无需注册、无需 API Key（MVP 阶段）。
 
-## 安装与启动
+生产环境直接使用 CDN：复制下方 URL 即可（本地开发时基址为 `localhost:3000`，文档构建会按环境替换）。
 
-> **必须使用 pnpm**，在仓库**根目录**执行安装。
-> 依赖位于 `apps/api` 与 `apps/docs`，根目录 `pnpm install` 会一并安装。
-
-```bash
-# 安装 pnpm
-corepack enable && corepack prepare pnpm@9.15.0 --activate
-
-# 安装全部 workspace 依赖
-pnpm install
-
-# 启动 API + 文档站
-pnpm dev
-```
+## 服务地址
 
 | 服务 | 地址 |
 | ------ | ------ |
-| API | <http://localhost:3000> |
+| API / CDN | <http://localhost:3000> |
 | Swagger | <http://localhost:3000/api/docs> |
 | 文档站 | <http://localhost:5173> |
 
@@ -80,12 +68,29 @@ fetch('http://localhost:3000/mock/users')
 <img src="http://localhost:3000/scene/empty" />
 ```
 
-## 环境变量
+## 本地开发（可选）
+
+> **必须使用 pnpm**，在仓库**根目录**执行安装。
+
+```bash
+corepack enable && corepack prepare pnpm@9.15.0 --activate
+pnpm install
+pnpm dev
+```
 
 | 变量 | 默认 | 说明 |
 | ------ | ------ | ------ |
 | `PORT` | `3000` | API 端口 |
-| `VITE_API_BASE` | `http://localhost:3000` | 文档站示例 URL 前缀 |
+| `VITE_API_BASE` | `http://localhost:3000` | 文档构建时的 API/CDN 示例前缀 |
+| `VITE_DOCS_ORIGIN` | `http://localhost:5173` | 文档构建时的文档站地址 |
+
+生产构建示例：
+
+```bash
+VITE_API_BASE=https://cdn.devimg.cn \
+VITE_DOCS_ORIGIN=https://devimg.cn \
+pnpm build:docs
+```
 
 ## 下一步
 

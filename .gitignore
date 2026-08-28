@@ -16,8 +16,10 @@ coverage/
 .env
 .env.local
 .env.*.local
+deploy/.env.deploy
 
 # Logs
+logs/
 *.log
 npm-debug.log*
 pnpm-debug.log*

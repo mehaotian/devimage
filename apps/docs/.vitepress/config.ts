@@ -1,6 +1,34 @@
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vitepress';
 
+/** API / CDN 根地址：本地默认 localhost；生产构建传 VITE_API_BASE */
 const API_BASE = process.env.VITE_API_BASE ?? 'http://localhost:3000';
+/** 文档站对外地址：生产构建传 VITE_DOCS_ORIGIN=https://devimg.cn */
+const DOCS_ORIGIN = process.env.VITE_DOCS_ORIGIN ?? 'http://localhost:5173';
+
+/**
+ * 构建时把 Markdown 里的本地示例 URL 替换为当前环境基址。
+ * 源文件仍写 localhost，便于本地开发；线上文档自动变成 CDN / 正式域名。
+ */
+function rewriteDocExampleUrls(): Plugin {
+  return {
+    name: 'devimage-rewrite-doc-example-urls',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!id.includes('/apps/docs/') || !id.endsWith('.md')) {
+        return null;
+      }
+      let next = code;
+      if (API_BASE !== 'http://localhost:3000') {
+        next = next.split('http://localhost:3000').join(API_BASE);
+      }
+      if (DOCS_ORIGIN !== 'http://localhost:5173') {
+        next = next.split('http://localhost:5173').join(DOCS_ORIGIN);
+      }
+      return next === code ? null : next;
+    },
+  };
+}
 
 export default defineConfig({
   title: 'devimg',
@@ -66,5 +94,6 @@ export default defineConfig({
     define: {
       __API_BASE__: JSON.stringify(API_BASE),
     },
+    plugins: [rewriteDocExampleUrls()],
   },
 });

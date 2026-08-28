@@ -30,9 +30,9 @@ description: >-
 
 ## 示例 URL 规范
 
-- 开发：`http://localhost:3000`
-- 生产：`https://cdn.devimage.cn`
-- 文档中写：`http://localhost:3000`（本地开发默认）
+- 源文件统一写：`http://localhost:3000`（便于本地开发）
+- 生产构建：`VITE_API_BASE=https://cdn.devimg.cn` + `VITE_DOCS_ORIGIN=https://devimg.cn`
+- VitePress 构建时会把 Markdown 中的 localhost 替换为上述基址；Playground 读 `__API_BASE__`
 - **表格内** URL 用尖括号：`<http://localhost:3000>`（避免 MD034）
 
 ## 迁移文档模板
