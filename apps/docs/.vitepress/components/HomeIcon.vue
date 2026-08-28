@@ -81,7 +81,7 @@ withDefaults(
     </defs>
   </svg>
 
-  <!-- stat: 免费额度 -->
+  <!-- stat: 无 SDK -->
   <svg
     v-else-if="name === 'stat-free'"
     :width="size"

@@ -23,17 +23,17 @@ description: >-
 ## 新增 API 文档流程
 
 1. 在 `apps/docs/api/{resource}.md` 创建页面
-2. 结构：概述 → 路由表 → Query 参数 → HTML/JS 示例 → 响应头 → Phase 标注
+2. 结构：概述 → 路由表 → Query 参数 → HTML/JS 示例 → 响应头
 3. 更新 `apps/docs/.vitepress/config.ts` sidebar
 4. 在 `apps/docs/guide/quick-start.md` 加一行示例
 5. 若涉及迁移，更新 `apps/docs/migrate/`
 
 ## 示例 URL 规范
 
-- 源文件统一写：`http://localhost:3000`（便于本地开发）
-- 生产构建：`VITE_API_BASE=https://cdn.devimg.cn` + `VITE_DOCS_ORIGIN=https://devimg.cn`
-- VitePress 构建时会把 Markdown 中的 localhost 替换为上述基址；Playground 读 `__API_BASE__`
-- **表格内** URL 用尖括号：`<http://localhost:3000>`（避免 MD034）
+- 用户文档示例统一写生产 CDN：`https://cdn.devimg.cn`
+- **不要**在用户文档中出现：仓库路径（如 `docs/*.md`）、内部规划链接、localhost、文档构建说明、部署、Swagger / OpenAPI、健康检查
+- 表格内 URL 用尖括号：`<https://cdn.devimg.cn>`（避免 MD034）
+- Playground 组件读 `__API_BASE__`，本地预览仍可打到本机 API；与 Markdown 示例地址无关
 
 ## 迁移文档模板
 

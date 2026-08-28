@@ -1,11 +1,11 @@
-# 真实照片占位
+# 真实照片 API
 
-**真实感照片占位**：写进 `<img src="…">` 就能用，无需单独配置图床。
+按宽高返回图库中的真实照片，用于商品主图、列表封面、Banner 等需要照片质感的占位。将 URL 写入 `<img src>` 即可。
 
-- **固定**：同一链接始终同一张图（适合商品详情、Banner）
-- **随机**：每次打开可能不同（适合列表、瀑布流）
+- **固定**：带 `seed`，或使用 `/id/:id/...`，同一 URL 始终同一张
+- **随机**：`/photo/:w/:h` 且省略 `seed`，每次请求可能不同
 
-用法与 [纯色占位](/api/placeholder)、[seed 占位](/api/placeholder#seed) 相同。使用规范见 [公平使用](/guide/fair-use)。
+与 [合成占位图](/api/placeholder) 的路径习惯相近，但内容为照片而非色块。使用规范见 [使用规范](/guide/fair-use)。
 
 ## 在线试玩
 
@@ -17,47 +17,26 @@
 
 ---
 
-## 示例
+## `GET /photo/:width/:height`
 
-### 商品主图（固定）
+宽、高范围 **10–4000**。`scene` 与 `cat` 指定其一即可。
 
-```html
-<img src="http://localhost:3000/photo/400/400?scene=product&seed=product-5" />
-```
+| 参数 | 说明 |
+| ------ | ------ |
+| scene | 用途，见下表 |
+| cat | 题材（中文，如 `美食`） |
+| seed | 有则固定选图；省略则随机 |
+| grayscale | `1` 灰度 |
+| blur | 1–10 模糊 |
+| format | `webp`（默认）`jpeg` `png` |
 
-### 资讯列表（随机）
+### 用途（scene）
 
-每次刷新可能换一张，URL 里不要加 `seed`：
-
-```html
-<img src="http://localhost:3000/photo/320/200?scene=news" />
-```
-
-### 首页 Banner（固定）
-
-```html
-<img src="http://localhost:3000/photo/1200/400?scene=banner&seed=hero-1" />
-```
-
-### 指定题材（可选）
-
-试玩区展开 **更多选项**，可按「美食」「咖啡」等题材筛选：
-
-```html
-<img src="http://localhost:3000/photo/640/480?cat=美食&seed=banner-1" />
-```
-
----
-
-## 用途一览
-
-试玩里「用途」下拉与下表对应（URL 参数为 `scene`）：
-
-| 用途 | scene | 适合页面 |
+| 用途 | scene | 常见页面 |
 | ------ | ------ | ------ |
 | 商品 | `product` | 电商主图、商品卡片 |
 | 餐饮 | `food` | 餐厅、外卖 |
-| 新闻资讯 | `news` | 资讯列表、头条 |
+| 新闻资讯 | `news` | 资讯列表 |
 | 文章博客 | `article` | 博客封面 |
 | 出行 | `travel` | 行程、票务 |
 | 酒店民宿 | `hotel` | 住宿详情 |
@@ -71,26 +50,46 @@
 | 促销活动 | `promo` | 活动 Banner |
 | 通用 | `gallery` | 不限题材 |
 
+完整题材与用途列表：
+
+```http
+GET /photo/categories
+GET /photo/scenes
+```
+
+### 示例
+
+```html
+<img src="https://cdn.devimg.cn/photo/400/400?scene=product&seed=product-5" alt="product" />
+<img src="https://cdn.devimg.cn/photo/320/200?scene=news" alt="news" />
+<img src="https://cdn.devimg.cn/photo/1200/400?scene=banner&seed=hero-1" alt="banner" />
+<img src="https://cdn.devimg.cn/photo/640/480?cat=美食&seed=banner-1" alt="food" />
+```
+
+### 响应头
+
+- 带 `seed`：`Cache-Control: public, max-age=31536000, immutable`
+- 无 `seed`：`Cache-Control: public, max-age=60, must-revalidate`
+- `X-DevImage-Photo-Id`：实际选中的图库 id
+
 ---
 
-## 参数参考
+## picsum 兼容
 
-`GET /photo/:width/:height`
-
-| 参数 | 说明 |
+| 路由 | 说明 |
 | ------ | ------ |
-| scene | 用途（见上表），与 cat 二选一 |
-| cat | 具体题材（中文，如 `美食`），与 scene 二选一 |
-| seed | 有则固定；省略则随机 |
-| grayscale | `1` 灰度 |
-| blur | 1–10 模糊 |
-| format | `webp`（默认）`jpeg` `png` |
+| `GET /id/:id/:width/:height` | 按图库 id 取图，可带 `grayscale`、`blur`、`format` |
+| `GET /id/:id/info` | 该 id 的元信息 JSON |
+| `GET /v2/list` | 列表；query：`page`、`limit`、`cat` |
 
-宽、高范围 **10–4000**，与 [占位图](/api/placeholder) 相同。
+```html
+<img src="https://cdn.devimg.cn/id/1/800/600" alt="photo by id" />
+```
+
+路径对照见 [从 picsum 迁移](/migrate/from-picsum)。
 
 ---
 
-## 其他
+## 与 Mock 的关系
 
-- 从 picsum 迁移：[从 picsum 迁移](/migrate/from-picsum)
-- 使用 DevImage [Mock 数据](/api/mock) 时，商品/资讯等图片地址已自动指向本服务
+[Mock 数据](/api/mock) 中的文章封面、商品图默认指向本接口；无可用照片时回退为色块占位。

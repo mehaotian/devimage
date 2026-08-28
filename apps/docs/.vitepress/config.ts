@@ -1,4 +1,3 @@
-import type { Plugin } from 'vite';
 import { defineConfig } from 'vitepress';
 
 /** API / CDN 根地址：本地默认 localhost；生产构建传 VITE_API_BASE */
@@ -10,11 +9,15 @@ const DOCS_ORIGIN = process.env.VITE_DOCS_ORIGIN ?? 'http://localhost:5173';
  * 构建时把 Markdown 里的本地示例 URL 替换为当前环境基址。
  * 源文件仍写 localhost，便于本地开发；线上文档自动变成 CDN / 正式域名。
  */
-function rewriteDocExampleUrls(): Plugin {
+function rewriteDocExampleUrls(): {
+  name: string;
+  enforce: 'pre';
+  transform: (code: string, id: string) => string | null;
+} {
   return {
     name: 'devimage-rewrite-doc-example-urls',
     enforce: 'pre',
-    transform(code, id) {
+    transform(code: string, id: string) {
       if (!id.includes('/apps/docs/') || !id.endsWith('.md')) {
         return null;
       }
@@ -32,7 +35,7 @@ function rewriteDocExampleUrls(): Plugin {
 
 export default defineConfig({
   title: 'devimg',
-  description: '图即 — 开发用的占位图 CDN。占位图、头像、场景图、Mock 数据，URL 即用。',
+  description: '图即 — 国内开发者占位图 CDN。占位图、头像、真实照片、骨架屏与 Mock 数据。',
   lang: 'zh-CN',
   ignoreDeadLinks: true,
   head: [
@@ -57,7 +60,6 @@ export default defineConfig({
             { text: '功能一览', link: '/guide/dev-spec' },
             { text: '使用规范', link: '/guide/fair-use' },
             { text: '头像许可', link: '/guide/avatar-licenses' },
-            { text: '部署', link: '/guide/deployment' },
           ],
         },
       ],
@@ -70,7 +72,7 @@ export default defineConfig({
             { text: '头像', link: '/api/avatar' },
             { text: '码形占位', link: '/api/qr' },
             { text: '场景图', link: '/api/scene' },
-            { text: '真实图库', link: '/api/photo' },
+            { text: '真实照片', link: '/api/photo' },
             { text: 'Mock 数据', link: '/api/mock' },
           ],
         },
@@ -86,7 +88,7 @@ export default defineConfig({
       ],
     },
     footer: {
-      message: 'devimg · 图即 — 开发用的占位图 CDN',
+      message: 'devimg · 图即 — 国内开发者占位图 CDN',
       copyright: 'Copyright © 2026 devimg',
     },
   },

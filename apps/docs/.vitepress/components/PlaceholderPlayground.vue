@@ -73,7 +73,7 @@ onUnmounted(() => { if (timer) clearTimeout(timer); });
     :api-url="apiUrl"
     :html-snippet="htmlSnippet"
     :copied="copied"
-    hint="推荐浏览器直连 URL；固定 seed 适合 UI 回归。详见使用规范。"
+    hint="需要画面稳定时使用 seed。详见使用规范。"
     @copy-preview="copyPreview"
   >
     <template #preview>

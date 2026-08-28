@@ -9,35 +9,35 @@ const API_BASE =
 const rootRef = ref<HTMLElement | null>(null);
 useReveal(rootRef);
 
-const heroBadges = ['稳定可靠', '开发者友好', 'URL 即用'];
+const heroBadges = ['无需注册', '国内 CDN', '路径即参数'];
 
 const stats = [
   {
     icon: 'stat-link',
-    value: '9+',
-    label: 'API 路由',
-    hint: '占位 · 头像 · Mock',
+    value: '7',
+    label: '资源类型',
+    hint: '占位 · 头像 · 照片 · Mock',
     color: 'purple',
   },
   {
     icon: 'stat-bolt',
-    value: 'SVG',
-    label: '矢量实时输出',
-    hint: 'img 直出，可缩放',
+    value: '50+',
+    label: '头像风格',
+    hint: '图即算法与开源接入',
     color: 'amber',
   },
   {
     icon: 'stat-tools',
-    value: '0',
-    label: 'SDK / 配置项',
-    hint: 'URL 复制即用',
+    value: 'SVG',
+    label: '默认输出',
+    hint: '亦可 WebP / PNG',
     color: 'slate',
   },
   {
     icon: 'stat-free',
-    value: '100/min',
-    label: '免费额度',
-    hint: '开发阶段够用',
+    value: '0',
+    label: 'SDK / API Key',
+    hint: '复制 URL 即可调用',
     color: 'blue',
   },
 ];
@@ -46,46 +46,46 @@ const highlights = [
   {
     icon: 'highlight-api',
     color: 'blue',
-    badge: '全覆盖',
-    title: '丰富 API',
-    desc: '占位图、头像、场景插画、Mock 数据 — 开发阶段常用的都在这。',
-    points: ['/:w/:h 占位图', '/avatar 字母头像', '/mock 假 REST'],
+    badge: '接口',
+    title: '开发常用占位集中在同一域名',
+    desc: '色块与纹理占位、真实照片、多风格头像、骨架屏、空状态场景图、伪码形，以及中文 Mock JSON。',
+    points: ['占位图 / 骨架屏 / 场景图', '头像与真实照片', 'Mock 用户、文章、商品'],
   },
   {
     icon: 'highlight-fast',
     color: 'green',
-    badge: '轻量',
-    title: '轻量响应',
-    desc: 'SVG 和 JSON 实时生成，img 和 fetch 直接调用，没有额外依赖。',
-    points: ['SVG 实时生成', 'JSON 可缓存', '无 npm 包'],
+    badge: '输出',
+    title: '默认 SVG，需要位图时可转码',
+    desc: '占位、头像、场景与码形默认返回 SVG，便于缩放。小程序等场景可使用 WebP 或 PNG。',
+    points: ['默认 image/svg+xml', '后缀或 format 指定栅格', 'seed 路由可长期缓存'],
   },
   {
     icon: 'highlight-check',
     color: 'purple',
-    badge: '零门槛',
-    title: '开发可用',
-    desc: '占位资源随便用，不用注册，先把页面搭起来再说。',
-    points: ['无需账号', '免费额度', '文档有示例'],
+    badge: '接入',
+    title: '无需注册，兼容常见 URL 习惯',
+    desc: '不发放 API Key。支持 placehold 的宽x高写法、picsum 的 seed / id 路径，以及 JSONPlaceholder 风格的 Mock 前缀。',
+    points: ['/800x600 与路径配色', '/seed、/id、/v2/list', '/mock/users、/posts、/products'],
   },
   {
     icon: 'highlight-clipboard',
     color: 'orange',
-    badge: '即拷即用',
-    title: '简单易用',
-    desc: '复制 URL 到项目里就行，路径即参数，文档有示例照着写。',
-    points: ['路径即 API', 'Query 可选', '兼容常见写法'],
+    badge: '确定',
+    title: '同一 URL 可得到稳定结果',
+    desc: '占位、头像、照片、码形均支持 seed。相同参数返回相同画面，适合列表占位与 UI 回归。',
+    points: ['/seed/:seed/:w/:h', '头像 style + 标识', '照片 scene / cat + seed'],
   },
 ];
 
 const resources = [
-  { icon: 'res-placeholder', title: '占位图', desc: '随机色块 SVG', route: '/800/600', link: '/api/placeholder', count: '任意尺寸' },
-  { icon: 'res-seed', title: 'Seed 固定图', desc: '确定性配色', route: '/seed/demo/800/600', link: '/api/placeholder', count: 'UI 回归' },
-  { icon: 'res-avatar', title: '字母头像', desc: 'devimg 首字 / 多风格 seed', route: '/avatar/devimg/张三/128', link: '/api/avatar', count: '40+ 风格' },
-  { icon: 'res-scene', title: '场景插画', desc: '404 / 空状态 / 断网', route: '/scene/404', link: '/api/scene', count: '4 种 variant' },
-  { icon: 'res-users', title: 'Mock 用户', desc: '中文姓名 + 头像', route: '/mock/users', link: '/api/mock', count: '最多 100 条' },
-  { icon: 'res-posts', title: 'Mock 文章', desc: '标题 + 正文', route: '/mock/posts', link: '/api/mock', count: '列表数据' },
-  { icon: 'res-products', title: 'Mock 商品', desc: '名称 + 价格 + 图', route: '/mock/products', link: '/api/mock', count: '列表数据' },
-  { icon: 'res-404', title: '404 快捷', desc: '等价 /scene/404', route: '/404', link: '/api/scene', count: '快捷路由' },
+  { icon: 'res-placeholder', title: '占位图', desc: '色块、纹理、边框与文字', route: '/800/600', link: '/api/placeholder', count: '10–4000 px' },
+  { icon: 'res-seed', title: 'Seed 占位', desc: '相同 seed 固定配色', route: '/seed/demo/800/600', link: '/api/placeholder', count: 'immutable' },
+  { icon: 'res-avatar', title: '头像', desc: '中文首字与 50 余种风格', route: '/avatar/devimg/张三/128', link: '/api/avatar', count: '50+ 风格' },
+  { icon: 'res-scene', title: '场景占位', desc: '404、空数据、断网、搜索无结果', route: '/scene/404', link: '/api/scene', count: '4 种 variant' },
+  { icon: 'res-404', title: '骨架屏', desc: '列表、卡片、网格加载态', route: '/skeleton/375/812', link: '/api/skeleton', count: '4 种布局' },
+  { icon: 'res-posts', title: '真实照片', desc: '按用途或题材取图，可固定 seed', route: '/photo/400/400?scene=product&seed=demo', link: '/api/photo', count: 'scene / cat' },
+  { icon: 'res-products', title: '码形占位', desc: '伪 QR、伪条码，仅作 UI 占位', route: '/qr/demo/128', link: '/api/qr', count: '不可扫描' },
+  { icon: 'res-users', title: 'Mock 数据', desc: '用户、文章、商品，含分页与单条', route: '/mock/users', link: '/api/mock', count: '每类 100 条' },
 ];
 
 const platformTabs = [
@@ -238,10 +238,10 @@ onUnmounted(() => {
           <div class="dh-badges">
             <span v-for="b in heroBadges" :key="b" class="dh-badge-pill">{{ b }}</span>
           </div>
-          <h1 class="dh-hero-title">开发者的<br />图片基础设施</h1>
+          <h1 class="dh-hero-title">国内开发者的<br />占位图 CDN</h1>
           <p class="dh-hero-desc">
-            devimg（图即）提供占位图、字母头像、场景插画和 Mock 数据的 URL API。
-            常用能力集中在一个域名下，复制链接即可用于页面或接口联调。
+            图即（devimg）按 URL 返回占位图、头像、真实照片、骨架屏、场景图与 Mock JSON。
+            无需 SDK 与 API Key，将地址写入 <code>img</code> 或 <code>fetch</code> 即可。
           </p>
           <div class="dh-hero-actions">
             <a href="/guide/quick-start" class="dh-btn dh-btn-primary">
@@ -356,8 +356,8 @@ onUnmounted(() => {
     <!-- 图片资源 8 宫格 -->
     <section class="dh-section dh-section-alt">
       <div class="dh-section-head reveal">
-        <h2>丰富的图片资源</h2>
-        <p>覆盖开发阶段常见的占位需求，每个资源都有独立 API 文档。</p>
+        <h2>已开放的资源</h2>
+        <p>下列接口均可直接调用，参数与示例见各 API 文档。</p>
       </div>
       <div class="dh-resources">
         <a
@@ -378,15 +378,15 @@ onUnmounted(() => {
         </a>
       </div>
       <div class="dh-resources-more reveal">
-        <a href="/guide/dev-spec">浏览完整 API 列表 →</a>
+        <a href="/guide/dev-spec">查看已上线路由与后期规划 →</a>
       </div>
     </section>
 
     <!-- 使用场景 + 代码 -->
     <section class="dh-section">
       <div class="dh-section-head reveal">
-        <h2>适用于各种开发场景</h2>
-        <p>不管你用什么框架，用法都是一行 URL。</p>
+        <h2>在页面与接口中引用</h2>
+        <p>Web、H5、小程序与组件库均可直接使用 CDN 地址，无需安装依赖。</p>
       </div>
 
       <div class="dh-scenario-tabs reveal">
@@ -457,10 +457,10 @@ onUnmounted(() => {
         <span class="dh-cta-rocket">
           <HomeIcon name="icon-rocket" :size="48" />
         </span>
-        <h2>准备好提升开发效率了吗？</h2>
-        <p>不用注册，复制 URL 贴进项目，先把页面搭起来。</p>
+        <h2>从一条 URL 开始</h2>
+        <p>无需注册。将占位地址写入页面，或按迁移指南替换 picsum / placehold 域名。</p>
         <a href="/guide/quick-start" class="dh-btn dh-btn-white">
-          免费开始使用 →
+          查看快速开始 →
         </a>
       </div>
     </section>
@@ -473,7 +473,7 @@ onUnmounted(() => {
             <img src="/logo-nav.png" alt="devimg" class="dh-footer-logo-img" width="40" height="40" />
             <div>
               <span class="dh-footer-logo">devimg</span>
-              <p>图即 — 开发用的占位图 CDN</p>
+              <p>图即 — 国内开发者占位图 CDN</p>
             </div>
           </a>
         </div>
@@ -481,7 +481,7 @@ onUnmounted(() => {
           <h4>产品</h4>
           <a href="/api/placeholder">占位图</a>
           <a href="/api/avatar">头像</a>
-          <a href="/api/scene">场景图</a>
+          <a href="/api/photo">真实照片</a>
           <a href="/api/mock">Mock 数据</a>
         </div>
         <div class="dh-footer-col">
@@ -493,8 +493,8 @@ onUnmounted(() => {
         </div>
         <div class="dh-footer-col">
           <h4>资源</h4>
-          <a :href="`${API_BASE}/api/docs`" target="_blank">Swagger</a>
-          <a :href="`${API_BASE}/health`" target="_blank">健康检查</a>
+          <a href="/guide/fair-use">使用规范</a>
+          <a href="/guide/avatar-licenses">头像许可</a>
         </div>
       </div>
       <div class="dh-footer-bottom">

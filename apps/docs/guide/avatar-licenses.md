@@ -10,7 +10,7 @@ DevImage 头像由**图即风格**与**三方接入**组成，许可责任按来
 | ------ | ------ | ------ | ---------- |
 | `native` | 图即风格 | 图即 SVG 算法生成 | 图即项目许可，可商用 |
 | `partner` | 三方接入 | DiceBear、Jdenticon、Minidenticons | 各 style / 库独立许可 |
-| `composite` | 图即（规划） | PNG 部件拼接 | 自有美术资源 |
+| `composite` | 图即 | PNG 部件拼接 | 尚未对公开接口提供 |
 
 查询完整列表：`GET /avatar/styles`。风格说明见 [头像 API · 风格目录](/api/avatar#风格目录)。
 
@@ -71,7 +71,7 @@ DevImage 头像由**图即风格**与**三方接入**组成，许可责任按来
 
 ### CC0 / MIT style
 
-多数 DiceBear 几何 / 角色风格为 CC0；`icons` 为 Bootstrap Icons（MIT）。完整列表见 [头像 API](/api/avatar#三方接入--dicebear)。
+多数 DiceBear 几何 / 角色风格为 CC0；`icons` 为 Bootstrap Icons（MIT）。完整 style 列表见 `GET /avatar/styles` 或 [头像 API · 开源接入](/api/avatar#开源接入节选)。
 
 ---
 
@@ -98,5 +98,5 @@ DevImage 头像由**图即风格**与**三方接入**组成，许可责任按来
 ## 相关链接
 
 - [头像 API · 风格目录](/api/avatar#风格目录)
-- [使用规范与公平使用](/guide/fair-use)
-- [头像 API 试玩](/api/avatar)
+- [使用规范](/guide/fair-use)
+- [头像 API](/api/avatar)

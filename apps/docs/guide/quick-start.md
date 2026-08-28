@@ -1,99 +1,84 @@
 # 快速开始
 
-DevImage 提供 **URL 即 API** 的占位资源服务，无需注册、无需 API Key（MVP 阶段）。
-
-生产环境直接使用 CDN：复制下方 URL 即可（本地开发时基址为 `localhost:3000`，文档构建会按环境替换）。
+图即（devimg）是面向国内开发者的占位资源 CDN。将 URL 写入 `<img>` 或 `fetch` 即可获取占位图、头像、真实照片、骨架屏、场景图与 Mock JSON，无需注册，也无需 API Key。
 
 ## 服务地址
 
 | 服务 | 地址 |
 | ------ | ------ |
-| API / CDN | <http://localhost:3000> |
-| Swagger | <http://localhost:3000/api/docs> |
-| 文档站 | <http://localhost:5173> |
+| CDN | <https://cdn.devimg.cn> |
 
 ## 占位图
 
+默认返回 SVG。需要固定画面时使用 `/seed`；需要与 placehold.co 相近的路径时可写 `/800x600`。
+
 ```html
-<!-- 随机色块 -->
-<img src="http://localhost:3000/800/600" />
-
-<!-- 自定义文字与颜色 -->
-<img src="http://localhost:3000/400/300?text=Banner&bg=409eff&fg=ffffff" />
-
-<!-- 固定 seed（每次相同） -->
-<img src="http://localhost:3000/seed/my-app/800/600" />
+<img src="https://cdn.devimg.cn/800/600" alt="placeholder" />
+<img src="https://cdn.devimg.cn/400/300?text=Banner&bg=409eff&fg=ffffff" alt="banner" />
+<img src="https://cdn.devimg.cn/seed/my-app/800/600" alt="seed placeholder" />
+<img src="https://cdn.devimg.cn/800x600?text=Banner" alt="placehold alias" />
 ```
+
+详见 [占位图 API](/api/placeholder)。
 
 ## 头像
 
+同一风格与同一标识始终返回同一张图。`devimg` 支持中文首字。
+
 ```html
-<!-- 首字头像（devimg 默认 text=1） -->
-<img src="http://localhost:3000/avatar/devimg/张三/128" alt="avatar" />
-
-<!-- 纯渐变、无首字 -->
-<img src="http://localhost:3000/avatar/devimg/Luna/128?text=0" alt="gradient avatar" />
-
-<!-- 图即算法风格（玻璃拟态） -->
-<img src="http://localhost:3000/avatar/devimg-glass/Luna/128" alt="glass avatar" />
-
-<!-- 多风格 seed（DiceBear rings） -->
-<img src="http://localhost:3000/avatar/rings/Luna/128" alt="rings avatar" />
+<img src="https://cdn.devimg.cn/avatar/devimg/张三/128" alt="张三" />
+<img src="https://cdn.devimg.cn/avatar/devimg/Luna/128?text=0" alt="gradient" />
+<img src="https://cdn.devimg.cn/avatar/lorelei/Luna/128" alt="lorelei" />
 ```
 
-风格列表与在线试玩见 [头像 API](/api/avatar)。
+风格列表见 [头像 API](/api/avatar)，三方风格许可见 [头像许可](/guide/avatar-licenses)。
 
-## 码形占位（伪 QR · 伪条码）
+## 真实照片
+
+按用途（`scene`）或题材（`cat`）取图。带 `seed` 时同一 URL 固定同一张；省略 `seed` 时每次请求可能不同。
 
 ```html
-<img src="http://localhost:3000/qr/demo/128" alt="pseudo qr" width="128" height="128" />
-<img src="http://localhost:3000/qr/demo/320/80?variant=dots" alt="banner qr" width="320" height="80" />
-<img src="http://localhost:3000/barcode/sku-mock/320/80" alt="pseudo barcode" width="320" height="80" />
+<img src="https://cdn.devimg.cn/photo/400/400?scene=product&seed=product-5" alt="product" />
+<img src="https://cdn.devimg.cn/photo/320/200?scene=news" alt="news" />
+```
+
+详见 [真实照片 API](/api/photo)。从 picsum 迁移见 [迁移指南](/migrate/from-picsum)。
+
+## 骨架屏与场景图
+
+骨架屏用于列表、卡片等加载态。场景图为文案 SVG，覆盖 404、空数据、网络错误与搜索无结果。
+
+```html
+<img src="https://cdn.devimg.cn/skeleton/350/120?type=card" alt="skeleton" />
+<img src="https://cdn.devimg.cn/scene/empty?w=800&h=600" alt="empty" />
+<img src="https://cdn.devimg.cn/404" alt="404" />
+```
+
+## 码形占位
+
+生成的图案**不是**有效二维码或条形码，不可扫描，仅用于界面占位。
+
+```html
+<img src="https://cdn.devimg.cn/qr/demo/128" alt="pseudo qr" width="128" height="128" />
+<img src="https://cdn.devimg.cn/barcode/sku-mock/320/80" alt="pseudo barcode" width="320" height="80" />
 ```
 
 详见 [码形占位 API](/api/qr)。
 
 ## Mock 数据
 
+路径习惯接近 [JSONPlaceholder](https://jsonplaceholder.typicode.com)，前缀为 `/mock`。每类资源池 100 条，同一 `id` 内容固定。
+
 ```javascript
-fetch('http://localhost:3000/mock/users')
-  .then((r) => r.json())
-  .then(console.log);
+const users = await fetch('https://cdn.devimg.cn/mock/users').then((r) => r.json());
+const post = await fetch('https://cdn.devimg.cn/mock/posts/1').then((r) => r.json());
 ```
 
-## 场景图
-
-```html
-<img src="http://localhost:3000/scene/404?w=800&h=600" />
-<img src="http://localhost:3000/scene/empty" />
-```
-
-## 本地开发（可选）
-
-> **必须使用 pnpm**，在仓库**根目录**执行安装。
-
-```bash
-corepack enable && corepack prepare pnpm@9.15.0 --activate
-pnpm install
-pnpm dev
-```
-
-| 变量 | 默认 | 说明 |
-| ------ | ------ | ------ |
-| `PORT` | `3000` | API 端口 |
-| `VITE_API_BASE` | `http://localhost:3000` | 文档构建时的 API/CDN 示例前缀 |
-| `VITE_DOCS_ORIGIN` | `http://localhost:5173` | 文档构建时的文档站地址 |
-
-生产构建示例：
-
-```bash
-VITE_API_BASE=https://cdn.devimg.cn \
-VITE_DOCS_ORIGIN=https://devimg.cn \
-pnpm build:docs
-```
+详见 [Mock 数据 API](/api/mock)。请遵守 [使用规范](/guide/fair-use)，避免对 Mock 接口高频轮询。
 
 ## 下一步
 
+- [功能一览](/guide/dev-spec)：已上线路由与后期规划
 - [占位图 API](/api/placeholder)
 - [从 picsum 迁移](/migrate/from-picsum)
-- [腾讯云部署指南](/guide/deployment)
+- [从 placehold 迁移](/migrate/from-placehold)

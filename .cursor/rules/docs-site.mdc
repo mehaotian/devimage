@@ -25,7 +25,7 @@ apps/docs/
 
 - 语言：中文
 - 每个 API 页包含：路由、参数表、HTML/JS 示例、响应头说明
-- 示例 URL 使用 `http://localhost:3000` 或环境变量说明
+- 示例 URL 使用生产 CDN：`https://cdn.devimg.cn`。不要写 localhost，不要解释文档如何构建或替换地址
 - 代码块必须标注语言（禁止裸 ` ``` `）：`html`、`javascript`、`bash`、`http`、`text` 等
 - 表格用 compact 风格：`| 列 | 列 |`、分隔行 `| ------ | ------ |`（pipe 两侧有空格）
 - 表格内 URL 用尖括号 `<http://...>`；单元格含 `|` 时用反引号或 `\|` 转义
@@ -39,6 +39,7 @@ apps/docs/
 
 ## 禁止
 
-- 不要在文档站引用未实现的 Phase 2 功能为「已上线」（标注 Phase 2）
-- 不要复制 `docs/` 规划全文到 VitePress（可摘要 + 链接）
-- 部署文档统一描述 **腾讯云轻量 + COS + CDN**，不写香港 VPS / 阿里云 OSS
+- 不要链接或提及仓库内部文件（如 `docs/完整开发文档.md`）、GitHub blob、规划文档路径
+- 不要写 localhost、文档构建替换、部署步骤、Swagger / OpenAPI、健康检查
+- 不要用 Phase / MVP / 一期 等内部排期用语；未上线能力只写在「后期规划」，且用用户能理解的产品方向
+- 不要把未上线能力写成已开放

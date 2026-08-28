@@ -25,8 +25,7 @@ description: >-
 ```markdown
 | 服务 | 地址 |
 | ------ | ------ |
-| API | <http://localhost:3000> |
-| Swagger | <http://localhost:3000/api/docs> |
+| CDN | <https://cdn.devimg.cn> |
 ```
 
 ### 表格反例
@@ -51,7 +50,7 @@ description: >-
 
 | 场景 | 写法 |
 | ------ | ------ |
-| 表格中的 URL | 尖括号：`<http://localhost:3000>` |
+| 表格中的 URL | 尖括号：`<https://cdn.devimg.cn>` |
 | 正文外链 | Markdown 链接：`[picsum.photos](https://picsum.photos)` |
 | 代码块 / 反引号内 | 保持原样，**不要**再套尖括号 |
 | HTML/JS 示例中的 src | 写在 \`\`\`html 块内，lint 不检查 |

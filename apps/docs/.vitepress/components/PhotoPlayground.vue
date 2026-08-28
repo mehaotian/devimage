@@ -799,7 +799,7 @@ onUnmounted(() => {
       class="photo-playground__pane photo-playground__catalog"
       role="tabpanel"
     >
-      <p class="photo-playground__catalog-desc">点击缩略图即可回到试玩区预览。</p>
+      <p class="photo-playground__catalog-desc">点击缩略图可预览并生成对应 URL。</p>
 
       <h4 class="photo-playground__catalog-title">按用途</h4>
       <div class="photo-playground__gallery-grid">

@@ -1089,7 +1089,7 @@ onUnmounted(() => {
       role="tabpanel"
     >
       <div class="avatar-playground__gallery-head">
-        <p class="avatar-playground__gallery-desc">点击缩略图即可回到试玩区预览。</p>
+        <p class="avatar-playground__gallery-desc">点击缩略图可预览并生成对应 URL。</p>
         <p v-if="patternCatalogStale" class="avatar-playground__gallery-warn">
           纹理列表可能不是最新，请刷新页面后重试。
         </p>

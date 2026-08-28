@@ -1,167 +1,123 @@
-# 功能与分期规划
+# 功能一览
 
-> 完整规格见仓库 [`docs/完整开发文档.md`](https://github.com/devimage/devimage/blob/main/docs/完整开发文档.md)
+图即当前已开放的接口如下。尺寸范围均为 **10–4000**（栅格输出单边上限 **1024**）。接口路径不含版本号前缀。
 
-DevImage 是**占位图 CDN**：URL 可直接用于 `<img src>` 和 `fetch()`，无需注册或 SDK。
-
----
-
-## 分期总览
-
-| 阶段 | 目标 | 核心能力 |
-| ------ | ------ | ---------- |
-| **MVP（已完成）** | 基础占位 CDN | 合成占位、头像、场景文案、Mock、伪码 |
-| **功能补全一期** | picsum 替代 + 纯程序增强 | `/photo` 73 分类、骨架屏、placehold parity |
-| **功能补全二期** | 设计素材依赖 | scene 插画 Composer（**暂缓**） |
-| **三期** | 产品化 | API Key、Freemium、Mock 完整 REST |
-| **四期** | 平台化 | 图标 / Lottie / 音效 / 团队库 |
-
-> 详细排期见仓库 [`docs/占位与场景差异化规划.md`](https://github.com/devimage/devimage/blob/main/docs/占位与场景差异化规划.md)。
+完整参数与示例见各 API 页。
 
 ---
 
-## 一期（当前）✅
+## 已上线路由
 
-### 合成占位图
+### 占位图
 
-| 路由 | 参数 | 说明 |
-| ------ | ------ | ------ |
-| `GET /:w/:h` | `text`, `bg`, `fg` | 随机色块 SVG |
-| `GET /seed/:seed/:w/:h` | 同上 | 固定 seed，每次相同 |
-
-- 尺寸：10–4000
-- 颜色：hex 不含 `#`
-- 文字：最长 50 字符
-
-### 头像
-
-| 路由 | 参数 | 说明 |
-| ------ | ------ | ------ |
-| `GET /avatar/:style/:seed/:size` | `bg`, `fg` | 图即风格 + 三方接入（45 种） |
-| `GET /avatar/styles` | — | 含 `engine` / `license` |
-
-中文首字：`/avatar/devimg/张三/128`
-
-文档试玩：各 API 页内嵌 Playground；规范见 [使用规范](/guide/fair-use)。
-
-### 场景图
-
-| 路由 | variant | 说明 |
-| ------ | --------- | ------ |
-| `GET /scene/:variant` | `404` `empty` `network` `search` | 场景 SVG |
-| `GET /404` | — | 快捷 404 |
-
-Query：`w`（默认 800）、`h`（默认 600）、`theme`、`title`、`subtitle`、`accent`、`seed`
-
-### Mock 数据
-
-| 路由 | Query | 响应 |
-| ------ | ------- | ------ |
-| `GET /mock/users` | `count` 或 `_page`/`_limit` | 用户数组 |
-| `GET /mock/users/:id` | — | 单个用户（id 1–100） |
-| `GET /mock/posts` | `count` 或 `_page`/`_limit` | 文章数组 |
-| `GET /mock/posts/:id` | — | 单篇文章 |
-| `GET /mock/products` | `count` 或 `_page`/`_limit` | 商品数组 |
-| `GET /mock/products/:id` | — | 单个商品 |
-
-### 系统
+合成色块或纹理 SVG，可选 WebP / PNG。兼容 placehold 的 `宽x高` 与路径配色。
 
 | 路由 | 说明 |
 | ------ | ------ |
-| `GET /health` | 健康检查 |
-| `GET /api/docs` | Swagger 文档 |
+| `GET /:width/:height` | 色块占位；无 `bg` 时背景色随机 |
+| `GET /seed/:seed/:width/:height` | 相同 seed 固定配色 |
+| `GET /800x600` | placehold 别名（`宽x高`） |
+| `GET /:w/:h/:bg/:fg` | 路径配色，如 `/800/600/eee/fff` |
 
-**源站限流**：MVP **未启用**（见 [使用规范](/guide/fair-use)）；三期规划 API Key 分级
+Query：`text`、`bg`/`bc`、`fg`/`tc`、`format`、`border`、`borderColor`、`cross`、`style=pattern`、`pattern`。
 
----
+文档：[占位图 API](/api/placeholder)
 
-## 功能补全一期（当前实施）📋
+### 骨架屏
 
-> **原则**：不依赖设计 / AI 素材。**骨架屏 + 占位先动**。
-> 场景插画 Composer **二期 B**；图库 `/photo` **二期 A**（COS 未上传）。
-
-| 功能 | 路由 | 优先级 |
-| ------ | ------ | -------- |
-| 骨架屏 | `GET /skeleton/:w/:h` | **P0** ⭐ |
-| placehold 别名 | `/800x600`、路径配色、`?border=1` | **P0** ⭐ |
-| 占位 pattern | `?style=pattern` | P0 |
-| scene 文案增强 | `?theme`、`?title`、`?subtitle`、`?seed` | **P1** ✅ |
-| Mock 分页 / 单条 | `?_page`、`/mock/posts/:id` | **P1** ✅ |
-
----
-
-## 功能补全二期 A（图库 · COS 上传后）📋
-
-| 功能 | 路由 |
+| 路由 | 说明 |
 | ------ | ------ |
-| 真实照片 73 分类 | `GET /photo/:w/:h?cat=` |
-| 固定照片 / 列表 | `/id/:id/:w/:h`、`/v2/list` |
-| Mock 商品图联动 | products.image → photo URL |
+| `GET /skeleton/:width/:height` | SVG 骨架屏 |
 
----
+Query：`type`（`page` / `card` / `row` / `grid`）、`theme`、`cols`、`animate`。
 
-## 功能补全二期 B（场景插画 · 暂缓）📋
+文档：[骨架屏 API](/api/skeleton)
 
-| 功能 | 说明 |
+### 头像
+
+同一 `style` + 标识始终同一张图。图即风格支持中文首字；另接入 DiceBear、Jdenticon、Minidenticons，合计 **50 余种**风格（含少量别名）。
+
+| 路由 | 说明 |
 | ------ | ------ |
-| Scene Composer + figures/props 部件 | 需设计 / AI 素材验收通过 |
-| `/scene/:variant/:seed` 插画级输出 | 依赖 Composer |
-| `/scene/styles` | 场景目录 JSON |
+| `GET /avatar/:style/:seed/:size` | 头像 SVG；可加 `.webp` / `.png` |
+| `GET /avatar/styles` | 风格目录 JSON（含 engine、license） |
+| `GET /avatar/patterns` | 图即纹理 id 列表 |
+
+文档：[头像 API](/api/avatar) · [头像许可](/guide/avatar-licenses)
+
+### 码形占位
+
+图案仅作界面占位，**不可扫描**。
+
+| 路由 | 说明 |
+| ------ | ------ |
+| `GET /qr/:seed/:size` | 伪 QR（正方形） |
+| `GET /qr/:seed/:w/:h` | 伪 QR（矩形，码形居中留边） |
+| `GET /barcode/:seed/:w/:h` | 伪条码 |
+| `GET /code/styles` | variant 与参数说明 JSON |
+
+文档：[码形占位 API](/api/qr)
+
+### 场景图
+
+当前为**文案 SVG**（可改标题、副标题、主题色），不是插画。快捷路由 `/404` 等价于 `/scene/404`。
+
+| 路由 | variant |
+| ------ | --------- |
+| `GET /scene/:variant` | `404`、`empty`、`network`、`search` |
+| `GET /404` | 同上，固定 404 |
+
+Query：`w`、`h`、`theme`、`title`、`subtitle`、`accent`、`seed`。
+
+文档：[场景图 API](/api/scene)
+
+### 真实照片
+
+按用途或题材取图。带 `seed` 时固定；省略则随机。亦提供 picsum 风格的 id / 列表接口。
+
+| 路由 | 说明 |
+| ------ | ------ |
+| `GET /photo/:width/:height` | 按 `scene` 或 `cat` 取图 |
+| `GET /photo/categories` | 题材列表 |
+| `GET /photo/scenes` | 用途列表 |
+| `GET /id/:id/:width/:height` | 按图库 id（picsum 兼容） |
+| `GET /id/:id/info` | 照片元信息 |
+| `GET /v2/list` | 照片列表 |
+
+Query：`scene`、`cat`、`seed`、`grayscale`、`blur`、`format`（`webp` 默认、`jpeg`、`png`）。
+
+文档：[真实照片 API](/api/photo)
+
+### Mock 数据
+
+中文假数据，习惯接近 JSONPlaceholder。每类资源池 **100** 条（id 1–100），同一 id 内容固定。
+
+| 路由 | 说明 |
+| ------ | ------ |
+| `GET /mock/users` | 用户列表 |
+| `GET /mock/users/:id` | 单个用户 |
+| `GET /mock/posts` | 文章列表（含封面图） |
+| `GET /mock/posts/:id` | 单篇文章 |
+| `GET /mock/products` | 商品列表（含商品图） |
+| `GET /mock/products/:id` | 单个商品 |
+
+列表支持 `count`，或 `_page` + `_limit` 分页（二者勿混用）。
+
+文档：[Mock 数据 API](/api/mock)
 
 ---
 
-## 已提前完成（原二期部分）✅
+## 后期规划
 
-- 占位图 WebP / PNG 栅格
-- Mock posts / products
-- 伪 QR / 伪条码（`/qr`、`/barcode`）
+以下内容**尚未开放**，列入规划是为说明产品方向，不作为当前接口承诺。上线后会更新本页与对应 API 文档。
 
----
+| 方向 | 说明 |
+| ------ | ------ |
+| 场景插画 | 在现有文案 SVG 之上提供插画级空状态 / 404 等画面 |
+| 用量与密钥 | 按调用量或 API Key 分层；限额变更会提前在文档公布 |
+| Mock 写操作 | 模拟 `POST` / `PUT` / `DELETE` 成功响应（仍为假数据） |
+| 嵌套 Mock | 如评论等从属资源，便于列表-详情联调 |
+| 更多资源类型 | 图标、Lottie、音效等开发素材 CDN |
+| 团队与私有化 | 私有资源库、私有化部署 |
 
-## 三期 📋
-
-- API Key 与 Freemium 分层
-- Mock POST/PUT/DELETE（fake 成功）
-- 资源型拼接风格 `devimage-cn`（PNG manifest）
-- 嵌套 Mock（comments 等）
-
----
-
-## 四期 🔮
-
-- 图标 / Lottie / 音效 CDN
-- 团队私有资源库
-- B2B 私有化部署
-
----
-
-## 实现状态速查
-
-| 模块 | 一期 | 当前代码 |
-| ------ | ------ | ---------- |
-| 合成占位 | ✅ | ✅ |
-| 头像 | ✅ | ✅ |
-| 场景 | ✅ | ✅（文案 query + seed 调色板） |
-| Mock | ✅ | ✅（分页 + 单条 posts/products） |
-| 骨架屏 | 功能补全一期 | ✅ |
-| 占位 parity/pattern | 功能补全一期 | ✅ |
-| 真实照片 | 功能补全二期 A | ❌ |
-| 占位 WebP/PNG | MVP | ✅ |
-| scene 插画 Composer | 功能补全二期 B | ❌ 暂缓 |
-| API Key | 三期 | ❌ |
-
----
-
-## 示例
-
-```html
-<img src="http://localhost:3000/800/600" />
-<img src="http://localhost:3000/seed/demo/800/600" />
-<img src="http://localhost:3000/avatar/devimg/Luna/128?text=0" />
-<img src="http://localhost:3000/avatar/rings/Luna/128" />
-<img src="http://localhost:3000/scene/404" />
-```
-
-```javascript
-const users = await fetch('http://localhost:3000/mock/users').then(r => r.json());
-```
+当前不提供自定义图库上传、真实可扫码生成，以及 Mock 数据的持久化写入。

@@ -310,7 +310,6 @@ function copyPreviewLink(): void {
           <p class="code-playground__preview-caption">{{ previewCaption }}</p>
           <p class="code-playground__preview-hint">
             图案不可扫描，仅作 UI 占位
-            <span v-if="stylesLoadedFromApi" class="code-playground__sync-hint"> · variant 已同步 API</span>
           </p>
         </div>
 
@@ -510,8 +509,8 @@ function copyPreviewLink(): void {
 
       <p class="code-playground__hint">
         生成的图案<strong>不是</strong>有效二维码或条形码，请勿用于支付、登录或物流扫码。
-        固定 seed URL 适合 CDN 缓存；详见
-        <a href="/guide/fair-use">公平使用</a>。
+        固定 seed 的 URL 可被 CDN 长期缓存，详见
+        <a href="/guide/fair-use">使用规范</a>。
       </p>
     </div>
   </div>

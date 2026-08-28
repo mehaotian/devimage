@@ -69,7 +69,7 @@ assets/seed-pack/          # CC0 精选包
 ## 详细文档
 
 - [docs/腾讯云COS部署指南.md](../../docs/腾讯云COS部署指南.md)
-- [apps/docs/guide/deployment.md](../../apps/docs/guide/deployment.md)
+- [docs/生产部署与运维手册.md](../../docs/生产部署与运维手册.md)
 
 ## 禁止
 

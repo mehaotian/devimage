@@ -1,6 +1,6 @@
 # 骨架屏 API
 
-用于列表、卡片、详情页加载态的 SVG 骨架占位，100% 程序生成。
+返回用于列表、卡片、详情页加载态的 SVG 骨架屏。可选择布局类型与明暗主题。
 
 ## 在线试玩
 
@@ -13,8 +13,6 @@
 ---
 
 ## `GET /skeleton/:width/:height`
-
-返回 SVG 骨架屏。
 
 ### 参数
 
@@ -31,18 +29,18 @@
 
 | type | 说明 |
 | ------ | ------ |
-| page | 顶栏 + 多卡片条（移动端整页） |
+| page | 顶栏与多卡片条，适合整页加载 |
 | card | 左图右文卡片 |
-| row | 列表行（圆头像 + 两行文字） |
-| grid | 等分网格 cell |
+| row | 列表行（圆形头像与两行文字） |
+| grid | 等分网格 |
 
 ### 示例
 
 ```html
-<img src="http://localhost:3000/skeleton/375/812?type=page" />
-<img src="http://localhost:3000/skeleton/350/120?type=card&theme=dark" />
-<img src="http://localhost:3000/skeleton/300/64?type=row" />
-<img src="http://localhost:3000/skeleton/800/600?type=grid&cols=3&animate=1" />
+<img src="https://cdn.devimg.cn/skeleton/375/812?type=page" alt="page skeleton" />
+<img src="https://cdn.devimg.cn/skeleton/350/120?type=card&theme=dark" alt="card skeleton" />
+<img src="https://cdn.devimg.cn/skeleton/300/64?type=row" alt="row skeleton" />
+<img src="https://cdn.devimg.cn/skeleton/800/600?type=grid&cols=3&animate=1" alt="grid skeleton" />
 ```
 
 ### 响应
