@@ -100,7 +100,7 @@ onUnmounted(() => { if (timer) clearTimeout(timer); });
       <label class="pg-field">
         <span>背景 bg / 文字 fg（hex 不含 #）</span>
         <div class="pg-row">
-          <input v-model="bg" type="text" class="pg-input" placeholder="6366f1" />
+          <input v-model="bg" type="text" class="pg-input" placeholder="3b5bdb" />
           <input v-model="fg" type="text" class="pg-input" placeholder="ffffff" />
         </div>
       </label>

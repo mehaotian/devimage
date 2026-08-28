@@ -40,7 +40,7 @@ export default defineConfig({
   ignoreDeadLinks: true,
   head: [
     ['link', { rel: 'icon', href: '/favicon.png', type: 'image/png' }],
-    ['meta', { name: 'theme-color', content: '#6366f1' }],
+    ['meta', { name: 'theme-color', content: '#3b5bdb' }],
   ],
   themeConfig: {
     logo: { src: '/logo-nav.png', alt: 'devimg' },
@@ -86,10 +86,6 @@ export default defineConfig({
           ],
         },
       ],
-    },
-    footer: {
-      message: 'devimg · 图即 — 国内开发者占位图 CDN',
-      copyright: 'Copyright © 2026 devimg',
     },
   },
   vite: {

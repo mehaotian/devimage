@@ -459,14 +459,14 @@ function copyPreviewLink(): void {
                   <input
                     type="color"
                     class="code-playground__color-picker"
-                    :value="toColorPickerValue(accent, '6366f1')"
+                    :value="toColorPickerValue(accent, '3b5bdb')"
                     @input="accent = normalizeHex(($event.target as HTMLInputElement).value)"
                   />
                   <input
                     v-model="accent"
                     type="text"
                     class="code-playground__input code-playground__hex"
-                    placeholder="6366f1"
+                    placeholder="3b5bdb"
                     maxlength="7"
                   />
                 </div>

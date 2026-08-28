@@ -39,7 +39,7 @@
 <img src="https://cdn.devimg.cn/scene/404?w=800&h=600" alt="404" />
 <img src="https://cdn.devimg.cn/scene/empty" alt="empty" />
 <img src="https://cdn.devimg.cn/scene/empty?theme=dark&title=购物车是空的&seed=demo" alt="empty cart" />
-<img src="https://cdn.devimg.cn/scene/network?accent=6366f1&subtitle=稍后再试" alt="network" />
+<img src="https://cdn.devimg.cn/scene/network?accent=3b5bdb&subtitle=稍后再试" alt="network" />
 ```
 
 ### 响应

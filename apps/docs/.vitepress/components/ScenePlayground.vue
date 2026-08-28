@@ -97,7 +97,7 @@ async function copyPreview(): Promise<void> {
       <label class="pg-field">
         <span>accent / seed（可选）</span>
         <div class="pg-row">
-          <input v-model="accent" type="text" class="pg-input" placeholder="6366f1" />
+          <input v-model="accent" type="text" class="pg-input" placeholder="3b5bdb" />
           <input v-model="seed" type="text" class="pg-input" placeholder="demo" />
         </div>
       </label>

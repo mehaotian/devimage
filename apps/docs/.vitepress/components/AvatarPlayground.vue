@@ -67,7 +67,7 @@ const SIZE_PRESETS = [32, 64, 128, 256] as const;
 const CODE_RECIPES = [
   { title: '中文首字', path: '/avatar/devimg/张三/128' },
   { title: '纯图案无字', path: '/avatar/devimg/Luna/128?text=0' },
-  { title: '品牌色', path: '/avatar/devimg/张三/128?bg=6366f1&fg=ffffff' },
+  { title: '品牌色', path: '/avatar/devimg/张三/128?bg=3b5bdb&fg=ffffff' },
   { title: '卡通 Lorelei', path: '/avatar/lorelei/Luna/128' },
   { title: '方形', path: '/avatar/devimg/张三/128?shape=square' },
   { title: 'WebP 位图', path: '/avatar/devimg/张三/128.webp' },
@@ -1021,14 +1021,14 @@ onUnmounted(() => {
                   <input
                     type="color"
                     class="avatar-playground__color-picker"
-                    :value="toColorPickerValue(bgColor, '6366f1')"
+                    :value="toColorPickerValue(bgColor, '3b5bdb')"
                     @input="bgColor = normalizeHex(($event.target as HTMLInputElement).value)"
                   />
                   <input
                     v-model="bgColor"
                     type="text"
                     class="avatar-playground__input avatar-playground__hex"
-                    placeholder="6366f1"
+                    placeholder="3b5bdb"
                     maxlength="7"
                   />
                 </div>
@@ -1055,7 +1055,7 @@ onUnmounted(() => {
             </div>
 
             <div v-if="showBgControl" class="avatar-playground__presets">
-              <button type="button" class="avatar-playground__preset" @click="applyPreset('6366f1', 'ffffff')">
+              <button type="button" class="avatar-playground__preset" @click="applyPreset('3b5bdb', 'ffffff')">
                 靛蓝
               </button>
               <button type="button" class="avatar-playground__preset" @click="applyPreset('0ea5e9', 'ffffff')">

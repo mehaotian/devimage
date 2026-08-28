@@ -36,7 +36,7 @@
 <img src="https://cdn.devimg.cn/avatar/devimg/张三/128" alt="张三" width="128" height="128" />
 <img src="https://cdn.devimg.cn/avatar/lorelei/Luna/128" alt="Luna" width="128" height="128" />
 <img src="https://cdn.devimg.cn/avatar/devimg/Luna/128?text=0" alt="pattern" width="128" height="128" />
-<img src="https://cdn.devimg.cn/avatar/devimg/张三/128?bg=6366f1&fg=ffffff" alt="brand" width="128" height="128" />
+<img src="https://cdn.devimg.cn/avatar/devimg/张三/128?bg=3b5bdb&fg=ffffff" alt="brand" width="128" height="128" />
 <img src="https://cdn.devimg.cn/avatar/devimg/张三/128?shape=square" alt="square" width="128" height="128" />
 <img src="https://cdn.devimg.cn/avatar/devimg/张三/128.webp" alt="webp" width="128" height="128" />
 ```

@@ -36,7 +36,7 @@
 
 ```html
 <img src="https://cdn.devimg.cn/800/600" alt="placeholder" />
-<img src="https://cdn.devimg.cn/400/300?text=Hero&bg=6366f1&fg=ffffff" alt="hero" />
+<img src="https://cdn.devimg.cn/400/300?text=Hero&bg=3b5bdb&fg=ffffff" alt="hero" />
 <img src="https://cdn.devimg.cn/800/600.webp" alt="webp" />
 <img src="https://cdn.devimg.cn/800/600?format=webp" alt="webp query" />
 <img src="https://cdn.devimg.cn/800/600?border=2&cross=1" alt="border" />
