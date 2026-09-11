@@ -77,13 +77,13 @@
 
 ### Phase 3 — P2  polish（Day 12–14）
 
-| 功能 | 说明 |
-| ------ | ------ |
-| 文档站完善 | 全部 API 页 + 迁移指南 |
-| OpenAPI / Swagger | `/api/docs` |
-| 速率限制 | 免费 100 req/min/IP |
-| 错误页 | 统一 400/404 JSON + SVG |
-| README + 掘金宣发素材 | 对外发布 |
+| 功能 | 说明 | 状态 |
+| ------ | ------ | ------ |
+| 文档站完善 | 全部 API 页 + 迁移指南 | ✅ |
+| OpenAPI / Swagger | `/api/docs` | ✅ |
+| 速率限制 | 免费 1000 req/min/IP（栅格 60） | ✅ |
+| 错误页 | 统一 400/404 JSON + SVG | 🚧 部分 |
+| 对外宣发 | 掘金已发布；**稿件不入库** | ✅ |
 
 ### 明确不做（2 周内）
 
@@ -99,12 +99,12 @@
 
 > 详见 [占位与场景差异化规划](./占位与场景差异化规划.md) §13。
 
-| 优先级 | 功能 |
-| -------- | ------ |
-| **P0** ⭐ | `/skeleton/:w/:h` 骨架屏 |
-| **P0** ⭐ | placehold parity（`800x600`、路径配色、pattern） |
-| P1 | Mock 分页、scene 文案 query |
-| — | `/photo` + 图库 → **二期 A**（COS 未上传） |
+| 优先级 | 功能 | 状态 |
+| -------- | ------ | ------ |
+| **P0** ⭐ | `/skeleton/:w/:h` 骨架屏 | ✅ |
+| **P0** ⭐ | placehold parity（`800x600`、路径配色、pattern） | ✅ |
+| P1 | Mock 分页、scene 文案 query | ✅ |
+| — | `/photo` API | ✅；COS 原图 / meta 🚧 |
 
 ---
 
@@ -176,7 +176,9 @@ apps/docs/
 
 ## 8. 发布清单
 
-- [ ] 所有 P0 路由测试通过
-- [ ] 腾讯云轻量 + COS + CDN 配置完成
-- [ ] README 含 3 行 quick start
-- [ ] CHANGELOG v0.1.0
+- [x] 所有 P0 路由可用
+- [x] 腾讯云轻量 + CDN 配置完成（`cdn.devimg.cn`）
+- [x] README 含 quick start
+- [x] 掘金宣发已发布（不入库）
+- [ ] 图库原图上 COS + meta 补全
+- [ ] CHANGELOG 随版本补记

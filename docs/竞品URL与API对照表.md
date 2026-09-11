@@ -1,7 +1,8 @@
 # 竞品 URL 与 API 对照表
 
 > 用于 DevImage 路由设计、picsum 兼容层、文档示例对齐。  
-> 基准域名（规划）：`https://cdn.devimage.cn` · API 文档：`https://devimage.cn`
+> 生产域名：`https://cdn.devimg.cn` · 文档站：`https://devimg.cn`  
+> **2026-08**：下表「DevImage 路由」凡已写明的路径均已上线，除非标注 📋。
 
 ---
 
@@ -20,16 +21,11 @@
 
 ### DevImage 推荐 canonical URL
 
-```base
-# 主路由（picsum 风格斜杠）
-GET https://cdn.devimage.cn/800/600
-
-# placehold 风格（可选别名）
-GET https://cdn.devimage.cn/800x600?text=Banner&bg=409eff&fg=ffffff
-
-# 格式后缀
-GET https://cdn.devimage.cn/800/600.webp
-GET https://cdn.devimage.cn/800/600.svg
+```http
+GET https://cdn.devimg.cn/800/600
+GET https://cdn.devimg.cn/800x600?text=Banner&bg=409eff&fg=ffffff
+GET https://cdn.devimg.cn/800/600.webp
+GET https://cdn.devimg.cn/800/600.svg
 ```
 
 ---
@@ -38,7 +34,7 @@ GET https://cdn.devimage.cn/800/600.svg
 
 | 竞品 | URL 模式 | 示例 | DevImage 路由 | 优先级 |
 | ------ | ---------- | ------ | --------------- | -------- |
-| picsum.photos | 随机 | `/800/600` | `GET /photo/800/600` 或兼容 `/800/600?type=photo` | P2 |
+| picsum.photos | 随机 | `/800/600` | `GET /photo/800/600`（`/:w/:h` 仍为合成 SVG） | ✅ |
 | picsum.photos | seed | `/seed/demo/800/600` | `GET /seed/{seed}/{w}/{h}` | P2 |
 | picsum.photos | 固定 ID | `/id/237/800/600` | `GET /id/{id}/{w}/{h}` | P2 |
 | picsum.photos | 灰度 | `?grayscale` | `?grayscale=1` | P3 |
@@ -48,12 +44,13 @@ GET https://cdn.devimage.cn/800/600.svg
 
 ### picsum 兼容层（降低迁移成本）
 
-```base
-# 完全兼容模式（Phase 2，需配置 ENABLE_PICSUM_COMPAT=true）
-GET https://cdn.devimage.cn/800/600          → 等同 /photo/800/600
-GET https://cdn.devimage.cn/seed/app/800/600
-GET https://cdn.devimage.cn/id/237/800/600
+```http
+GET https://cdn.devimg.cn/photo/800/600
+GET https://cdn.devimg.cn/seed/app/800/600
+GET https://cdn.devimg.cn/id/1/800/600
 ```
+
+`ENABLE_PICSUM_COMPAT`（把 `/:w/:h` 映射成 photo）**未做**，避免与色块占位冲突。
 
 ---
 
@@ -67,10 +64,9 @@ GET https://cdn.devimage.cn/id/237/800/600
 
 ### DevImage 推荐
 
-```base
-GET https://cdn.devimage.cn/avatar/张三/128
-GET https://cdn.devimage.cn/avatar/lorelei/user-123/64.svg
-GET https://cdn.devimage.cn/avatar/John%20Doe/48?mode=initials&bg=6366f1
+```http
+GET https://cdn.devimg.cn/avatar/devimg/张三/128
+GET https://cdn.devimg.cn/avatar/lorelei/user-123/64
 ```
 
 ---
@@ -79,15 +75,15 @@ GET https://cdn.devimage.cn/avatar/John%20Doe/48?mode=initials&bg=6366f1
 
 | 场景 | 国内现状 | DevImage 路由 | 优先级 |
 | ------ | ---------- | --------------- | -------- |
-| 404 页面 | 组件库内置 SVG | `GET /scene/404` 或 `GET /404` | P1 |
-| 空状态 | Ant Design Empty 等 | `GET /scene/empty?variant=no-data` | P1 |
-| 网络错误 | 各组件库分散 | `GET /scene/error?variant=network` | P2 |
-| 骨架屏背景 | 无统一服务 | `GET /skeleton/{w}/{h}` | P2 |
+| 404 页面 | 组件库内置 SVG | `GET /scene/404` 或 `GET /404` | ✅ |
+| 空状态 | Ant Design Empty 等 | `GET /scene/empty` | ✅ |
+| 网络错误 | 各组件库分散 | `GET /scene/network` | ✅ |
+| 骨架屏背景 | 无统一服务 | `GET /skeleton/{w}/{h}` | ✅ |
 
-```base
-GET https://cdn.devimage.cn/scene/404?w=800&h=600
-GET https://cdn.devimage.cn/scene/empty?variant=search
-GET https://cdn.devimage.cn/skeleton/375/812
+```http
+GET https://cdn.devimg.cn/scene/404?w=800&h=600
+GET https://cdn.devimg.cn/scene/empty?theme=dark
+GET https://cdn.devimg.cn/skeleton/375/812
 ```
 
 ---
@@ -101,10 +97,10 @@ GET https://cdn.devimage.cn/skeleton/375/812
 | 物流 / 收银 mock | 假 EAN 条纹图 | `GET /barcode/:seed/:w/:h` | P1 |
 | 样式 | 圆角模块、配色 | `?fg=&bg=&accent=&radius=` | P2 |
 
-```base
-GET https://cdn.devimage.cn/qr/checkout/256
-GET https://cdn.devimage.cn/qr/demo/128.webp
-GET https://cdn.devimage.cn/barcode/sku-mock/320/80?variant=ean13
+```http
+GET https://cdn.devimg.cn/qr/checkout/256
+GET https://cdn.devimg.cn/qr/demo/128.webp
+GET https://cdn.devimg.cn/barcode/sku-mock/320/80?variant=ean13
 ```
 
 > **边界**：以上均为 **不可扫描** 占位；真实 QR API（URL 传 `data`）不在 DevImage 占位范围，见 [码形占位规划 §8](./伪二维码占位规划.md)。
@@ -126,7 +122,7 @@ GET https://cdn.devimage.cn/barcode/sku-mock/320/80?variant=ean13
 | ------ | ------ |
 | 用户 | `GET /mock/users`、`/mock/users/:id` |
 | 文章 | `GET /mock/posts`、`/mock/posts/:id` |
-| 商品 | `GET /mock/products?count=10` |
+| 商品 | `GET /mock/products`、`/mock/products/:id` |
 | 分页 | `GET /mock/users?_page=1&_limit=10` |
 
 ---
@@ -161,11 +157,11 @@ GET https://cdn.devimage.cn/barcode/sku-mock/320/80?variant=ean13
 
 | 原 URL | DevImage 替换 |
 | -------- | --------------- |
-| `picsum.photos/800/600` | `cdn.devimage.cn/photo/800/600` |
-| `placehold.co/600x400` | `cdn.devimage.cn/600/400` |
-| `placehold.co/600x400?text=Hi` | `cdn.devimage.cn/600/400?text=Hi` |
-| `jsonplaceholder.typicode.com/posts/1` | `cdn.devimage.cn/mock/posts/1` |
-| `api.dicebear.com/10.x/lorelei/svg?seed=x&size=48` | `cdn.devimage.cn/avatar/lorelei/x/48` |
+| `picsum.photos/800/600` | `cdn.devimg.cn/photo/800/600` |
+| `placehold.co/600x400` | `cdn.devimg.cn/600/400` |
+| `placehold.co/600x400?text=Hi` | `cdn.devimg.cn/600/400?text=Hi` |
+| `jsonplaceholder.typicode.com/posts/1` | `cdn.devimg.cn/mock/posts/1` |
+| `api.dicebear.com/10.x/lorelei/svg?seed=x&size=48` | `cdn.devimg.cn/avatar/lorelei/x/48` |
 
 ---
 
@@ -173,4 +169,4 @@ GET https://cdn.devimage.cn/barcode/sku-mock/320/80?variant=ean13
 
 - API 版本前缀（管理类）：`/v1/...`
 - 图片 CDN 路径：**不加版本号**（URL 稳定优先，类似 picsum）
-- OpenAPI 文档：`https://devimage.cn/openapi.json`（NestJS Swagger 生成）
+- OpenAPI / Swagger：`https://cdn.devimg.cn/api/docs`

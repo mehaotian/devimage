@@ -1,7 +1,8 @@
 # 图库分类与 manifest 规范
 
-> **用途**：DevImage 真实图库（Pexels CC0）上传 COS 前的**分类标准、缺口清单、manifest 字段约定**。  
-> **状态**：规范文档 · 暂不进入 API 开发  
+> **用途**：DevImage 真实图库（Pexels CC0）的**分类标准、缺口清单、manifest 字段约定**。  
+> **状态**：规范文档 · **`/photo` API 已上线**；运行时 manifest 以 `apps/api/data/photo/` 为准（82 cat · 8132 张）。  
+> 采集侧缺口：enriched meta **699 / 8132**；COS 原图尚未批量上传。  
 > **相关**：[占位与场景差异化规划](./占位与场景差异化规划.md) · [腾讯云 COS 部署指南](./腾讯云COS部署指南.md)
 
 ---
@@ -45,10 +46,11 @@
 
 ---
 
-## 2. 现有图库盘点（73 cat · ~7300 张）
+## 2. 现有图库盘点
 
-> 路径：`placeholder-images/{cat}/pexels_{id}.jpeg` + `pexels_{id}_meta.json`  
-> 统计时间：2026-07-03
+> **运行时（2026-08）**：`apps/api/data/photo/` — **82 cat · 8132 张 · enriched_meta 699**。  
+> 下列 §2.1 为 2026-07-03 采集盘点（73 cat · ~7300 张），分类口径仍有效；张数以运行时 manifest 为准。  
+> 采集路径：`placeholder-images/{cat}/pexels_{id}.jpeg` + `pexels_{id}_meta.json`
 
 ### 2.1 按用途分组
 
