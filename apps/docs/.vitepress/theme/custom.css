@@ -101,6 +101,11 @@
   display: none;
 }
 
+/* 首页已有自定义页脚（版权 + 备案），隐藏主题默认页脚以免重复 */
+body:has(.devimg-home) .VPFooter {
+  display: none;
+}
+
 .devimg-home {
   color: var(--vp-c-text-1);
 }
@@ -1234,7 +1239,7 @@
 /* ========== 结尾 ========== */
 .dh-end {
   position: relative;
-  padding: 72px 24px;
+  padding: 72px 24px 108px;
   background: var(--dh-band);
   color: #e7e9ee;
   overflow: hidden;
@@ -1265,11 +1270,101 @@
   margin: 0 0 24px;
 }
 
+/* ========== 社区卡片：骑在深色收尾与页脚之间 ========== */
+.dh-after {
+  background: var(--vp-c-bg-soft);
+}
+
+.dh-community {
+  position: relative;
+  z-index: 1;
+  margin-top: -56px;
+  padding: 0 24px 8px;
+}
+
+.dh-community-card {
+  max-width: var(--dh-max);
+  margin: 0 auto;
+  padding: 32px 36px 28px;
+  background: var(--vp-c-bg);
+  border: 1px solid var(--dh-border);
+  border-radius: var(--dh-radius-lg);
+  box-shadow: 0 16px 40px rgba(30, 34, 42, 0.1);
+}
+
+.dark .dh-community-card {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
+}
+
+.dh-community-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px 40px;
+  margin-bottom: 28px;
+}
+
+.dh-community-copy h2 {
+  font-size: clamp(1.25rem, 2.4vw, 1.625rem);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin: 8px 0 10px;
+  padding: 0;
+  border: none;
+}
+
+.dh-community-copy p {
+  font-size: 0.875rem;
+  line-height: 1.85;
+  color: var(--vp-c-text-2);
+  margin: 0;
+  max-width: 36em;
+}
+
+.dh-community-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dh-community-qq {
+  font-family: var(--dh-mono);
+  font-size: 0.75rem;
+  color: var(--vp-c-text-3);
+  letter-spacing: 0.04em;
+}
+
+.dh-community-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 28px 32px;
+}
+
+@media (max-width: 760px) {
+  .dh-community-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dh-community-cta {
+    align-items: flex-start;
+  }
+
+  .dh-community-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .dh-community-card {
+    padding: 24px 22px 20px;
+  }
+}
+
 /* ========== 页脚 ========== */
 .dh-footer {
-  border-top: 1px solid var(--dh-border);
-  background: var(--vp-c-bg-soft);
-  padding: 44px 24px 20px;
+  padding: 36px 24px 20px;
 }
 
 .dh-footer-inner {
@@ -1351,6 +1446,35 @@
   border-top: 1px solid var(--dh-border);
   font-size: 0.75rem;
   color: var(--vp-c-text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  text-align: center;
+}
+
+.dh-footer-sep {
+  color: var(--vp-c-divider);
+}
+
+.dh-beian {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.18s;
+}
+
+.dh-beian:hover {
+  color: var(--dh-accent);
+}
+
+.VPFooter .copyright a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.VPFooter .copyright a:hover {
+  color: var(--vp-c-brand-1);
 }
 
 /* ========== 导航栏 Logo ========== */

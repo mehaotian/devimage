@@ -51,6 +51,12 @@ export default defineConfig({
       { text: '功能一览', link: '/guide/dev-spec' },
       { text: '迁移', link: '/migrate/from-picsum' },
     ],
+    footer: {
+      message:
+        '欢迎加入 <a href="https://qm.qq.com/q/3cTXgqracg" target="_blank" rel="noopener noreferrer">QQ 群 166188735</a>，一起交流、共建与反馈',
+      copyright:
+        'Copyright © 2026 图即（devimg） · <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">冀ICP备16015192号-7</a>',
+    },
     sidebar: {
       '/guide/': [
         {

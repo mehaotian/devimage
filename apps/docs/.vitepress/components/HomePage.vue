@@ -120,6 +120,25 @@ const routes = [
   { route: '/mock/:resource', name: 'Mock 数据', desc: '用户、文章、商品，含分页与单条', link: '/api/mock' },
 ];
 
+/** 首页社区卡片：交流、共建与反馈 */
+const community = [
+  {
+    kicker: '交流',
+    title: '聊聊用法，也听听别人怎么用',
+    desc: '迁移 picsum、挑头像风格、给空状态选一张场景图——这些小事，在群里慢慢说就好。',
+  },
+  {
+    kicker: '共建',
+    title: '接口、文档和图库，欢迎一起动手',
+    desc: '提想法、补一页说明、改一条路由，或只是指出哪里别扭。图即还在长大，可能很需要你的一个建议。',
+  },
+  {
+    kicker: '反馈',
+    title: '那里不对，你来告诉我',
+    desc: '限额触发、文档对不上、某张图不该出现——直接告诉我，我会认真看。',
+  },
+];
+
 const notes = [
   {
     kicker: '范围',
@@ -564,41 +583,81 @@ onMounted(() => {
       </div>
     </section>
 
-    <footer class="dh-footer">
-      <div class="dh-footer-inner">
-        <div class="dh-footer-brand">
-          <a href="/" class="dh-footer-brand-link">
-            <img src="/logo-nav.png" alt="devimg" class="dh-footer-logo-img" width="32" height="32" />
-            <div>
-              <span class="dh-footer-logo">devimg</span>
-              <p>图即 — 国内开发者占位图 CDN</p>
+    <div class="dh-after">
+      <section class="dh-community" aria-labelledby="dh-community-title">
+        <article class="dh-community-card" data-reveal>
+          <div class="dh-community-top">
+            <div class="dh-community-copy">
+              <span class="dh-note-kicker">社区</span>
+              <h2 id="dh-community-title">邀你共创</h2>
+              <p>
+                图即是给国内开发者用的占位 CDN。你可以来聊聊用法，也可以直接参与开发。
+                无论是补一页文档、改一条路由，还是只是过来看看别人怎么用——都欢迎。
+              </p>
             </div>
-          </a>
+            <div class="dh-community-cta">
+              <a
+                class="dh-btn dh-btn-primary"
+                href="https://qm.qq.com/q/3cTXgqracg"
+                target="_blank"
+                rel="noopener noreferrer"
+              >加入 QQ 群</a>
+              <!-- <span class="dh-community-qq">166188735</span> -->
+            </div>
+          </div>
+          <div class="dh-community-grid">
+            <div v-for="item in community" :key="item.kicker" class="dh-note">
+              <span class="dh-note-kicker">{{ item.kicker }}</span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.desc }}</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <footer class="dh-footer">
+        <div class="dh-footer-inner">
+          <div class="dh-footer-brand">
+            <a href="/" class="dh-footer-brand-link">
+              <img src="/logo-nav.png" alt="devimg" class="dh-footer-logo-img" width="32" height="32" />
+              <div>
+                <span class="dh-footer-logo">devimg</span>
+                <p>图即 — 国内开发者占位图 CDN</p>
+              </div>
+            </a>
+          </div>
+          <div class="dh-footer-col">
+            <h4>产品</h4>
+            <a href="/api/placeholder">占位图</a>
+            <a href="/api/avatar">头像</a>
+            <a href="/api/photo">真实照片</a>
+            <a href="/api/mock">Mock 数据</a>
+          </div>
+          <div class="dh-footer-col">
+            <h4>文档</h4>
+            <a href="/guide/quick-start">快速开始</a>
+            <a href="/guide/dev-spec">功能一览</a>
+            <a href="/migrate/from-picsum">从 picsum 迁移</a>
+            <a href="/migrate/from-placehold">从 placehold 迁移</a>
+          </div>
+          <div class="dh-footer-col">
+            <h4>资源</h4>
+            <a href="/guide/fair-use">使用规范</a>
+            <a href="/guide/avatar-licenses">头像许可</a>
+          </div>
         </div>
-        <div class="dh-footer-col">
-          <h4>产品</h4>
-          <a href="/api/placeholder">占位图</a>
-          <a href="/api/avatar">头像</a>
-          <a href="/api/photo">真实照片</a>
-          <a href="/api/mock">Mock 数据</a>
+        <div class="dh-footer-bottom">
+          <span>Copyright © 2026 图即（devimg）</span>
+          <span class="dh-footer-sep" aria-hidden="true">·</span>
+          <a
+            class="dh-beian"
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >冀ICP备16015192号-7</a>
         </div>
-        <div class="dh-footer-col">
-          <h4>文档</h4>
-          <a href="/guide/quick-start">快速开始</a>
-          <a href="/guide/dev-spec">功能一览</a>
-          <a href="/migrate/from-picsum">从 picsum 迁移</a>
-          <a href="/migrate/from-placehold">从 placehold 迁移</a>
-        </div>
-        <div class="dh-footer-col">
-          <h4>资源</h4>
-          <a href="/guide/fair-use">使用规范</a>
-          <a href="/guide/avatar-licenses">头像许可</a>
-        </div>
-      </div>
-      <div class="dh-footer-bottom">
-        <span>Copyright © 2026 devimg</span>
-      </div>
-    </footer>
+      </footer>
+    </div>
   </div>
 </template>
 
